@@ -12,6 +12,10 @@ the scripts
 
 Scripts depend on this convention.
 
+Dependencies on external python modules are in 'requirements.txt', so you can run
+    pip install -r requirements.txt
+to fulfill these.
+
 Before you use the scripts, create a config file specifying what mesh you'd want to do.
 
 config.json
