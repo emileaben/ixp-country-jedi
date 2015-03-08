@@ -1,0 +1,183 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>IXP / Country</title>
+  <meta charset="utf-8" />
+</head>
+<script src="../bower_components/underscore/underscore-min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
+<script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<style>
+.tick line {
+  shape-rendering: crispEdges;
+  stroke: #000;
+}
+line.minor  {
+  stroke: #777;
+  stroke-dasharray: 2,2;
+}
+path.domain {
+  fill: none;
+  stroke: black;
+}
+
+.axis text {
+    font-size: 8px;
+}
+#vizcontainer {
+   float: left;
+   /* border: 1px solid grey; */
+}
+#details {
+   /* border: 1px solid grey;
+   height: 100%
+}
+</style>
+<body>
+ 
+<div id="vizcontainer">
+<svg style="width:1000px;height:1000px;border:1px lightgray solid;" />
+</div>
+<div id="details">
+Hover over cells in the matrix on the left to get detailed information in this window
+</div>
+  <footer>
+<script type="text/javascript">
+   // .format() for strings
+   // First, checks if it isn't implemented yet.
+   if (!String.prototype.format) {
+     String.prototype.format = function() {
+       var args = arguments;
+       return this.replace(/{(\d+)}/g, function(match, number) { 
+         return typeof args[number] != 'undefined'
+           ? args[number]
+           : match
+         ;
+       });
+     };
+   }
+
+   var proto = 'v4';
+   var height = 900;
+   var width = height;
+   var border_width = 200;
+   var things = d3.select("svg")
+      .append("g")
+      .attr("transform", "translate(200,200)")
+      .attr("id", "adjacencyG")
+      .selectAll("rect")
+   var legendg = d3.select("svg")
+      .append("g").attr("transform","translate(20,20)");
+   // legend hack. needs proper legend still
+   legendg.append("rect").attr('x',0).attr('y',0).attr('width',20).attr('height',20).attr('fill','green');
+   legendg.append("text").attr('x',40).attr('y',20).text("IXP IPs: YES, out-of-country IPs:  NO");
+   legendg.append("rect").attr('x',0).attr('y',20).attr('width',20).attr('height',20).attr('fill','orange');
+   legendg.append("text").attr('x',40).attr('y',40).text("IXP IPs:  NO, out-of-country IPs:  NO");
+   legendg.append("rect").attr('x',0).attr('y',40).attr('width',20).attr('height',20).attr('fill','blue');
+   legendg.append("text").attr('x',40).attr('y',60).text("IXP IPs: YES, out-of-country IPs: YES");
+   legendg.append("rect").attr('x',0).attr('y',60).attr('width',20).attr('height',20).attr('fill','red');
+   legendg.append("text").attr('x',40).attr('y',80).text("IXP IPs:  NO, out-of-country IPs:  YES");
+   //axis
+   d3.select("#adjacencyG").append("text").attr("transform", "translate(-10,-10) rotate(90)").attr('x',250).attr('y',140) .text("Source (by ASN)");
+   d3.select("#adjacencyG").append("text").text("Destination (by ASN)").attr('x',250).attr('y',-130);
+
+   var xScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
+   var yScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
+   var row_count, col_count;
+   var thinglist = [];
+   var probe_info;
+   var count = 0
+   d3.json("ixpcountry.{0}.json".format( proto ), function(error,data) {
+      var rows = data['rows'];
+      var cols = data['cols'];
+      var cells = data['cells'];
+      var row_count = rows.length;
+      var col_count = cols.length;
+      var row_by_idx = _.indexBy(rows, 'id'); 
+      var sort_orders = {
+         'id':     _.pluck( rows.sort( function(a,b) { return d3.ascending( a.id, b.id ) } ), 'id'),
+         'asn_v4': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v4, b.asn_v4 ) } ), 'id'),
+         'asn_v6': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v6, b.asn_v6 ) } ), 'id')
+      };
+      xScale.domain( sort_orders.asn_v4 )
+      yScale.domain( sort_orders.asn_v4 )
+      xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
+      yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
+      xAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
+      yAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
+      d3.select("#adjacencyG").append("g").attr("class",'axis').call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
+      d3.select("#adjacencyG").append("g").attr("class",'axis').call(yAxis);
+
+      function text_from_datacell( d ) {
+         var txt = [];
+         
+         txt.push(d.data.in_country ? 'incc: yes' : 'incc: no');
+         txt.push(d.data.via_ixp    ? 'ixp: yes' : 'ixp: no');
+         txt.push("srcAS" + row_by_idx[ d.row ].asn_v4);
+         txt.push("dstAS" + row_by_idx[ d.col ].asn_v4);
+         txt.push("srcPrb" + d.row);
+         txt.push("dstPrb" + d.col);
+         return txt.join("\n");
+      };
+      /*var fisheye = d3.fisheye.circular()
+         .radius(100)
+         .distortion(3); */
+      function cellcolor( d ) {
+         if (  d.data.via_ixp &&   d.data.in_country) { return "green"; }
+         if (! d.data.via_ixp &&   d.data.in_country) { return "orange";}
+         if (  d.data.via_ixp && ! d.data.in_country) { return "blue";}
+         if (! d.data.via_ixp && ! d.data.in_country) { return "red";}
+         return "pink"; // should not happen
+         
+      };
+      function mouseover_evt( d ) {
+         var txt = [];
+         json_file = "details/{0}.{1}.{2}.json".format( d.row , d.col, proto );
+         $.ajax({url: json_file, 
+            async: false
+         }).done(function( data ) {
+            txt.push('<pre>{0}</pre>'.format( data['tracetxt'] ));
+            console.log( data );;
+         });
+         var nodeSelection = d3.select(this).style({'stroke-width':2});
+         txt.push(d.data.in_country ? 'incc: yes' : 'incc: no');
+         txt.push(d.data.via_ixp    ? 'ixp: yes' : 'ixp: no');
+         txt.push("src AS " + row_by_idx[ d.row ].asn_v4);
+         txt.push("dst AS " + row_by_idx[ d.col ].asn_v4);
+         txt.push("src Prb " + d.row);
+         txt.push("dst Prb " + d.col);
+         $("#details").html( txt.join("<br>") );
+      }
+      var things_viz = things.data( cells )
+         .enter()
+         .append('rect')
+         // fisheye needs attrs called d.x and d.y
+         .datum( function(d) { d.x = xScale( d.col ), d.y = yScale( d.row ) ; return d } )
+         .attr('x', function(d) { return d.x } )
+         .attr('y', function(d) { return d.y } )
+         .attr('width', Math.floor(( width - border_width) / col_count ) -1)
+         .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
+         .on('mouseover', mouseover_evt)
+         .style('fill', cellcolor );
+         //.style('stroke-width', function(d) { return d.data.in_country ? 0 : 0.5 } )
+         //.style('stroke', function(d) { return d.data.in_country ? "grey" : "red" } );
+      things_viz.append('title').text( text_from_datacell );
+      /*
+      d3.select('svg').on('mousemove', function() {
+         mcoord = d3.mouse(this);
+         mcoord[0] -= border_width;
+         mcoord[1] -= border_width;
+         fisheye.focus( mcoord );
+         things_viz.each( function(d) { d.fisheye = fisheye(d); })
+            .attr("x", function(d) { return d.fisheye.x; })
+            .attr("y", function(d) { return d.fisheye.y; })
+            .attr("width", function(d) { return d.fisheye.z * 3; })
+            .attr("height", function(d) { return d.fisheye.z * 3; });
+      });
+      */
+   });
+  </script>
+  </footer>
+</body>
+</html>

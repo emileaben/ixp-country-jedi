@@ -1,0 +1,32 @@
+/*
+ * General style sheet
+ */
+ 
+body        { font-family:"dejavu sans","arial",sans-Serif; font-size: 82%; margin: 2px; }
+
+#message    { width: 63%; text-align: center; font-weight: bold; border: 0px; }
+
+/* #map        { width: 100%; height: 95%; float: left; } */
+
+#map_v4, #map_v6 { width: 49.5%; height: 100%; }
+#map_v4 { float: left; }
+#map_v6 { float: right; }
+
+#panel      { width: 34%; float: left; border: 0px; padding: .5em 0 0 .5em; min-width:100px; }
+
+#bottom     { clear: both; border: solid 1px black; }
+
+.leaflet-clickable {
+/*  stroke-dasharray: 10,10,3,10;*/
+  animation: dash 5s linear infinite;
+  -webkit-animation: dash 5s linear infinite;
+}
+
+@-webkit-keyframes dash {
+  to { stroke-dashoffset: 100; }
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: 100; }
+}
+
