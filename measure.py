@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import json
-import sys
 import time
+import os
+import sys
+sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import Measure
 
 ### read a probeset.json (default in current dir)

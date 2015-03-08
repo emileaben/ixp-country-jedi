@@ -1,18 +1,16 @@
 #!/usr/bin/env python
+import os
+import sys
+sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import MeasurementInfo
 from Atlas import MeasurementFetch
 from Atlas import MeasurementPrint
 from Atlas import MeasurementEnhance
 from Atlas import ProbeInfo
 import json
-import yaml
 import re
 import time
-import sys
 import ripe.atlas.sagan
-import IXP 
-import os
-import os.path
 from radix import Radix
 
 ### static definitions

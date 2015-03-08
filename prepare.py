@@ -7,7 +7,9 @@ import re
 import json
 from bs4 import BeautifulSoup
 from math import radians, cos, sin, asin, sqrt
-sys.path.append('/Users/emile/workspace/atlas/lib')
+import os
+import sys
+sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import ProbeInfo
 
 ## find connected probes
