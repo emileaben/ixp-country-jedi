@@ -5,7 +5,7 @@ import json
 import sys
 import dns.resolver
 import traceback
-import ssl
+#import ssl
 import time
 
 #if hasattr(socket, 'setdefaulttimeout'):
@@ -50,8 +50,10 @@ class IPInfoCache():
       if not ip in self.ips:
          self.ips[ip] = {}
       try:
-         gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-         locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ), context=gcontext )
+         #this context trick was needed at some point, forgot to document why :(
+         #gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+         #locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ), context=gcontext )
+         locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ) )
          locjson = json.load( locinfo )
          if len( locjson['crowdsourced'] ) > 0:
             loc = locjson['crowdsourced'][0]['canonical_georesult']
