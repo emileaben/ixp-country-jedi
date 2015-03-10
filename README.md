@@ -13,7 +13,9 @@ the scripts
 Scripts depend on this convention.
 
 Dependencies on external python modules are in 'requirements.txt', so you can run
+
     pip install -r requirements.txt
+
 to fulfill these.
 
 Before you use the scripts, create a config file specifying what mesh you'd want to do.
@@ -23,10 +25,12 @@ config.json
 
 This file contains base data used for creating measurements and analysing the results.
 It currently contains 3 parts:
-   'country': ISO 2 letter code for the country under analysis
-   'ixps': List of IXPs one wants to detect/report on
-   'locations': List of cities
 
+    *country*: ISO 2 letter code for the country under analysis
+    *ixps*: List of IXPs one wants to detect/report on
+    *locations*: List of cities on which probe selection will be based.
+
+An example is provided in the *example* directory.
 
 prepare.py
 ==========
@@ -67,18 +71,18 @@ get-ips.py
 This script gathers metadata for all IPs in the collected data. This is done
 separately from the rest of analysis-code because it is time-consuming and
 ideally is done pretty soon after making all measurements. If done too soon,
-not all measurements are in yet, if done much later meta-data, like reverse
-hostname mapping might have changed, so ballpark is don't get-ips a few minutes
-after measure.py. This step will create an 'ips.json-fragments' file with
-reverse DNS lookups, ASNs and geoloc (via OpenIPMap, not MaxMind) of IPs
-encountered in traceroutes.
+not all measurement results are in yet, if done much later (think days)
+meta-data, like reverse hostname mapping might have changed, so ballpark is
+don't get-ips a few minutes after measure.py. This step will create an
+'ips.json-fragments' file with reverse DNS lookups, ASNs and geoloc (via
+OpenIPMap, not MaxMind) of IPs encountered in traceroutes.
 
 get-measurements.py
 ===================
 
 This script fetches measurements (from measurementset.json) and does some
 initial analyses on them using information from config.json, basedata.json,
-probeset.json and ips.json-fragments.  It creates a local 'results' directory
+probeset.json and ips.json-fragments.  It creates a local *results* directory
 and outputs a single json file per measurement (analysed.<msm_id>.json) which
 is a list of analysis results, one result per src/dst combination.
 
@@ -86,10 +90,11 @@ analyse-results.py
 ==================
 
 This script produces text and/or webpages with analysis and visualisation in a
-local 'analysis' directory. For webpages these need to be on an actual
+local *analysis* directory. For webpages these need to be on an actual
 webserver for some of the javascript in them to work. One can easily create a
 local webserver that would work for this purpose like this: 
-    cd analysis python -m SimpleHTTPServer 3333
+
+    cd analysis ; python -m SimpleHTTPServer 3333
 
 and then pointing your browser at localhost:3333/<viz-name> Note that some
 visualisations use libraries in a common directory located in the 'analysis'

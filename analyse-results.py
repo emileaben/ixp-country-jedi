@@ -422,10 +422,10 @@ def main():
    # 'ixp_county'
    # 'ixpcountry'
    defs={
-      'ixpcount': False,
-      'incountry': False,
-      'ixpcountry': False,
-      'cities': False,
+      'ixpcount': True,
+      'incountry': True,
+      'ixpcountry': True,
+      'cities': True,
       'asgraph': True,
       'geopath': True,
       'ixplans': True,
