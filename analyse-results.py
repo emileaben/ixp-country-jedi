@@ -279,9 +279,43 @@ def do_ixplans_printresult( data ):
          result['ixps'].append( i )
       with open('%s/ixplans.%s.json' % ( VIZPATH, proto ), 'w') as outfile:
          json.dump( result , outfile )
-   print "GEOPATH viz results in '%s'" % ( VIZPATH )
+   print "IXP LANs: viz results in '%s'" % ( VIZPATH )
+
+### probetags
+def init_probetags():
+   return {}
+def do_probetags_entry( data, proto, data_entry ):
+   pass
+def do_probetags_printresult( data ):
+   print "PROBETAGS"
+   VIZPATH="./analysis/probetags/"
+   if not os.path.exists( VIZPATH ):
+      os.makedirs( VIZPATH )
+   tags = {
+      'system': Counter(),
+      'user': Counter()
+   }
+         
+   json_out = {
+      'system': [],
+      'user': [],
+   }
+   for p in PROBES:
+      for t in p['tags']:
+         if t.startswith('system-'):
+            t = t[7:]
+            tags['system'][ t ] += 1
+         else:
+            tags['user'][ t ] += 1
+   for tagtype in tags:
+      for tag in sorted( tags[tagtype].keys() ):
+         json_out[tagtype].append({'text': tag, 'count': tags[tagtype][tag]})
+   with open("%s/tags.json" % ( VIZPATH ), 'w') as outfile:
+      json.dump( json_out, outfile )
+   print "PROBE TAGS: viz results in '%s'" % ( VIZPATH )
+
    
-### stub 
+### viaanchor
 def init_viaanchor():
    data = {}
    for proto in ('v4','v6'):
@@ -343,6 +377,21 @@ def do_viaanchor_printresult( data ):
             print >>f, json.dumps( result, indent=2 )
       print "VIAANCHOR viz results for anchor %s in '%s'" % ( anchor_id, ANCHORPATH )
 
+def init_cities():
+   return {'v4': Counter(), 'v6': Counter()}
+
+def do_cities_entry( data, proto, data_entry ):
+   for city in data_entry['locations']:
+      data[proto][city] += 1
+
+def do_cities_printresult( data ):
+   print "CITIES"
+   print "======"
+   for proto in ('v4','v6'):
+      print "IP%s" % ( proto )
+      for city,count in data[ proto ].most_common():
+         print "  %s (%s)" % (city, count)
+
 ### below might be easy to copy-paste for additional analyses
 ### stub 
 def init_stub():
@@ -373,44 +422,38 @@ def main():
    # 'ixp_county'
    # 'ixpcountry'
    defs={
-      'ixpcount': True,
-      'incountry': True,
-      'ixpcountry': True,
+      'ixpcount': False,
+      'incountry': False,
+      'ixpcountry': False,
+      'cities': False,
       'asgraph': True,
       'geopath': True,
       'ixplans': True,
+      'probetags': True,
       'viaanchor': False, ## buggy
    }
    ### initialise all analyses
    data = {}
    ### copy template viz stuff
    copytree('../template/','./analysis')
-   if defs['ixpcount']:    data['ixpcount']   = init_ixpcount()
-   if defs['incountry']:  data['incountry'] = init_incountry()
-   if defs['ixpcountry']:  data['ixpcountry'] = init_ixpcountry()
-   if defs['asgraph']:      data['asgraph']     = init_asgraph()
-   if defs['geopath']:     data['geopath']    = init_geopath()
-   if defs['ixplans']:     data['ixplans']    = init_ixplans()
-   if defs['viaanchor']:     data['viaanchor']    = init_viaanchor()
+   ## only the analyses that are 'True'
+   analysis_list = sorted( filter(lambda x: defs[x], defs.keys() ) )
+   for analysis in analysis_list:
+      ## this is a fancy way of saying: 
+      #data['ixpcount']   = init_ixpcount()
+      #data['incountry']   = init_incountryy()
+      data[ analysis ] = globals()['init_%s' % analysis]()
 
    ### loop over all traceroutes
    for proto,data_entry in data_line_generator():
-      if defs['ixpcount']:   do_ixpcount_entry( data['ixpcount'], proto, data_entry )
-      if defs['incountry']: do_incountry_entry( data['incountry'], proto, data_entry )
-      if defs['ixpcountry']: do_ixpcountry_entry( data['ixpcountry'], proto, data_entry )
-      if defs['asgraph']: do_asgraph_entry( data['asgraph'], proto, data_entry )
-      if defs['geopath']: do_geopath_entry( data['geopath'], proto, data_entry )
-      if defs['ixplans']: do_ixplans_entry( data['ixplans'], proto, data_entry )
-      if defs['viaanchor']: do_viaanchor_entry( data['viaanchor'], proto, data_entry )
+      for analysis in analysis_list:
+         ## this calls:
+         # do_ixpcountry_entry( data['ixpcountry'], proto, data_entry )
+         globals()["do_%s_entry" % analysis]( data[ analysis ], proto, data_entry )
 
    ### print analyses results
-   if defs['ixpcount']:   do_ixpcount_printresult( data['ixpcount'] )
-   if defs['incountry']: do_incountry_printresult( data['incountry'] )
-   if defs['ixpcountry']: do_ixpcountry_printresult( data['ixpcountry'] )
-   if defs['asgraph']: do_asgraph_printresult( data['asgraph'] )
-   if defs['geopath']: do_geopath_printresult( data['geopath'] )
-   if defs['ixplans']: do_ixplans_printresult( data['ixplans'] )
-   if defs['viaanchor']: do_viaanchor_printresult( data['viaanchor'] )
+   for analysis in analysis_list:
+      globals()["do_%s_printresult" % analysis]( data[analysis] )
 
 if __name__ == '__main__':
    main()
