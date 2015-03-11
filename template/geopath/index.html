@@ -17,8 +17,11 @@
 <script src="geopath.js" type="text/javascript"></script>
 </head>
 <body onload="initmap()";>
-   <div id="map_v4"></div>
-   <div id="map_v6"></div>
+These maps show the IPv4 paths (left) and IPv6 paths (right) seen in traceroutes.
+Indirect links in traceroutes (ie. with hops inbetween without answer, or no geoloc) are shown 
+with dotted lines, direct links with lines with long-short alternating pattern.
+   <div id="box_v4"><div id="map_v4"></div></div>
+   <div id="box_v6"><div id="map_v6"></div></div>
 </body>
 </html>
 
