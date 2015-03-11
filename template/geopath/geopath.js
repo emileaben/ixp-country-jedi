@@ -21,7 +21,7 @@ var center = new L.LatLng(52,4);
 
 var myStyle = {
    'className': '.animatedpath',
-   'weight': 1
+   'weight': 2
 };
 
 function initmap() {
@@ -68,7 +68,7 @@ function initmap() {
       var locStyle = myStyle;
       if ( feature.properties.is_direct == false ) {
          locStyle.dashArray = '2,10,2,10';
-         locStyle['opacity'] = 0.10;
+         locStyle['opacity'] = 0.25;
       } else {
          locStyle.dashArray = '10,10,3,10';
          locStyle['opacity'] = 0.40;
@@ -77,7 +77,8 @@ function initmap() {
          locStyle['color'] = "#ff7800";
          locStyle['opacity'] = 0.80;
       } else { */
-      locStyle['color'] = "#1f78b4";
+      //locStyle['color'] = "#1f78b4";
+      locStyle['color'] = "#191970"
       return locStyle;
    }
    ['v4','v6'].map( function( proto ) {
