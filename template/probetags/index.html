@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+body {
+   margin: 40px;
+   width: 90%;
+}
+span {
+    margin: 5px;
+    float: left;
+    white-space: nowrap;
+} 
+div {
+   margin-bottom: 50px;
+   background-color: lightgray;
+   float: right;
+}
+</style>
+</head>
+<body>
+<h2>System Tags</h2>
+<div id='system-tags'></div>
+<h2>User Tags</h2>
+<div id='user-tags'></div>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script>
+// .format() for strings
+// First, checks if it isn't implemented yet.
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined'
+        ? args[number]
+        : match
+      ;
+    });
+  };
+}
+
+$.ajax({url: "tags.json", success: function( data ) {
+      data['system'].map( function( item ) {
+         $('#system-tags').append( '<span style="font-size: {1}px">{0}</span>'.format( item['text'], 15+1.5*item['count'] ) );
+      });
+      data['user'].map( function( item ) {
+         $('#user-tags').append( '<span style="font-size: {1}px">{0}</span>'.format( item['text'], 15+1.5*item['count'] ) );
+      });
+   }
+});
+</script>
+</body>
