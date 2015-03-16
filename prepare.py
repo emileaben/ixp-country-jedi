@@ -273,20 +273,21 @@ if __name__ == '__main__':
          basedata['ixps'][ ixp['name'] ]['memberlist'] = ixp['memberlist']
          basedata['ixps'][ ixp['name'] ]['memberlist_asns'] = sorted( list( member_asn_set ) )
    if 'country' in conf:
-      probes = find_probes_in_country( conf['country'] )
-      selected_probes = do_probe_selection( probes, conf, basedata )
-      ## writing to probeset.json
-      print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
-      with open('probeset.json','w') as outfile:
-         json.dump( selected_probes, outfile, indent=2 )
+      if os.path.isfile('probeset.json'):
+         print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
+      else: 
+         probes = find_probes_in_country( conf['country'] )
+         selected_probes = do_probe_selection( probes, conf, basedata )
+         ## writing to probeset.json
+         print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
+         with open('probeset.json','w') as outfile:
+            json.dump( selected_probes, outfile, indent=2 )
    else:      
       ## TODO figure out how to deal with multi-country, or no country defined
       print "need a country, exiting"
    print >>sys.stderr, "writing basedata (locations/ixps) to basedata.json"
    with open('./basedata.json','w') as bdfile:
       json.dump( basedata, bdfile, indent=2 )
-
-
 
 '''
 if __name__ == '__main__':
