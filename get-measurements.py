@@ -20,16 +20,27 @@ RESULTDIR='./results'
 
 def check_if_via_ixp( tr, ixp_radix ):
    ips = set()
-   ixps = set()
+   ip2minhop = {}
+   ixps = []
    for h in tr.ip_path:
       for ip in h:
          if isinstance(ip, str):
             ips.add( ip )
-   for ip in ips:
+            if not ip in ip2minhop:
+               ip2minhop[ ip ] = h.index
+            elif ip2minhop[ ip ] > h.index:
+               ip2minhop[ ip ] = h.index
+   ## ips lowest to highest hop (so lan that was encountered first is listed first)
+   sorted_ips = sorted( ips, key=lambda ip:ip2minhop[ ip ] )
+   last = None
+   for ip in sorted_ips:
       rnode = ixp_radix.search_best( ip )
       if rnode != None:
-         ixps.add( rnode.data['name'] )
-   return sorted( list(ixps) )
+         ixp = rnode.data['name']
+         if last == None or last != ixp:
+            ixps.append( ixp )
+            last = ixp
+   return ixps
 
 def create_ixp_radix( conf ):
    ixp_radix = Radix()
