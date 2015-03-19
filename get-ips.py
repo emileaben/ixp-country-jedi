@@ -19,38 +19,51 @@ def get_asnmeta( asn ):
    ## and https://stat.ripe.net/data/routing-status/data.json?resource=%s
    name_url = "https://stat.ripe.net/data/as-overview/data.json?resource=AS%s" % ( asn )
    size_url = "https://stat.ripe.net/data/routing-status/data.json?resource=AS%s" % ( asn )
-   try:
-      nconn = urllib2.urlopen( name_url , timeout=60 )
-   except:
+   MAX_RETRIES=5
+
+   nconn = None
+   nretries = 0
+   if nconn == None and nretries <= MAX_RETRIES:
       try:
          nconn = urllib2.urlopen( name_url , timeout=60 )
       except:
-         print "URL fetch error on: %s" % (name_url)
-         #raise ValueError("URL fetch error on: %s" % (name_url) )
-   try:
-      ndata = json.load( nconn )
-      holder = ndata['data']['holder']
-      name,desc_cc = holder.split(" ",1)
-      desc,cc = desc_cc.rsplit(",",1)
-      meta['as_name'] = name
-      meta['as_description'] = desc
-      meta['as_country'] = cc
-   except:
-      print "asn name extraction failed for %s" % ( asn )
-   try:
-      sconn = urllib2.urlopen( size_url , timeout=60 )
-   except:
+         nretries += 1
+   if not nconn:
+      print "URL fetch error on: %s" % (name_url)
+   else:
+      try:
+         ndata = json.load( nconn )
+         holder = ndata['data']['holder']
+         name_desc,cc = holder.rsplit(",",1)
+         nd_list = name_desc.split(" ",1)
+         name = nd_list[0]
+         desc = None
+         if len(nd_list) == 1:
+            desc = nd_list[0]
+         else:
+            desc = nd_list[1]
+         meta['as_name'] = name
+         meta['as_description'] = desc
+         meta['as_country'] = cc
+      except:
+         print "asn name extraction failed for %s (%s)" % ( asn, ndata )
+
+   sconn = None
+   sretries = 0
+   if sconn == None and sretries <= MAX_RETRIES:
       try:
          sconn = urllib2.urlopen( size_url , timeout=60 )
       except:
-         print "URL fetch error on: %s" % (name_url)
-         #raise ValueError("URL fetch error on: %s" % (size_url) )
-   try:
-      sdata = json.load( sconn )
-      meta['ips_v4'] = sdata['data']['announced_space']['v4']['ips']
-      meta['48s_v6'] = sdata['data']['announced_space']['v6']['48s']
-   except:
-      print "asn size extraction failed for %s" % ( asn )
+         sretries += 1
+   if not sconn:
+      print "URL fetch error on: %s" % (size_url)
+   else:
+      try:
+         sdata = json.load( sconn )
+         meta['ips_v4'] = sdata['data']['announced_space']['v4']['ips']
+         meta['48s_v6'] = sdata['data']['announced_space']['v6']['48s']
+      except:
+         print "asn size extraction failed for %s (%s)" % ( asn, sdata )
    return meta
 
 def main():
