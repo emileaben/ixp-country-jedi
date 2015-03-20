@@ -9,6 +9,7 @@
 <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
 <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 <script src="../bower_components/colorbrewer/colorbrewer.js"></script>
+<script src="../common/jedi-utils.js"></script>
 <style>
 .tick line {
   shape-rendering: crispEdges;
@@ -41,6 +42,9 @@ LAN that was seen in traceroutes between source and destination RIPE Atlas probe
 For now this only shows IPv4 results (see source code to get IPv6)
 <div id="vizcontainer">
 <svg style="width:1000px;height:1000px;border:1px lightgray solid;" />
+</div>
+<div id="details">
+Hover over cells in the matrix on the left to get detailed information in this window
 </div>
   <footer>
 <script type="text/javascript">
@@ -123,12 +127,9 @@ For now this only shows IPv4 results (see source code to get IPv6)
          .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
          .attr('opacity', 0.8)
          .style('fill', function(d) { return colorScale( d.ixp ) } )
-         .on('mouseover', cell_mouseover)
+         // note that this only creates for the nodes where we have data, need full matrix for all nodes
+         .on('mouseover', function (d) { console.log( d) ; jedi_cell_detail_to_jquery_elt( proto, nodes[ d.source ].probe_id, nodes[ d.target ].probe_id , $("#details") ) } )
          .on('mouseout', cell_mouseout);
-      function cell_mouseover(p) {
-         // TODO nice viz for
-         //console.log( p );
-      }
       function cell_mouseout(p) {
          //console.log( p );
       }

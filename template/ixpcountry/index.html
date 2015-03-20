@@ -8,6 +8,7 @@
 <script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
 <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
 <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../common/jedi-utils.js"></script>
 <style>
 .tick line {
   shape-rendering: crispEdges;
@@ -131,6 +132,7 @@ Hover over cells in the matrix on the left to get detailed information in this w
          return "pink"; // should not happen
          
       };
+      /*
       function mouseover_evt( d ) {
          var txt = [];
          //json_file = "details/{0}.{1}.{2}.json".format( d.row , d.col, proto );
@@ -142,14 +144,9 @@ Hover over cells in the matrix on the left to get detailed information in this w
             console.log( data );;
          });
          var nodeSelection = d3.select(this).style({'stroke-width':2});
-         txt.push(d.data.in_country ? 'incc: yes' : 'incc: no');
-         txt.push(d.data.via_ixp    ? 'ixp: yes' : 'ixp: no');
-         txt.push("src AS " + row_by_idx[ d.row ].asn_v4);
-         txt.push("dst AS " + row_by_idx[ d.col ].asn_v4);
-         txt.push("src Prb " + d.row);
-         txt.push("dst Prb " + d.col);
          $("#details").html( txt.join("<br>") );
       }
+      */
       var things_viz = things.data( cells )
          .enter()
          .append('rect')
@@ -159,7 +156,7 @@ Hover over cells in the matrix on the left to get detailed information in this w
          .attr('y', function(d) { return d.y } )
          .attr('width', Math.floor(( width - border_width) / col_count ) -1)
          .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
-         .on('mouseover', mouseover_evt)
+         .on('mouseover', function (d) { jedi_cell_detail_to_jquery_elt( proto, d.row, d.col , $("#details") ) } ) 
          .style('fill', cellcolor );
          //.style('stroke-width', function(d) { return d.data.in_country ? 0 : 0.5 } )
          //.style('stroke', function(d) { return d.data.in_country ? "grey" : "red" } );
