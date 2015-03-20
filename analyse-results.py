@@ -324,12 +324,13 @@ def do_probetags_printresult( data ):
       'user': [],
    }
    for p in PROBES:
-      for t in p['tags']:
-         if t.startswith('system-'):
-            t = t[7:]
-            tags['system'][ t ] += 1
-         else:
-            tags['user'][ t ] += 1
+      if 'tags' in p:
+         for t in p['tags']:
+            if t.startswith('system-'):
+               t = t[7:]
+               tags['system'][ t ] += 1
+            else:
+               tags['user'][ t ] += 1
    for tagtype in tags:
       for tag in sorted( tags[tagtype].keys() ):
          json_out[tagtype].append({'text': tag, 'count': tags[tagtype][tag]})
@@ -452,7 +453,7 @@ def main():
       'asgraph': True,
       'geopath': True,
       'ixplans': True,
-#      'probetags': True,
+      'probetags': True,
       'viaanchor': False, ## buggy
    }
 
