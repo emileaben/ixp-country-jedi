@@ -29,6 +29,32 @@ def data_line_generator():
             else:
                print >>sys.stderr," error on msm entry: %s " % ( msm_entry )
 
+### common . For stuff general enough to apply to multiple analyses.
+### example is text representation for traces, indexed by srcprb.dstprb
+def init_common():
+  return {'v4': {}, 'v6': {}} 
+
+def do_common_entry( data, proto, data_entry ):
+   detail_key = '.'.join(map(str,[ data_entry['src_prb_id'] , data_entry['dst_prb_id'] ]))
+   if not detail_key in data[proto]:
+      data[proto][detail_key] = []
+   data[proto][detail_key].append( data_entry )
+
+def do_common_printresult( data ):
+   COMMONPATH='./analysis/common/details'
+   for proto in ('v4','v6'):
+      cpp = "%s/%s" % (COMMONPATH,proto)
+      for detail_key in data[ proto ].keys():
+         data_sorted = sorted( data[proto][detail_key], key=lambda x:x['ts'])
+         data_latest = data_sorted[-1]
+         src_prb,dst_prb = detail_key.split('.')
+         ldir = "%s/%s/%s/%s" % ( COMMONPATH, proto, src_prb, dst_prb )
+         if not os.path.exists( ldir ):
+            os.makedirs( ldir )
+         latest_file = "%s/latest.json" % (ldir)
+         # see ixpcountry template for example of how to use these latest.json files
+         with open(latest_file, 'w') as outfile:
+            json.dump( data_latest, outfile )
 
 ### ixpcount
 def init_ixpcount():
@@ -161,9 +187,6 @@ def do_ixpcountry_printresult( ixpcountry ):
       os.makedirs( VIZPATH )
    if not os.path.exists( VIZDETAILSPATH ):
       os.makedirs( VIZDETAILSPATH )
-   ## put viz boilerplate in #TODO
-   # cp template/ixpcountry ./IE-2015-01/viz
-   # cp -R template/bower_components ./IE-2015-01/viz/ixpcountry/
    for proto in ('v4','v6'):
       with open('%s/ixpcountry.%s.json' % (VIZPATH,proto), 'w') as outfile:
          json.dump( ixpcountry['summary'][ proto ], outfile )   
@@ -429,9 +452,11 @@ def main():
       'asgraph': True,
       'geopath': True,
       'ixplans': True,
-      'probetags': True,
+#      'probetags': True,
       'viaanchor': False, ## buggy
    }
+
+   defs['common']=True ## always true
    ### initialise all analyses
    data = {}
    ### copy template viz stuff

@@ -133,7 +133,8 @@ Hover over cells in the matrix on the left to get detailed information in this w
       };
       function mouseover_evt( d ) {
          var txt = [];
-         json_file = "details/{0}.{1}.{2}.json".format( d.row , d.col, proto );
+         //json_file = "details/{0}.{1}.{2}.json".format( d.row , d.col, proto );
+         json_file = "../common/details/{0}/{1}/{2}/latest.json".format( proto, d.row, d.col );
          $.ajax({url: json_file, 
             async: false
          }).done(function( data ) {
