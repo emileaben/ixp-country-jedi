@@ -50,11 +50,12 @@ def create_ixp_radix( conf ):
          node.data['name'] = ixp['name']
    return ixp_radix
 
-def check_if_is_in_country( country, locs):
-   country=country.upper()
+def check_if_is_in_country( countries, locs):
    for loc in locs:
-      if loc != None and loc != '' and not loc.endswith( country ):
-         return False
+      if loc != None: 
+         cc_in_loc = loc.rsplit(',',1)[1]
+         if not cc_in_loc in countries:
+            return False
    return True
 
 def get_destination_rtts( tr ):
@@ -119,7 +120,11 @@ def main():
          as_links = MeasurementEnhance.aslinksplus( data, ixp_radix )
          geojson = MeasurementEnhance.togeojson( data, probes_by_id[ src_prb_id ] , probes_by_id[ dst_prb_id ] )
          #print as_links
-         is_in_country = check_if_is_in_country( conf['country'], locs )
+         countries = conf['country']
+         if type(countries) != list:
+            countries = [ countries ]
+         countries = map(lambda x:x.upper(), countries)
+         is_in_country = check_if_is_in_country( countries, locs )
          #print "INCOUNTRY: %s" % (is_in_country)
          dst_rtts = get_destination_rtts( tr )
          outdata.append( {
@@ -187,11 +192,12 @@ now = int(time.time())
 #then = now - 8*3600
 then = now - 3600
 
-def check_if_is_in_country( country, locs):
-   country=country.upper()
+def check_if_is_in_country( countries, locs):
    for loc in locs:
-      if loc != None and not loc.endswith( country ):
-         return False
+      if loc != None:
+         cc_in_loc = loc.rsplit(',',1)
+            if cc_in_loc in countries:
+               return False
    return True
 
 def check_if_via_ixp( tr, ixp_radix ):

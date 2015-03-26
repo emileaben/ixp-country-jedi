@@ -142,6 +142,8 @@ def do_probe_selection( probes, conf, basedata ):
    print "selected asncount: %s, multiprobe: %s\n(%s)" % ( asn_count, asn_multiprobe_count, selected_asn_set )
    print ' '.join(["--add=%s" % (x) for x in selected_probes ])
    '''
+   if len(prb_per_asn_distr.keys()) == 0:
+      return []
    # print some stats
    print "distribution of probes per ASN:"
    for i in range(1,1+max( prb_per_asn_distr.keys() )):
@@ -276,8 +278,14 @@ if __name__ == '__main__':
       if os.path.isfile('probeset.json'):
          print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
       else: 
-         probes = find_probes_in_country( conf['country'] )
-         selected_probes = do_probe_selection( probes, conf, basedata )
+         countries = conf['country']
+         selected_probes = []
+         if type(countries) != list:
+            countries = [ countries ]
+         for country in countries:
+            probes_cc = find_probes_in_country( country )
+            sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
+            selected_probes += sel_probes_for_cc
          ## writing to probeset.json
          print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
          with open('probeset.json','w') as outfile:
