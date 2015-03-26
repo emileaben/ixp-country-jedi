@@ -104,7 +104,11 @@ def do_ixpcount_printresult( ixps ):
       print txt
       print '=' * len(txt)
       for ixp in sorted( ixps[ key ], key=lambda x: ixps[ key ][x] , reverse=True ):
-         print "%02d\t%.1f%%\t%s" % ( ixps[key][ixp] , 100.0*ixps[key][ixp]/ixps[key]['_total'], ixp )
+         pct = 0
+         try:
+            pct = 100.0*ixps[key][ixp]/ixps[key]['_total']
+         except: pass
+         print "%02d\t%.1f%%\t%s" % ( ixps[key][ixp] , pct, ixp )
 
 ### incountry
 def init_incountry():
