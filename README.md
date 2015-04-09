@@ -31,14 +31,17 @@ config.json
 This file contains base data used for creating measurements and
 analysing the results.  It currently contains 3 parts:
 
-    *country*:   ISO 2 letter code for the country under analysis
+    *country*:   ISO 2 letter code for the country under analysis,
+                 or list of countries under analysis.
 
     *ixps*:      List of IXPs one wants to detect/report on
 
     *locations*: List of cities on which probe selection will be
                  based.
 
-An example is provided in the *example* directory.
+An example is provided in the *example* directory. Only the *country* is mandatory. 
+Without a *locations* section, the capital of *country* (or first country if *country*
+is a list) is used for probe selection (see below).
 
 prepare.py
 ==========
