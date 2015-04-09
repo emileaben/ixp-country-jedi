@@ -120,10 +120,7 @@ def main():
          as_links = MeasurementEnhance.aslinksplus( data, ixp_radix )
          geojson = MeasurementEnhance.togeojson( data, probes_by_id[ src_prb_id ] , probes_by_id[ dst_prb_id ] )
          #print as_links
-         countries = conf['country']
-         if type(countries) != list:
-            countries = [ countries ]
-         countries = map(lambda x:x.upper(), countries)
+         countries = basedata['countries']
          is_in_country = check_if_is_in_country( countries, locs )
          #print "INCOUNTRY: %s" % (is_in_country)
          dst_rtts = get_destination_rtts( tr )

@@ -234,6 +234,22 @@ def get_memberlist_html_table( conn ):
       col_idx += 1
    return asns
 
+def capital_city_for_country( country_code ):
+   ''' 
+      Use world bank API to return Capital city for a given country-code 
+      Example: returns 'Jakarta,ID' if country_code=='ID'.
+   '''
+   try:
+      wb_url = "http://api.worldbank.org/countries/%s/?format=json" % ( country_code.lower() )
+      req = urllib2.urlopen( wb_url )
+      resp = json.loads(req.read())
+      lat = resp[1][0]['latitude']
+      lon = resp[1][0]['longitude']
+      name = "%s,%s" % ( resp[1][0]['capitalCity'], country_code )
+      return (name,lat,lon)
+   except:
+      raise ValueError("can't get capital city for '%s' from WorldBank API" % ( country_code ) )
+
 def locstr2latlng( locstring ):
    try:
       locstr = urllib2.quote( locstring )
@@ -260,11 +276,29 @@ if __name__ == '__main__':
    basedata = { # aux info we want saved
       'locations': {}, ## locations keyed by name
       'ixps': {}, ## IXPs keyed by name
+      'countries': [], ## countries by iso code
    }  ## auxiliary info that we want saved
+   if not 'country' in conf:
+      print "need a country, exiting"
+      sys.exit(1)
+   # 'list'-ify country
+   if type( conf['country'] ) != list:
+      basedata['countries'] = [ conf['country'] ]
+   else:
+      basedata['countries'] = conf['country']
+   # uppercase all
+   basedata['countries'] = map(lambda x:x.upper(), basedata['countries'])
    ## location infos
-   for loc in conf['locations']:
-      lat,lon = locstr2latlng( loc ) 
-      basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
+   ## If no location present, select the capital of the first country in list
+   if not 'locations' in conf or len( conf['locations'] ) == 0:
+      print "%s" % ( basedata['countries'] )
+      capital_str,lat,lon = capital_city_for_country( basedata['countries'][0] )
+      print >> sys.stderr, "No location info available for probe selection, defaulting to capital city of country (%s)" % ( capital_str )
+      basedata['locations'][ capital_str ] = {'lat': lat, 'lon': lon} 
+   else:
+      for loc in conf['locations']:
+         lat,lon = locstr2latlng( loc ) 
+         basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
    for ixp in conf['ixps']:
       basedata['ixps'][ ixp['name'] ] = {
          'peeringlans': ixp['peeringlans']
@@ -274,26 +308,20 @@ if __name__ == '__main__':
          print member_asn_set
          basedata['ixps'][ ixp['name'] ]['memberlist'] = ixp['memberlist']
          basedata['ixps'][ ixp['name'] ]['memberlist_asns'] = sorted( list( member_asn_set ) )
-   if 'country' in conf:
-      if os.path.isfile('probeset.json'):
-         print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
-      else: 
-         countries = conf['country']
-         selected_probes = []
-         if type(countries) != list:
-            countries = [ countries ]
-         for country in countries:
-            probes_cc = find_probes_in_country( country )
-            sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
-            selected_probes += sel_probes_for_cc
-         ## writing to probeset.json
-         print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
-         with open('probeset.json','w') as outfile:
-            json.dump( selected_probes, outfile, indent=2 )
-   else:      
-      ## TODO figure out how to deal with multi-country, or no country defined
-      print "need a country, exiting"
-   print >>sys.stderr, "writing basedata (locations/ixps) to basedata.json"
+   if os.path.isfile('probeset.json'):
+      print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
+   else: 
+      for country in basedata['countries']:
+         print >>sys.stderr, "Preparing country: %s" % ( country )
+         probes_cc = find_probes_in_country( country )
+         sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
+         selected_probes += sel_probes_for_cc
+         print >>sys.stderr, "END country: %s" % ( country )
+      ## writing to probeset.json
+      print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
+      with open('probeset.json','w') as outfile:
+         json.dump( selected_probes, outfile, indent=2 )
+      print >>sys.stderr, "writing basedata (locations/ixps) to basedata.json"
    with open('./basedata.json','w') as bdfile:
       json.dump( basedata, bdfile, indent=2 )
 
