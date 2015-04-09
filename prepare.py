@@ -243,8 +243,8 @@ def capital_city_for_country( country_code ):
       wb_url = "http://api.worldbank.org/countries/%s/?format=json" % ( country_code.lower() )
       req = urllib2.urlopen( wb_url )
       resp = json.loads(req.read())
-      lat = resp[1][0]['latitude']
-      lon = resp[1][0]['longitude']
+      lat = float(resp[1][0]['latitude'])
+      lon = float(resp[1][0]['longitude'])
       name = "%s,%s" % ( resp[1][0]['capitalCity'], country_code )
       return (name,lat,lon)
    except:
@@ -291,7 +291,6 @@ if __name__ == '__main__':
    ## location infos
    ## If no location present, select the capital of the first country in list
    if not 'locations' in conf or len( conf['locations'] ) == 0:
-      print "%s" % ( basedata['countries'] )
       capital_str,lat,lon = capital_city_for_country( basedata['countries'][0] )
       print >> sys.stderr, "No location info available for probe selection, defaulting to capital city of country (%s)" % ( capital_str )
       basedata['locations'][ capital_str ] = {'lat': lat, 'lon': lon} 
@@ -299,18 +298,20 @@ if __name__ == '__main__':
       for loc in conf['locations']:
          lat,lon = locstr2latlng( loc ) 
          basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
-   for ixp in conf['ixps']:
-      basedata['ixps'][ ixp['name'] ] = {
-         'peeringlans': ixp['peeringlans']
-      }
-      if 'memberlist' in ixp:
-         member_asn_set = get_memberlist( ixp['memberlist'] )
-         print member_asn_set
-         basedata['ixps'][ ixp['name'] ]['memberlist'] = ixp['memberlist']
-         basedata['ixps'][ ixp['name'] ]['memberlist_asns'] = sorted( list( member_asn_set ) )
+   if 'ixps' in conf:
+      for ixp in conf['ixps']:
+         basedata['ixps'][ ixp['name'] ] = {
+            'peeringlans': ixp['peeringlans']
+         }
+         if 'memberlist' in ixp:
+            member_asn_set = get_memberlist( ixp['memberlist'] )
+            print member_asn_set
+            basedata['ixps'][ ixp['name'] ]['memberlist'] = ixp['memberlist']
+            basedata['ixps'][ ixp['name'] ]['memberlist_asns'] = sorted( list( member_asn_set ) )
    if os.path.isfile('probeset.json'):
       print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
    else: 
+      selected_probes = []
       for country in basedata['countries']:
          print >>sys.stderr, "Preparing country: %s" % ( country )
          probes_cc = find_probes_in_country( country )

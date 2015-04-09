@@ -42,12 +42,12 @@ def check_if_via_ixp( tr, ixp_radix ):
             last = ixp
    return ixps
 
-def create_ixp_radix( conf ):
+def create_ixp_radix( basedata ):
    ixp_radix = Radix()
-   for ixp in conf['ixps']:
-      for prefix in ixp['peeringlans']:
+   for ixp_name,ixp_entry in basedata['ixps'].iteritems():
+      for prefix in ixp_entry['peeringlans']:
          node = ixp_radix.add( prefix )
-         node.data['name'] = ixp['name']
+         node.data['name'] = ixp_name 
    return ixp_radix
 
 def check_if_is_in_country( countries, locs):
@@ -83,13 +83,16 @@ def main():
       if 'address_v6' in p and p['address_v6'] != None:
          probes_by_ip[ p['address_v6'] ] = p['probe_id']
    #NOTE: there are IPs with multiple probes behind them, this just picks one.
-   conf = {}
-   with open('config.json','r') as infile:
-      conf = json.load ( infile )
+
+   # all auxilliary data should come from 'basedata' prepare-step should put it there
+   # this is so we can fill out the blanks in prepare-stage
+   #conf = {}
+   #with open('config.json','r') as infile:
+   #   conf = json.load ( infile )
    basedata = {}
    with open('basedata.json','r') as infile:
       basedata = json.load ( infile )
-   ixp_radix = create_ixp_radix( conf )
+   ixp_radix = create_ixp_radix( basedata )
    MeasurementPrint.IPInfoCacheFromFile('ips.json-fragments')
    MeasurementPrint.setCacheOnly( True )
    MeasurementEnhance.IPInfoCacheFromFile('ips.json-fragments')
