@@ -166,7 +166,8 @@ def do_probe_selection( probes, conf, basedata ):
          'dists': probes[prb_id]['dists'],
          'tags': probes[prb_id]['tags'],
          'address_v4': probes[prb_id]['address_v4'],
-         'address_v6': probes[prb_id]['address_v6']
+         'address_v6': probes[prb_id]['address_v6'],
+         'country_code': probes[prb_id]['country_code']
       })
    return outdata
 
