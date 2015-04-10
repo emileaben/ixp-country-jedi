@@ -14,15 +14,28 @@ span {
 div {
    margin-bottom: 50px;
    background-color: lightgray;
-   float: right;
 }
+
+div.container {
+   float: left;
+   margin: 5px;
+}
+
 </style>
 </head>
 <body>
+<div class='container'>
+This tagcloud provides information about the <a href="https://atlas.ripe.net/docs/probe-tags/">RIPE Atlas probe tags</a>
+for the probes that were used for this mesh measurement. System tags are set by the RIPE Atlas system, while user tags are set by the probe host.
+</div>
+<div class='container'>
 <h2>System Tags</h2>
 <div id='system-tags'></div>
+</div>
+<div class='container'>
 <h2>User Tags</h2>
 <div id='user-tags'></div>
+</div>
 <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 <script>
 // .format() for strings
