@@ -217,19 +217,24 @@ def do_asgraph_entry( d, proto, entry ):
       d['links'][ link_key ] += 1
    
 def do_asgraph_printresult( d ):
-   result = {'nodes': [], 'links': []}
+   result = {'nodes': [], 'edges': []}
    VIZPATH='./analysis/asgraph/'
    if not os.path.exists( VIZPATH ):
       os.makedirs( VIZPATH )
    name2idx={}
    idx=0
    for n in d['nodes']:
-      result['nodes'].append({'name': n, 'count': d['nodes'][n] })
+      count = d['nodes'][n]
       name2idx[ n ] = idx
+      typ = 'asn'
+      if n.startswith('_'):
+         typ = 'ixp'
+         n = n.lstrip('_');
+      result['nodes'].append({'id': idx, 'name': n, 'type': typ, 'count': count })
       idx += 1
    for l in d['links']:
       src,dst,typ = l.split('>',2)
-      result['links'].append({'source': name2idx[src], 'target': name2idx[dst], 'type': typ})
+      result['edges'].append({'source': name2idx[src], 'target': name2idx[dst], 'type': typ})
    with open('%s/asgraph.json' % ( VIZPATH), 'w') as outfile:
       json.dump( result , outfile )
    print "ASGRAPH viz results in '%s'" % ( VIZPATH )

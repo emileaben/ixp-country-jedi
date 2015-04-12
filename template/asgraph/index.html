@@ -13,59 +13,27 @@
 }
 
 </style>
+<link rel="stylesheet" href="../bower_components/alchemyjs/dist/alchemy.css">
 <body>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<div id="alchemy" class="alchemy"></div>
+<script type="text/javascript" src="../bower_components/alchemyjs/dist/scripts/vendor.js"></script>
+<script type="text/javascript" src="../bower_components/alchemyjs/dist/alchemy.min.js"></script>
 <script>
-
-var width = 960,
-    height = 500;
-var rmax = 30;
-
-//var color = d3.scale.category20();
-
-var force = d3.layout.force()
-    .charge(-200)
-    .linkDistance(70)
-    .size([width, height]);
-
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-
-d3.json("asgraph.json", function(error, graph) {
-  force
-      .nodes(graph.nodes)
-      .links(graph.links)
-      .start();
-
-  var link = svg.selectAll(".link")
-      .data(graph.links)
-    .enter().append("line")
-      .attr("class", "link")
-      .style("stroke-width", function(d) { return Math.pow(d.value, 0.25); });
-
-  var node = svg.selectAll(".node")
-      .data(graph.nodes)
-    .enter().append("circle")
-      .attr("class", "node")
-      .attr("r", function(d) { return 2+Math.pow( d.count, 0.25 ); })
-      .style("fill", function(d) { if( d.name.match(/^AS/) ) { return "green" } else { return "red"; } })
-      .call(force.drag);
-
-  node.append("title")
-      .text(function(d) { return d.name; });
-
-  force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
-    //node.attr("cx", function(d) { return d.x = Math.max(rmax, Math.min(width - rmax, d.x)); })
-    //    .attr("cy", function(d) { return d.y = Math.max(rmax, Math.min(height - rmax, d.y)); });
-
-  });
-});
-
+  var config = {
+      dataSource: "asgraph.json",
+      nodeCaptionsOnByDefault: true,
+      nodeTypes: {type: ["ixp", "asn"]},
+      nodeStyle: {
+         "ixp": {
+            "color"  : "#EE5511"
+         },
+         "asn": {
+            "color"  : "#EEEEFF"
+         }
+      },
+      nodeCaption: "name"
+  };
+  alchemy.begin( config );
 </script>
+</body>
+</html>
