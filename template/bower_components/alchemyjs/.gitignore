@@ -1,0 +1,15 @@
+bower_components
+node_modules
+.tmp
+.sass-cache
+*.swp
+*.DS_Store
+app/scripts/testConf.coffee
+ToDo.md
+testConf.coffee.md
+app/index.html
+site/dist
+.grunt
+archive
+s3.yml
+sauce.yml

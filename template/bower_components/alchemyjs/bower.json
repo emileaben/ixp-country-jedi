@@ -1,0 +1,21 @@
+{
+  "name": "alchemyjs",
+  "version": "0.4.2",
+  "main": [
+    "dist/alchemy.min.css",
+    "dist/alchemy.min.js"
+  ],
+  "ignore": [
+    "site",
+    "app",
+    "test"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.0",
+    "d3": "~3.4.1",
+    "components-font-awesome": "~4.1.0",
+    "lodash": "~2.4.1",
+    "bootstrap": "~3.1.1"
+  },
+  "devDependencies": {}
+}
