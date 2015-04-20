@@ -30,12 +30,12 @@ function initmap() {
    var mapqUrl='http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
 
    var map_v4 = new L.Map('map_v4');
-   map_v4.setView([20, 0], 3);
+   map_v4.setView([20, 0], 12);
    var osm4 = new L.TileLayer(mapqUrl, {attribution: osmAttrib});
    map_v4.addLayer(osm4);
 
    var map_v6 = new L.Map('map_v6');
-   map_v6.setView([20, 0], 3);
+   map_v6.setView([20, 0], 12);
    var osm6 = new L.TileLayer(mapqUrl, {attribution: osmAttrib});
    map_v6.addLayer(osm6);
    maps = {
@@ -82,12 +82,15 @@ function initmap() {
       return locStyle;
    }
    ['v4','v6'].map( function( proto ) {
-      console.log( proto )
       $.getJSON( "geopath.{0}.json".format( proto ), function( geodata ) {
-         L.geoJson(geodata,{
+         gjlayer = L.geoJson(geodata,{
             style: doStyle,
             onEachFeature: onEachFeature
          }).addTo(maps[ proto ]);
+         // fit map to features
+         if ( maps[ proto ].getZoom() > maps[proto].getBoundsZoom( gjlayer.getBounds() ) ) {
+            maps[ proto ].fitBounds( gjlayer.getBounds() );
+         }
       });
    });
 

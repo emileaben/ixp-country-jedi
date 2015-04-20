@@ -23,10 +23,10 @@ body        { font-family:"dejavu sans","arial",sans-Serif; font-size: 82%; marg
 }
 
 @-webkit-keyframes dash {
-  to { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: -100; }
 }
 
 @keyframes dash {
-  to { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: -100; }
 }
 
