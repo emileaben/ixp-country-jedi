@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 from collections import Counter
+from urlparse import urlparse
 import argparse
+import time
 import urllib2
+import arrow
 import sys
 import re
 import json
@@ -12,11 +15,38 @@ import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import ProbeInfo
 
+
 ## find connected probes
 PROBE_URL = 'https://atlas.ripe.net/api/v1/probe/?limit=100'
 
+MEASUREMENT_TYPES = set([
+   'probe-mesh',
+   'http-traceroute',
+   'https-traceroute'
+])
+
 sources = {}
 dests = {}
+
+def country_stats( cc ):
+   stats = {}
+   stats['routed_asns'] = routed_asns_for_country(cc)
+   # add more stats here?
+   return stats
+
+def routed_asns_for_country( cc ):
+   ## find country routing stats
+   routed_asns = None
+   yyyymmdd = arrow.now().format('YYYY-MM-01')
+   routed_asns_url = "https://stat.ripe.net/data/country-routing-stats/data.json?resource=%s&starttime=%s&endtime=%s" % (cc, yyyymmdd, yyyymmdd )
+   try:
+      conn = urllib2.urlopen( routed_asns_url )
+      info = json.load (conn )
+      routed_asns = info['data']['stats'][0]['asns_ris'] # should really be one
+   except:
+      print >>sys.stderr, "problem getting routed ASNs for '%s' from RIPEstat" % ( cc )
+   return routed_asns
+   
 
 def get_asns( cand_list ):
    nums = set()
@@ -75,6 +105,10 @@ def do_probe_selection( probes, conf, basedata ):
       ## down probes are not useful:
       if status != 1:
          continue
+      ## probes with auto-geoloc have unreliable geolocation :( :( :(
+      #if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
+      #   print >>sys.stderr, "EEPS system-auto-geoip-country %s" % ( prb_id )
+      #   continue
       dists = {}
       for loc in basedata['locations']:
          loclat = basedata['locations'][loc]['lat']
@@ -235,6 +269,69 @@ def get_memberlist_html_table( conn ):
       col_idx += 1
    return asns
 
+## probably make this blacklist configurable
+alexa_blacklist = set([
+   'xhamster.com',
+   'pornhub.com',
+   'xvideos.com',
+   'xnxx.com',
+   'bongacams.com'
+])
+
+def alexa_country_top25( countries ):
+   targets = []
+   for cc in countries:
+      al_url= "http://www.alexa.com/topsites/countries/%s" % ( cc )
+      req = urllib2.urlopen( al_url )
+      # when alexa changes layout this needs to change too
+      soup = BeautifulSoup( req )
+      tr = soup.findAll('p', class_='desc-paragraph')
+      for t in tr:
+         site = t.find('a').string.lower()
+         if site in alexa_blacklist:
+            print >>sys.stderr, "this alexa-top site for country:%s was blocked by ixp-country-jedi blacklist: %s" % ( cc, site )
+            print >>sys.stderr, "please adapt the blacklist (in source code) if you want this site measured anyways"
+            continue
+         ## add 'www'?
+         targets.append( site )
+   print >>sys.stderr, "WARNING: when using alexa-country-top25 lists, some sites may be considered offensive"
+   print >>sys.stderr, "WARNING: please consider looking at the 'targets' list in basedata.json and see if any of the sites"
+   print >>sys.stderr, "WARNING: that are going to be measured to might be offensive. Please be considerate to our RIPE Atlas Probe hosts"
+   print >>sys.stderr, "Targets found: %s\n" % ( '\n'.join( targets ) )
+   time.sleep( 5 )
+   return targets
+
+def hitlist_from_websites( urls ):
+   '''
+   Get list of hostnames from a list of urls
+   See for example: http://www.top.ge/cat.php?c=2&where=Government%2C+Ministries%2C+Departments
+   Or: http://en.wikipedia.org/wiki/List_of_banks_in_Georgia_%28country%29
+   '''
+   targets = set()
+   for url in urls:
+      req_urlp = urlparse( url )
+      req = urllib2.urlopen( url )
+      soup = BeautifulSoup( req )
+      for link in soup.findAll('a', href=True):
+         ex_url=link['href']
+         ex_urlp = urlparse( ex_url )
+         # remove all but full-qualified urls (get rid of website internal stuff typically)
+         if not ex_urlp.scheme in ('http','https'):
+            continue
+         if ex_urlp.hostname == req_urlp.hostname:
+            continue
+         # remove everything that has url-path (typically website internal stuff)
+         if ex_urlp.path not in ('','/'):
+            continue
+         targets.add( ex_urlp.hostname )
+   print >>sys.stderr, "WARNING: when using alexa-country-top25 lists, some sites may be considered offensive"
+   print >>sys.stderr, "WARNING: please consider looking at the 'targets' list in basedata.json and see if any of the sites"
+   print >>sys.stderr, "WARNING: that are going to be measured to might be offensive. Please be considerate to our RIPE Atlas Probe hosts"
+   print >>sys.stderr, "Targets found: %s\n" % ( '\n'.join( targets ) )
+   time.sleep( 5 )
+   return list(targets)
+   
+
 def capital_city_for_country( country_code ):
    ''' 
       Use world bank API to return Capital city for a given country-code 
@@ -278,7 +375,13 @@ if __name__ == '__main__':
       'locations': {}, ## locations keyed by name
       'ixps': {}, ## IXPs keyed by name
       'countries': [], ## countries by iso code
+      'country-stats': {}, ## various stats per country
+      'measurement-types': [], ## list of measurements we do
+      'targets': [], ## list of targets (if not probe-mesh)
    }  ## auxiliary info that we want saved
+   ####
+   # country
+   ####
    if not 'country' in conf:
       print "need a country, exiting"
       sys.exit(1)
@@ -289,7 +392,49 @@ if __name__ == '__main__':
       basedata['countries'] = conf['country']
    # uppercase all
    basedata['countries'] = map(lambda x:x.upper(), basedata['countries'])
-   ## location infos
+   ####
+   # stats per country
+   ####
+   for cc in basedata['countries']:
+      basedata['country-stats'][ cc ] = country_stats( cc )
+   ####
+   # measurement-types
+   ####
+   if 'measurement-type' in conf:
+      if type( conf['measurement-type'] ) != list :
+         conf['measurement-type'] = [ conf['measurement-type'] ]
+      for mtype in conf['measurement-type']:
+         if not mtype in MEASUREMENT_TYPES:
+            print >> sys.stderr, "measurement-type '%s' not supported (supported types: %s)" % (mtype, MEASUREMENT_TYPES)
+            sys.exit(1)
+         else:
+            basedata['measurement-types'].append( mtype )
+         ### probably need better syntax checking etc. here
+   else:
+      ## maybe make default 'http-traceroute' if 'targets' is defined?
+      basedata['measurement-types'] = ['probe-mesh']
+   ####
+   # targets
+   ####
+   if 'targets' in conf: 
+      if type( conf['targets'] ) == list:
+         basedata['targets'] = conf['targets']
+      else:
+         print >> sys.stderr, "config has 'targets', but that is not a list"
+   elif 'target-type' in conf:
+      if conf['target-type'] == 'alexa-country-top25':
+         basedata['targets'] = alexa_country_top25( basedata['countries'] )
+      else:
+         print >> sys.stderr, "unknown target-type of '%s' in config, bailing out"
+         sys.exit(1)
+   elif 'targets-from-websites' in conf:
+      if type(conf['targets-from-websites']) != list:
+         print >> sys.stderr, "unknown 'targets-from-websites' needs to be a list, baling out"
+         sys.exit(1)
+      basedata['targets'] = hitlist_from_websites( conf['targets-from-websites'] )
+   ####
+   # locations
+   ####
    ## If no location present, select the capital of the first country in list
    if not 'locations' in conf or len( conf['locations'] ) == 0:
       capital_str,lat,lon = capital_city_for_country( basedata['countries'][0] )
