@@ -113,7 +113,17 @@ def main():
          tr = ripe.atlas.sagan.TracerouteResult( data )
          tracetxt = MeasurementPrint.trace2txt( data )
          src_prb_id = data['prb_id']
-         dst_prb_id = probes_by_ip[ data['dst_addr'] ]
+         src_prb = probes_by_id[ src_prb_id ]
+         dst_prb_id = None
+         dst_prb = None
+         try:
+            dst_prb_id = probes_by_ip[ data['dst_addr'] ]
+            dst_prb = probes_by_id[  dst_prb_id ]
+         except: pass
+         if src_prb_id == dst_prb_id:
+            ### probe to itself is not interesting/useful
+            ## TODO filter this out in the measurement creation
+            continue
          ixps = check_if_via_ixp( tr, ixp_radix ) 
          via_ixp = False
          if len(ixps) > 0: via_ixp = True
@@ -121,7 +131,7 @@ def main():
          #print tracetxt
          locs = MeasurementPrint.trace2locs( data )
          as_links = MeasurementEnhance.aslinksplus( data, ixp_radix )
-         geojson = MeasurementEnhance.togeojson( data, probes_by_id[ src_prb_id ] , probes_by_id[ dst_prb_id ] )
+         geojson = MeasurementEnhance.togeojson( data, src_prb , dst_prb )
          #print as_links
          countries = basedata['countries']
          is_in_country = check_if_is_in_country( countries, locs )
@@ -278,7 +288,6 @@ for msm_id,msm_meta in f.items():
       is_in_country = check_if_is_in_country( country, locs )
       via_ixp = check_if_via_ixp( tr, ixp_radix )
       dst_rtts = get_destination_rtts( tr )
-      src_prb = data['prb_id']
       if not src_prb in probe_entries:
          probe_entries[ src_prb ] = {
             'id': src_prb,
