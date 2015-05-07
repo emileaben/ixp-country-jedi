@@ -31,7 +31,7 @@ def data_line_generator():
 
 ### common . For stuff general enough to apply to multiple analyses.
 ### example is text representation for traces, indexed by srcprb.dstprb
-def init_common():
+def init_common( basedata, probes ):
   return {'v4': {}, 'v6': {}} 
 
 def do_common_entry( data, proto, data_entry ):
@@ -57,7 +57,7 @@ def do_common_printresult( data ):
             json.dump( data_latest, outfile )
 
 ### ixpcount
-def init_ixpcount():
+def init_ixpcount( basedata, probes ):
    ixps = {
       'ixps_per_path': {},
       'seen': {'_none': 0, '_total': 0},
@@ -111,8 +111,17 @@ def do_ixpcount_printresult( ixps ):
          print "%02d\t%.1f%%\t%s" % ( ixps[key][ixp] , pct, ixp )
 
 ### incountry
-def init_incountry():
-   data = {}
+def init_incountry( basedata, probes ):
+   data = {
+      'countries': basedata['countries'],
+      'routed_asns': 0,
+      'probes': probes
+   }
+   for cc in basedata['country-stats']:
+      if 'routed_asns' in basedata['country-stats'][ cc ]:
+         data['routed_asns'] += basedata['country-stats'][ cc ]['routed_asns']
+      
+      
    for proto in ('v4','v6'):
       data[ proto ] = {
          'path_count': 0,
@@ -135,26 +144,52 @@ def do_incountry_entry( data, proto, entry ):
       except: pass
    for country in country_set:      
       #TODO exclude guest country
-         if not country in data[ proto ]['abroad']:
-            data[ proto ]['abroad'][ country ] = 0
-         data[ proto ]['abroad'][ country ] += 1
+         if not country in data['countries']:
+            if not country in data[ proto ]['abroad']:
+               data[ proto ]['abroad'][ country ] = 0
+            data[ proto ]['abroad'][ country ] += 1
 
 def do_incountry_printresult( data ):
-   print "Paths without out-of-country IP addresses"
+   DATAPATH='./analysis/incountry/'
+   if not os.path.exists( DATAPATH ):
+      os.makedirs( DATAPATH )
+   ooc_pct = {'v4': None, 'v6': None}
+   print "Paths with out-of-country IP addresses"
    print "========================================="
    for proto in ('v4','v6'):
       if data[ proto ]['path_count'] > 0:
-         pct = data[ proto ]['incountry_count'] * 100.0 / data[ proto ]['path_count']
-         print "IP%s : %.2f%%" % ( proto , pct )
+         ooc_pct[ proto ] = 100 - data[ proto ]['incountry_count'] * 100.0 / data[ proto ]['path_count']
+         print "IP%s : %.2f%%" % ( proto , ooc_pct[ proto ] )
          for country in sorted( data[ proto ]['abroad'], key=lambda x:data[proto]['abroad'][x], reverse=True):
             cnt = data[ proto ]['abroad'][ country ]
             pct = cnt * 100.0 / data[ proto ]['path_count']
             print "  %s : %.2f%% (%d)" % ( country , pct, cnt)
-
-
+   print "Country stats based on this"
+   print "---------------------------"
+   probe_asns = {'v4': set(), 'v6': set()}
+   for prb_info in data['probes']:
+      if 'asn_v4' in prb_info and prb_info['asn_v4'] != None:
+         probe_asns['v4'].add( prb_info['asn_v4'] )
+      if 'asn_v6' in prb_info and prb_info['asn_v6'] != None:
+         probe_asns['v6'].add( prb_info['asn_v6'] )
+   print "   ASNs in routing: %s" % ( data['routed_asns'] )
+   probe_asn_counts =  {'v4': None, 'v6': None}
+   for proto in ('v4','v6'):
+      cnt = len(probe_asns[ proto ])
+      print "   ASNs with public probes: %s (%s)" % ( cnt, proto )
+      probe_asn_counts[ proto ] = cnt
+   inc_data = {
+      'routed_asn_count': data['routed_asns'],
+      'probe_asn_count': probe_asn_counts,
+      'out_of_country_pct': ooc_pct
+   }
+   inc_json_file = "%s/incountry.json" % ( DATAPATH )
+   with open( inc_json_file,'w') as outf:
+      json.dump( inc_data, outf )
+   print "INCOUNTRY data file at: '%s'" % (inc_json_file)
 
 ### ixpcountry
-def init_ixpcountry():
+def init_ixpcountry( basedata, probes ):
    rows = []
    for p in PROBES:
       rows.append({
@@ -200,7 +235,7 @@ def do_ixpcountry_printresult( ixpcountry ):
    print "IXPCOUNTRY viz results available in %s" % ( VIZPATH )
 
 ### aspath
-def init_asgraph():
+def init_asgraph( basedata, probes ):
    d = {'nodes': Counter(),
         'links': Counter()
        }
@@ -240,7 +275,7 @@ def do_asgraph_printresult( d ):
    print "ASGRAPH viz results in '%s'" % ( VIZPATH )
 
 ## geopath stuff
-def init_geopath():
+def init_geopath( basedata, probes ):
    return {'v4':[], 'v6':[]}
 
 def do_geopath_entry( data, proto, data_entry ):
@@ -267,7 +302,7 @@ def do_geopath_printresult( data ):
    print "GEOPATH viz results in '%s'" % ( VIZPATH )
 
 ### ixplans (ixp-lans, not ix-plans ;) )
-def init_ixplans():
+def init_ixplans( basedata, probes ):
    # group by IP
    struct = {}
    for proto in ('v4','v6'):
@@ -314,7 +349,7 @@ def do_ixplans_printresult( data ):
    print "IXP LANs: viz results in '%s'" % ( VIZPATH )
 
 ### probetags
-def init_probetags():
+def init_probetags( basedata, probes ):
    return {}
 def do_probetags_entry( data, proto, data_entry ):
    pass
@@ -349,7 +384,7 @@ def do_probetags_printresult( data ):
 
    
 ### viaanchor
-def init_viaanchor():
+def init_viaanchor( basedata, probes ):
    data = {}
    for proto in ('v4','v6'):
       data[ proto ] = {
@@ -410,7 +445,7 @@ def do_viaanchor_printresult( data ):
             print >>f, json.dumps( result, indent=2 )
       print "VIAANCHOR viz results for anchor %s in '%s'" % ( anchor_id, ANCHORPATH )
 
-def init_cities():
+def init_cities( basedata, probes ):
    return {'v4': Counter(), 'v6': Counter()}
 
 def do_cities_entry( data, proto, data_entry ):
@@ -427,7 +462,7 @@ def do_cities_printresult( data ):
 
 ### below might be easy to copy-paste for additional analyses
 ### stub 
-def init_stub():
+def init_stub( basedata, probes ):
    return {}
 def do_stub_entry( data, proto, data_entry ):
    pass
@@ -454,6 +489,12 @@ def main():
    ### and/or specify this at command line, ie. ./analyse-results.py <analysis-name> <analysis-name>
    # 'ixp_county'
    # 'ixpcountry'
+   basedata = None
+   with open("basedata.json") as inf:
+      basedata = json.load( inf )
+   probes = None
+   with open("probeset.json") as inf:
+      probes = json.load( inf )
    defs={
       'ixpcount': True,
       'incountry': True,
@@ -475,9 +516,9 @@ def main():
    analysis_list = sorted( filter(lambda x: defs[x], defs.keys() ) )
    for analysis in analysis_list:
       ## this is a fancy way of saying: 
-      #data['ixpcount']   = init_ixpcount()
-      #data['incountry']   = init_incountryy()
-      data[ analysis ] = globals()['init_%s' % analysis]()
+      #data['ixpcount']   = init_ixpcount( basedata, probes )
+      #data['incountry']   = init_incountryy( basedata, probes )
+      data[ analysis ] = globals()['init_%s' % analysis]( basedata , probes )
 
    ### loop over all traceroutes
    for proto,data_entry in data_line_generator():
