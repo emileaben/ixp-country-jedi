@@ -21,6 +21,7 @@ PROBE_URL = 'https://atlas.ripe.net/api/v1/probe/?limit=100'
 
 MEASUREMENT_TYPES = set([
    'probe-mesh',
+   'traceroute',
    'http-traceroute',
    'https-traceroute'
 ])
@@ -106,9 +107,9 @@ def do_probe_selection( probes, conf, basedata ):
       if status != 1:
          continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
-      #if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
-      #   print >>sys.stderr, "EEPS system-auto-geoip-country %s" % ( prb_id )
-      #   continue
+      if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
+         print >>sys.stderr, "EEPS system-auto-geoip-country %s" % ( prb_id )
+         continue
       dists = {}
       for loc in basedata['locations']:
          loclat = basedata['locations'][loc]['lat']
