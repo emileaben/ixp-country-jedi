@@ -34,7 +34,7 @@ for mtype in basedata['measurement-types']:
             v4dst.append( p['address_v4'] )
          if 'address_v6' in p and p['address_v6'] != None:
             v6dst.append( p['address_v6'] )
-   elif mtype in ('http-traceroute','https-traceroute'):
+   elif mtype in ('traceroute','http-traceroute','https-traceroute'):
       v4dst += basedata['targets']
       v6dst += basedata['targets']
 
@@ -64,6 +64,7 @@ for mtype in basedata['measurement-types']:
          })
          print >>sys.stderr,"dst:%s msm_id:%s (probe-mesh)" % ( v6target, msm_id, )
          time.sleep(2)
+   #TODO refactor http/https and normal traceroute taking
    if mtype in ('http-traceroute','https-traceroute'):
       port = 80
       if mtype == 'https-traceroute': port = 443
@@ -79,6 +80,32 @@ for mtype in basedata['measurement-types']:
                      paris=1,
                      protocol='TCP',
                      port=port,
+                     resolve_on_probe=True,
+                     description="ixp-country-jedi to %s (IPv%s)" % ( target, ipproto )
+                  )
+               except:
+                  print "measurement creation failed for dst:%s (IPv%s)" % ( target, ipproto )
+               msms[ ipstr ].append({
+                  'msm_id': msm_id,
+                  'dst': target,
+                  'type': mtype
+               })
+               print >>sys.stderr,"dst:%s msm_id:%s (%s)" % ( target, msm_id, mtype )
+               time.sleep(2)
+            except:
+               print "something went wrong"
+   if mtype in ('traceroute'):
+      for target in v4dst:
+         for ipproto in (4,6):
+            try:
+               ipstr = "v%s" % ( ipproto )
+               try:
+                  msm_id = Measure.oneofftrace(
+                     v4src,
+                     target,
+                     af=ipproto,
+                     paris=1,
+                     protocol='ICMP',
                      resolve_on_probe=True,
                      description="ixp-country-jedi to %s (IPv%s)" % ( target, ipproto )
                   )
