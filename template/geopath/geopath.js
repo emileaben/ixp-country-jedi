@@ -71,7 +71,7 @@ function initmap() {
          locStyle['opacity'] = 0.25;
       } else {
          locStyle.dashArray = '10,10,3,10';
-         locStyle['opacity'] = 0.40;
+         locStyle['opacity'] = 0.70;
       }
       /* if ( feature.properties.sasn == 1299 || feature.properties.dasn == 1299) {
          locStyle['color'] = "#ff7800";
