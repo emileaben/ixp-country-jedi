@@ -48,6 +48,8 @@ def __ipsetforhop( hop ):
 def togeojson( data, srcprb, dstprb ):
    '''
    converts a trace to geojson data
+     srcprb and dstprb are dictionaries with probe info
+     dstprb can be None if the dst is not a probe
    '''
    entries = []
    if 'result' in data:
@@ -107,7 +109,7 @@ def togeojson( data, srcprb, dstprb ):
             last_resp_hop_ases = this_hop_ases
             last_resp_hop_nr = this_resp_hop_nr
       # add dst probe info
-      if len(last_resp_hop_locs) == 1:
+      if len(last_resp_hop_locs) == 1 and dstprb:
          last_loc = list(last_resp_hop_locs)[0]
          slat,slon,sloc = last_loc.split('|')
          dlat = dstprb['lat']
