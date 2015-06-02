@@ -3,6 +3,7 @@ import socket
 import urllib2
 import json
 import sys
+import arrow
 import IPInfoCache
 
 if hasattr(socket, 'setdefaulttimeout'):
@@ -71,7 +72,8 @@ def trace2txt( data, **kwargs ):
    if 'hostnames' in kwargs:
       print_hostnames = kwargs['hostnames']
    ## print a header
-   txt += "## msm_id:%s prb_id:%s dst:%s ts:%s\n" % (msm_id, data['prb_id'], data['dst_addr'], data['timestamp'])
+   tstring = arrow.get( data['timestamp'] ).format('YYYY-MM-DD HH:mm:ss ZZ')
+   txt += "## msm_id:%s prb_id:%s dst:%s ts:%s\n" % (msm_id, data['prb_id'], data['dst_addr'], tstring )
 
    for hop in res:
       ips = {}
