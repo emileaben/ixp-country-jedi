@@ -38,6 +38,17 @@ def measure_from_template( template_file, template_vars ):
    msm_id = msm_meta["measurements"][0]
    return msm_id
 
+def measure( msm_spec ):
+   msm_req = JsonRequest(MSM_URL)
+   try:
+      msm_conn = urllib2.urlopen(msm_req, json.dumps( msm_spec ) )
+   except urllib2.HTTPError as e:
+      print >>sys.stderr, ("Fatal error when reading results: %s" % e.read())
+      sys.exit(1)
+   msm_meta = json.load(msm_conn)
+   msm_id = msm_meta["measurements"][0]
+   return msm_id
+
 def oneofftrace( probes_def, dst, **kwargs ):
    probe_list = []
    if isinstance(probes_def, int):
