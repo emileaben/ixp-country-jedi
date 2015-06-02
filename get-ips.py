@@ -100,12 +100,13 @@ def main():
          asns.add( res['asn'] )
    # writes this file
    ipcache.toJsonFragments('ips.json-fragments')
-   asn_info = []
-   for asn in asns:
-      asnmeta = get_asnmeta( asn )
-      print asnmeta
-      asn_info.append( asnmeta )
-   with open('asns.json','w') as asnf:
-      json.dump(asn_info, asnf, indent=4) 
+   # RIPEstat API slow/times out on very large ASNs 
+   #asn_info = []
+   #for asn in asns:
+   #   asnmeta = get_asnmeta( asn )
+   #   print asnmeta
+   #   asn_info.append( asnmeta )
+   #with open('asns.json','w') as asnf:
+   #   json.dump(asn_info, asnf, indent=4) 
    
 main()
