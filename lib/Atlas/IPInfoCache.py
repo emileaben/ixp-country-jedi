@@ -1,19 +1,15 @@
 #!/usr/bin/env python
-import re
 import socket
 import urllib2
 import json
 import sys
 import dns.resolver
 import traceback
-#import ssl
+import ssl
 import time
 
 #if hasattr(socket, 'setdefaulttimeout'):
 #   socket.setdefaulttimeout(20)
-
-## rfc 1918 filter
-re_rfc1918 = re.compile('^10\.|^192\.168\.|^172\.1[6789]\.|^172\.2\d\.|^172\.3[01]\.')
 
 class IPInfoCache():
    def __init__(self,**kwargs):
@@ -53,30 +49,23 @@ class IPInfoCache():
          return loc,lat,lon
       if not ip in self.ips:
          self.ips[ip] = {}
-      if re_rfc1918.match( ip ):
-         self.ips[ip]['location'] = None
-         self.ips[ip]['lat'] = None
-         self.ips[ip]['lon'] = None
-      else:
-         try:
-            #this context trick was needed at some point, forgot to document why :(
-            #gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-            #locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ), context=gcontext )
-            locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ) )
-            locjson = json.load( locinfo )
-            if len( locjson['crowdsourced'] ) > 0:
-               loc = locjson['crowdsourced'][0]['canonical_georesult']
-               lat = locjson['crowdsourced'][0]['lat']
-               lon = locjson['crowdsourced'][0]['lon']
-            else:
-               loc = ''
-         except:
-            sys.stderr.write( "eeps: problem in loading routergeoloc for ip: %s\n" % ( ip ) )
-            traceback.print_exc(file=sys.stderr)
-            return None ## todo proper error handling
-         self.ips[ip]['location'] = loc
-         self.ips[ip]['lat'] = lat
-         self.ips[ip]['lon'] = lon
+      try:
+         gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+         locinfo = urllib2.urlopen( "https://marmot.ripe.net/openipmap/ipmeta.json?ip=%s" % ( ip ), context=gcontext )
+         locjson = json.load( locinfo )
+         if len( locjson['crowdsourced'] ) > 0:
+            loc = locjson['crowdsourced'][0]['canonical_georesult']
+            lat = locjson['crowdsourced'][0]['lat']
+            lon = locjson['crowdsourced'][0]['lon']
+         else:
+            loc = ''
+      except:
+         sys.stderr.write( "eeps: problem in loading routergeoloc for ip: %s\n" % ( ip ) )
+         traceback.print_exc(file=sys.stderr)
+         return None ## todo proper error handling
+      self.ips[ip]['location'] = loc
+      self.ips[ip]['lat'] = lat
+      self.ips[ip]['lon'] = lon
       return loc,lat,lon
 
    def getAsn(self, ip ):
@@ -92,20 +81,17 @@ class IPInfoCache():
          return asn
       if not ip in self.ips:
          self.ips[ip] = {}
-      if re_rfc1918.match(ip):
-         self.ips[ip]['asn'] = None
-      else:
-         try:
-            asninfo = urllib2.urlopen( "https://stat.ripe.net/data/prefix-overview/data.json?max_related=0&resource=%s" % ( ip ) )
-            asnjson = json.load( asninfo )
-            if len( asnjson['data']['asns'] ) > 0:
-               asn = asnjson['data']['asns'][0]['asn']
-            else:
-               asn = ''
-         except: 
-            sys.stderr.write( "eeps: problem in ASN for ip: %s\n" %  (ip ) )
-            return None ## todo proper error handling
-         self.ips[ip]['asn'] = asn
+      try:
+         asninfo = urllib2.urlopen( "https://stat.ripe.net/data/prefix-overview/data.json?max_related=0&resource=%s" % ( ip ) )
+         asnjson = json.load( asninfo )
+         if len( asnjson['data']['asns'] ) > 0:
+            asn = asnjson['data']['asns'][0]['asn']
+         else:
+            asn = ''
+      except: 
+         sys.stderr.write( "eeps: problem in ASN for ip: %s\n" %  (ip ) )
+         return None ## todo proper error handling
+      self.ips[ip]['asn'] = asn
       return asn
 
    def getHostname(self, ip ):
@@ -121,24 +107,21 @@ class IPInfoCache():
          return host
       if not ip in self.ips:
          self.ips[ip] = {}
-      if match.re_rfc1918( ip ):
-         self.ips[ip]['hostname'] = None
-      else:       
-         try:
-            resolve = self.resolver.query(dns.reversename.from_address( ip ),'PTR')
-            if len( resolve.response.answer ) > 0 :
-               host = str(resolve.response.answer[0].items[0])
-               host = host.rstrip('.')
-               host = host.lower()
-            else:
-               host = ''
-         except dns.resolver.NXDOMAIN: host = ''
-         except Exception as e: 
-            ## timeout?
-            #print >>sys.stderr, " %s " % ( e )
-            return None
-         # at this point resolving worked
-         self.ips[ip]['hostname'] = host
+      try:
+         resolve = self.resolver.query(dns.reversename.from_address( ip ),'PTR')
+         if len( resolve.response.answer ) > 0 :
+            host = str(resolve.response.answer[0].items[0])
+            host = host.rstrip('.')
+            host = host.lower()
+         else:
+            host = ''
+      except dns.resolver.NXDOMAIN: host = ''
+      except Exception as e: 
+         ## timeout?
+         #print >>sys.stderr, " %s " % ( e )
+         return None
+      # at this point resolving worked
+      self.ips[ip]['hostname'] = host
       return host
 
    def toJsonFragments(self, outfilename):
