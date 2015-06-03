@@ -3,9 +3,10 @@ import urllib2
 import urllib
 import json
 
-PROBE_API_HOST='https://atlas.ripe.net'
-PROBE_API_URL='%s/api/v1/probe/' % ( PROBE_API_HOST )
+#  pip install https://github.com/RIPE-NCC/ripe-atlas-cousteau/zipball/latest
+from ripe.atlas.cousteau import ProbeRequest
 
+PROBE_API_HOST='https://atlas.ripe.net'
 PROBE_API_URL_ARCHIVE='%s/api/v1/probe-archive/' % ( PROBE_API_HOST )
 
 def query_archive(**kwargs):
@@ -29,29 +30,14 @@ def query_archive(**kwargs):
       objects[ obj['id'] ] = obj
    return objects
 
+
 def query(**kwargs):
-   if 'day' in kwargs:
-      return query_archive(**kwargs)
-   if not 'limit' in kwargs:
-      kwargs['limit'] = 200
-   objects = {} 
-   url = "%s?%s" % (PROBE_API_URL, urllib.urlencode( kwargs ) )
-   try:
-      conn = urllib2.urlopen( url )
-   except:
-      raise ValueError("URL fetch error on: %s" % (url) )
-   result = json.load( conn )
-   objects = result['objects'] 
-   while result['meta']['next'] != None:
-      continurl = "%s/%s" % ( PROBE_API_HOST, result['meta']['next'] )
-      #print continurl
-      try:
-         contin = urllib2.urlopen( continurl )
-      except:
-         raise ValueError("URL fetch error on: %s" % (continurl) )
-      result = json.load( contin )
-      objects.extend( result['objects'] )
-   keyed_objects = {}
-   for obj in objects:
-      keyed_objects[ obj['id'] ] = obj
-   return keyed_objects
+    if 'day' in kwargs:
+        return query_archive(**kwargs)
+
+    keyed_objects = {}
+    probes = ProbeRequest(**kwargs)
+    for probe in probes:
+        keyed_objects[probe["id"]] = probe
+
+    return keyed_objects
