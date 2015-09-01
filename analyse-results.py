@@ -3,21 +3,41 @@ import json
 import sys
 import os
 import shutil
+import math
 from collections import Counter
+
+BASEDIR=os.path.dirname( os.path.realpath(__file__) )
+PROBE_BLACKLIST_FILE="%s/probe-blacklist.txt" % BASEDIR
 
 # globally available
 PROBES = []
 with open('probeset.json','r') as probesin:
    PROBES = json.load( probesin )
 PROBES_BY_ID = {}
-for p in PROBES:   
+for p in PROBES:
    PROBES_BY_ID[ p['probe_id'] ] = p
+
+PROBE_BLACKLIST = set()
+if os.path.isfile( PROBE_BLACKLIST_FILE ):
+    with open( PROBE_BLACKLIST_FILE ) as inf:
+        for line in inf:
+            line = line.rstrip('\n');
+            try:
+                prb_id,rest = line.split(None,1)
+                prb_id = int(prb_id)
+                PROBE_BLACKLIST.add( prb_id )
+                print "PROBE %s blacklisted" % prb_id
+            except:
+                print "can't parse this line in %s: %s" % ( PROBE_BLACKLIST_FILE, line )
+                sys.exit(1)
+
+## filter probe list through blacklist
 
 def data_line_generator():
    infilename = 'measurementset.json'
    proto = None
    with open(infilename,'r') as infile:
-      msms = json.load( infile )
+      msms = json.load( infile , encoding='utf-8')
       for meas_proto in msms:
          proto = meas_proto
          for msm_entry in msms[meas_proto]:
@@ -25,7 +45,12 @@ def data_line_generator():
                with open('./results/msm.%s.json' % ( msm_entry['msm_id'] ),'r') as msmfile:
                   data = json.load( msmfile )
                   for entry in data:
-                     yield proto, entry
+                     if 'src_prb_id' in entry and entry['src_prb_id'] in PROBE_BLACKLIST:
+                        continue
+                     elif 'dst_prb_id' in entry and entry['dst_prb_id'] in PROBE_BLACKLIST:
+                        continue
+                     else:
+                        yield proto, entry
             else:
                print >>sys.stderr," error on msm entry: %s " % ( msm_entry )
 
@@ -63,7 +88,7 @@ def init_ixpcount( basedata, probes ):
       'seen': {'_none': 0, '_total': 0},
       'seen_v4': {'_none': 0, '_total': 0},
       'seen_v6': {'_none': 0, '_total': 0}
-   } 
+   }
    return ixps
 
 def do_ixpcount_entry( ixps, proto, data ):
@@ -115,19 +140,17 @@ def init_incountry( basedata, probes ):
    data = {
       'countries': basedata['countries'],
       'routed_asns': 0,
-      'probes': probes
+      'probes': PROBES,
    }
    for cc in basedata['country-stats']:
       if 'routed_asns' in basedata['country-stats'][ cc ]:
          data['routed_asns'] += basedata['country-stats'][ cc ]['routed_asns']
-      
-      
    for proto in ('v4','v6'):
       data[ proto ] = {
          'path_count': 0,
          'incountry_count': 0,
          'abroad': {},
-         ## todo 'abroad' , keeps track of foreign country combi-counts (ie. 'DE,NL': 20)
+         'ooc_probes': Counter()   #tracks the probes that cause out of country paths (both src and dst)
       }
    return data
 
@@ -135,6 +158,9 @@ def do_incountry_entry( data, proto, entry ):
    data[ proto ]['path_count'] += 1
    if entry['in_country'] == True:
       data[ proto ]['incountry_count'] += 1
+   elif entry['in_country'] == False:
+      data[ proto ]['ooc_probes'][ entry['src_prb_id'] ] += 1
+      data[ proto ]['ooc_probes'][ entry['dst_prb_id'] ] += 1
    country_set = set()
    for loc in entry['locations']:
       country = None
@@ -153,7 +179,9 @@ def do_incountry_printresult( data ):
    DATAPATH='./analysis/incountry/'
    if not os.path.exists( DATAPATH ):
       os.makedirs( DATAPATH )
+   # ooc = out of country
    ooc_pct = {'v4': None, 'v6': None}
+   ooc_pct_per_ooc = {'v4': Counter(), 'v6': Counter()}
    print "Paths with out-of-country IP addresses"
    print "========================================="
    for proto in ('v4','v6'):
@@ -163,7 +191,13 @@ def do_incountry_printresult( data ):
          for country in sorted( data[ proto ]['abroad'], key=lambda x:data[proto]['abroad'][x], reverse=True):
             cnt = data[ proto ]['abroad'][ country ]
             pct = cnt * 100.0 / data[ proto ]['path_count']
+            ooc_pct_per_ooc[ proto ][ country ] = pct
             print "  %s : %.2f%% (%d)" % ( country , pct, cnt)
+         ## probes contributing most to out of country:
+         print "TOP 10 probes contributing to out-of-country-paths"
+         for prb_id,count in data[ proto ]['ooc_probes'].most_common(10):
+            involvepct = 100.0 * count / math.sqrt( data[ proto ]['path_count'] ) # roughly correct
+            print "  prb_id:%s / AS%s / %d/%d paths / involvepct:%.1f" % ( prb_id, PROBES_BY_ID[prb_id]['asn_%s' % proto] , count, data[proto]['path_count'], involvepct )
    print "Country stats based on this"
    print "---------------------------"
    probe_asns = {'v4': set(), 'v6': set()}
@@ -181,7 +215,11 @@ def do_incountry_printresult( data ):
    inc_data = {
       'routed_asn_count': data['routed_asns'],
       'probe_asn_count': probe_asn_counts,
-      'out_of_country_pct': ooc_pct
+      'out_of_country_pct': ooc_pct,
+      'out_of_country_country_pct': {
+        'v4': ooc_pct_per_ooc['v4'].most_common(),
+        'v6': ooc_pct_per_ooc['v6'].most_common()
+      }
    }
    inc_json_file = "%s/incountry.json" % ( DATAPATH )
    with open( inc_json_file,'w') as outf:
@@ -228,7 +266,7 @@ def do_ixpcountry_printresult( ixpcountry ):
       os.makedirs( VIZDETAILSPATH )
    for proto in ('v4','v6'):
       with open('%s/ixpcountry.%s.json' % (VIZPATH,proto), 'w') as outfile:
-         json.dump( ixpcountry['summary'][ proto ], outfile )   
+         json.dump( ixpcountry['summary'][ proto ], outfile )
       for detail_key in ixpcountry['details'][ proto ].keys():
          with open('%s/%s.%s.json' % ( VIZDETAILSPATH, detail_key, proto ), 'w') as outfile:
             json.dump( ixpcountry['details'][ proto ][ detail_key ], outfile )
@@ -493,8 +531,8 @@ def main():
    with open("basedata.json") as inf:
       basedata = json.load( inf )
    probes = None
-   with open("probeset.json") as inf:
-      probes = json.load( inf )
+   #with open("probeset.json") as inf:
+   #   probes = json.load( inf )
    defs={
       'ixpcount': True,
       'incountry': True,
@@ -507,18 +545,25 @@ def main():
       'viaanchor': False, ## buggy
    }
 
+   if len( sys.argv ) > 1:
+      # take defs from stdin arguments
+      # so you can say:   analyse-results.py incountry
+      defs = {}
+      for df in sys.argv[1:]:
+        defs[df]=True
+
    defs['common']=True ## always true
    ### initialise all analyses
    data = {}
    ### copy template viz stuff
-   copytree('../template/','./analysis')
+   copytree('%s/template/' % BASEDIR ,'./analysis')
    ## only the analyses that are 'True'
    analysis_list = sorted( filter(lambda x: defs[x], defs.keys() ) )
    for analysis in analysis_list:
       ## this is a fancy way of saying: 
       #data['ixpcount']   = init_ixpcount( basedata, probes )
       #data['incountry']   = init_incountryy( basedata, probes )
-      data[ analysis ] = globals()['init_%s' % analysis]( basedata , probes )
+      data[ analysis ] = globals()['init_%s' % analysis]( basedata , PROBES )
 
    ### loop over all traceroutes
    for proto,data_entry in data_line_generator():
