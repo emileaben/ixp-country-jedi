@@ -67,6 +67,23 @@ def get_destination_rtts( tr ):
                rtts.append( packet.rtt )
    return rtts
 
+def filter_cruft( data ):
+#removes garbage that is known to be bugs in ripe atlas traceroutes
+#https://atlas.ripe.net/docs/bugs/ (find 'edst')
+    if 'result' in data:
+        res = data['result']
+        for hop_idx, hop in enumerate( res ):
+            if 'result' in hop:
+                hop['result'] = [hr for hr in hop['result'] if 'edst' not in hr]
+
+                #for hr_idx, hr in enumerate( hop['result'] ):
+                #    if 'edst' in hr:
+                #        print >>sys.stderr, "EE %s" % hop
+                #        del hop['result'][ hr_idx ]
+                #        #del data['result'][ hop_idx ]['result'][ hr_idx ]
+    return data
+
+
 def main():
    msms = {}
    with open('measurementset.json','r') as infile:
@@ -108,8 +125,10 @@ def main():
       if os.path.exists( outfilename ):
          print >>sys.stderr, "file already exists %s" % ( outfilename )
          return
-      outdata = []      
+      outdata = []
       for data in MeasurementFetch.fetch( msm_id ):
+         data = filter_cruft( data )
+         assert 'edst' not in repr( data ), data
          tr = ripe.atlas.sagan.TracerouteResult( data )
          tracetxt = MeasurementPrint.trace2txt( data )
          src_prb_id = data['prb_id']
@@ -163,184 +182,28 @@ def main():
       with open(outfilename,'w') as outfile:
          json.dump( outdata, outfile, indent=2 )
    ## loop over measurements
-   parallel_proc = 0
-   children = set()
-   msm_list = msms['v4'] + msms['v6']
-   for m in msm_list:
-      child_pid = os.fork()
-      if child_pid == 0:
-         process_msm( m, 4) # only v4 atm
-         sys.exit(0)
-      else:
-         children.add( child_pid )
-         parallel_proc += 1
-         if parallel_proc >= MAX_PARALLEL_PROCESSES:
-            cpid,cstatus = os.wait()
-            children.remove( cpid )
-            parallel_proc -= 1
-   for cpid in children:
-      print "was still waiting for cpid: %s" % ( cpid )
-      os.waitpid(cpid,0)
-   print "FINISHED!"
+   #parallel_proc = 0
+   #children = set()
+   for m in msms['v4']:
+        process_msm(m,4)
+   for m in msms['v6']:
+        process_msm(m,6)
+#   msm_list = msms['v4'] + msms['v6']
+#   for m in msm_list:
+#   child_pid = os.fork()
+#   if child_pid == 0:
+#           process_msm( m, 4) # only v4 atm
+#         sys.exit(0)
+#      else:
+#         children.add( child_pid )
+#         parallel_proc += 1
+#         if parallel_proc >= MAX_PARALLEL_PROCESSES:
+#            cpid,cstatus = os.wait()
+#            children.remove( cpid )
+#            parallel_proc -= 1
+#   for cpid in children:
+#      print "was still waiting for cpid: %s" % ( cpid )
+#      os.waitpid(cpid,0)
+#   print "FINISHED!"
 
 main()
-
-'''
-
-probes = ProbeInfo.query(country_code=country)
-def probeinfo( prb_id, key ):
-   global probes
-   if prb_id in probes:
-      return probes[ prb_id ][ key ]
-   else:
-      newp = ProbeInfo.query(**{'id': prb_id})
-      for k,v in newp.items(): 
-         probes[ k ] = v
-      return probes[ prb_id ][ key ]
-
-now = int(time.time())
-#then = now - 8*3600
-then = now - 3600
-
-def check_if_is_in_country( countries, locs):
-   for loc in locs:
-      if loc != None:
-         cc_in_loc = loc.rsplit(',',1)
-            if cc_in_loc in countries:
-               return False
-   return True
-
-def check_if_via_ixp( tr, ixp_radix ):
-   ips = set()
-   for h in tr.ip_path:
-      for ip in h:
-         if isinstance(ip, str):
-            ips.add( ip )
-   for ip in ips:
-      rnode = ixp_radix.search_best( ip )
-      if rnode != None:
-         return True
-   return False
-
-def get_destination_rtts( tr ):
-   rtts = []
-   for hop in tr.hops:
-      for packet in hop.packets:
-         if packet.origin and tr.destination_address == packet.origin:
-            if isinstance( packet.rtt, float):
-               rtts.append( packet.rtt )
-   return rtts
-
-count=0
-v4_count=0
-v6_count=0
-
-in_country_count=0
-v4_in_country_count=0
-v6_in_country_count=0
-
-data_entries = []
-probe_entries = {}
-
-for msm_id,msm_meta in f.items():
-   print msm_meta['description']
-   rem = re.search(r'probe:\s+(\d+),\s+IPv(\d+)', msm_meta['description'])
-   dst_prb = None
-   protocol = None
-   if rem:
-      dst_prb = int(rem.group(1))
-      protocol = int(rem.group(2))
-   else:
-      raise ValueError("measurement description doesn't contain probeID and IP protocol version")
-   dst_asn = None
-   if protocol == 4:
-      dst_asn = probeinfo( dst_prb, 'asn_v4' )
-   elif protocol == 6:
-      dst_asn = probeinfo( dst_prb, 'asn_v6' )
-   else:
-      raise ValueError("IP protocol needs to be 4 or 6")
-
-
-   dstmb=None
-   if dst_asn in member_asn_set:
-      dstmb=True
-   else:
-      dstmb=False
-      
-   for data in MeasurementFetch.fetch( msm_id, start=then , stop=now ): 
-      tr = ripe.atlas.sagan.TracerouteResult( data )
-      src_prb = data['prb_id']
-      src_asn = None
-      if protocol == 4:
-         src_asn = probeinfo( src_prb , 'asn_v4' )
-      elif protocol == 6:
-         src_asn = probeinfo( src_prb , 'asn_v6' )
-      else:
-         raise ValueError("IP protocol needs to be 4 or 6")
-      srcmb=None
-      if src_asn in member_asn_set:
-         srcmb=True
-      else:
-         srcmb=False
-      tracetxt = MeasurementPrint.trace2txt( data )
-      print tracetxt
-      locs = MeasurementPrint.trace2locs( data )
-      is_in_country = check_if_is_in_country( country, locs )
-      via_ixp = check_if_via_ixp( tr, ixp_radix )
-      dst_rtts = get_destination_rtts( tr )
-      if not src_prb in probe_entries:
-         probe_entries[ src_prb ] = {
-            'id': src_prb,
-            'asn_v4': probeinfo( src_prb, 'asn_v4'),
-            'asn_v6': probeinfo( src_prb, 'asn_v6'),
-            'is_member': srcmb,
-         }
-      if not dst_prb in probe_entries:
-         probe_entries[ dst_prb ] = {
-            'id': dst_prb,
-            'asn_v4': probeinfo( dst_prb, 'asn_v4'),
-            'asn_v6': probeinfo( dst_prb, 'asn_v6'),
-            'is_member': dstmb,
-         }
-      data_entries.append( {
-         'ts': data['timestamp'],
-         'protocol': protocol,
-         'msm_id': msm_id,
-         'src_prb_id': data['prb_id'],
-         'dst_prb_id': dst_prb,
-         'src_asn': src_asn,
-         'dst_asn': dst_asn,
-         'last_rtt': tr.last_rtt,
-         'dst_rtts': dst_rtts,
-         'target_responded': tr.target_responded,
-         'src_is_member': srcmb,
-         'dst_is_member': dstmb,
-         'in_country': is_in_country,
-         'via_ixp': via_ixp,
-         'tracetxt': tracetxt,
-      } )
-      print "## ipv:%s\tmsm:%s\tsrcprb:%s\tdstprb:%s\tsrcasn:%s\tdstasn:%s\tlastrtt:%s\tdstreached:%s\tsrcmb:%s\tdstmb:%s\tincountry:%s\tixp:%s\tlocs:%s" % (protocol,msm_id, data['prb_id'], dst_prb, src_asn, dst_asn, tr.last_rtt, tr.target_responded, srcmb, dstmb, is_in_country, via_ixp, MeasurementPrint.trace2locs( data ) )
-      count += 1
-      if is_in_country:
-         in_country_count +=1
-      
-      if protocol == 4:
-         v4_count += 1
-         if is_in_country:
-            v4_in_country_count +=1
-      elif protocol == 6:
-         v6_count += 1
-         if is_in_country:
-print "#### KLOTR index: %.2f%%" % ( 100*float(in_country_count)/count )
-print "#### v4 KLOTR index: %.2f%%" % ( 100*float(v4_in_country_count)/v4_count )
-print "#### v6 KLOTR index: %.2f%%" % ( 100*float(v6_in_country_count)/v6_count )
-
-data_entries.sort(key=lambda k: k['ts'])
-
-json_out = {
-   'columns': probe_entries,
-   'data': data_entries
-}
-with open(json_output, 'w') as outfile:
-      print >>outfile, json.dumps( json_out, sort_keys=True, indent=2 )
-'''
