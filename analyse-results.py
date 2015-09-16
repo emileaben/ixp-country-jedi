@@ -4,7 +4,12 @@ import sys
 import os
 import shutil
 import math
+import codecs
 from collections import Counter
+
+## this allows to pipe output to a file and have it be utf-8
+# adapted from http://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file
+sys.stdout = codecs.getwriter('utf-8')(sys.stdout)
 
 BASEDIR=os.path.dirname( os.path.realpath(__file__) )
 PROBE_BLACKLIST_FILE="%s/probe-blacklist.txt" % BASEDIR
@@ -577,5 +582,12 @@ def main():
       globals()["do_%s_printresult" % analysis]( data[analysis] )
 
 if __name__ == '__main__':
-   main()
+   try:
+      main()
+   except UnicodeEncodeError, e:
+      print e
+      print "If you encounter errors like described here:"
+      print " http://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file"
+      print "Consider setting the env var: PYTHONIOENCODING=UTF-8"
+
 
