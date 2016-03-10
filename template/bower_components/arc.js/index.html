@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>arc.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js?2"></script>
+    <script src="./arc.js"></script>
+    <style>
+
+      body {
+        margin: 0px;
+        padding: 0px;
+        font:12px/15px 'Helvetica';
+      }
+
+      #text {
+        padding-left: 40px;
+        display:inline-block;
+      }
+
+      #map {
+        float: left;
+        width: 70%;
+        height: 700px;
+      }
+
+      #json-dump {
+        float:right;
+        width:  28%;
+        margin: 0px;
+        padding: 0px;
+        height: 650px;
+      }
+
+    </style>
+</head>
+<body>
+
+    <div id="text">
+      <h3><a href="https://github.com/springmeyer/arc.js">Arc.js with Leaflet</a>: click to plot arcs</h3> 
+    </div>
+
+    <div id="map"></div>
+
+    <div id="geojson">
+    <textarea id="json-dump"></textarea>
+    </div>
+
+    <script>
+        var map = new L.Map('map');
+        var idx = 1;
+        var features = [];
+        
+        //var url = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var attribution = 'Map data &copy; 2011 OpenStreetMap contributors';
+        
+        var url = 'http://{s}.tiles.mapbox.com/v3/springmeyer.map-7jkxlsx1/{z}/{x}/{y}.png'
+        var osm = new L.TileLayer(url, {maxZoom: 17, attribution: attribution, noWrap:true});
+        
+        map.setView(new L.LatLng(0, 0), 2).addLayer(osm);
+        
+        // number of intermediate arc points
+        var npoints = 100;
+        var offset = 20;
+        var coords = [];
+        var points = [];
+        var snap_tolerance = 500000;
+        
+        map.on('click', onMapClick);
+
+        var start;
+        var end;
+        function draw(coords) {
+            var len = coords.length;
+            if (len == 1) {
+                var hit = false;
+                start = coords[0];
+                for (var i=0;i<points.length;++i) {
+                    var distance = points[i].distanceTo(start);
+                    if (distance<snap_tolerance) {
+                        //console.log('hit previous point, re-using location')
+                        start = points[i];
+                        hit = true;
+                    } else {
+                        //console.log(distance);
+                    }
+                }
+                if (!hit) {
+                    points.push(start);
+                }
+                var circleOptions = {color: '#f03', opacity: 0.5, clickable:false};
+                var circle = new L.CircleMarker(start, circleOptions);
+                map.addLayer(circle);
+
+            } else if (len == 2) {
+                var hit = false;
+                end = coords[1];
+                for (var i=0;i<points.length;++i) {
+                    var distance = points[i].distanceTo(end);
+                    if (distance<snap_tolerance && (points[i].lng !== start.lng)) {
+                        //console.log('hit previous point, re-using location')
+                        end = points[i];
+                        hit = true;
+                    } else {
+                        //console.log(distance);
+                    }
+                }
+                if (!hit) {
+                    points.push(end);
+                }
+                var circleOptions = {color: '#f03', opacity: 0.5, clickable:false};
+                var circle = new L.CircleMarker(end, circleOptions);
+                map.addLayer(circle);
+
+                try {
+                    var from = {x: start.lng, y: start.lat};
+                    var to = {x: end.lng, y:end.lat};
+                    var properties = {
+                        arc:idx++,
+                        start:''+from.lon+','+from.lat,
+                        end:''+to.lon+','+to.lat
+                    };
+                    var greatCircle = new arc.GreatCircle(from,to,properties);
+                } catch (e) {
+                    // catch possible antipodes error
+                    alert(e.message);
+                    coords.length = 0;
+                    return;
+                }
+                
+                var gc = greatCircle.Arc(npoints,{offset:offset});
+                var line = new L.geoJson().addTo(map);
+                var geojson_feature = gc.json();
+                features.push(geojson_feature)
+                // TODO  - figure out how to disable interactivity on json lines
+                line.addData(geojson_feature);
+                line.bindPopup("great circle from " + coords[0] + " to " + coords[1]);
+                setTimeout(function() {
+                    map.addLayer(line);
+                    coords.length = 0;
+                    document.getElementById("json-dump").value = JSON.stringify(
+                                                                { "type": "FeatureCollection",
+                                                                  "features": features
+                                                                });
+
+                },0)
+            }
+        }
+
+        function onMapClick(e) {
+          var coord = new L.LatLng(e.latlng.lat, e.latlng.lng);
+          //console.log('clicked at: ' + e.latlng.lng + ' ' + e.latlng.lat)
+          coords.push(coord.wrap());
+          draw(coords);
+        }
+
+        function add(s,e) {
+            var start_ll = new L.LatLng(s[1],s[0]);
+            var end_ll = new L.LatLng(e[1],e[0]);
+            var start_coord = {x: start_ll.lng, y:start_ll.lat};
+            var end_coord = {x:end_ll.lng, y:end_ll.lat};
+            var description = ''+s[0]+','+s[1]+'=>'+e[0]+','+e[1]+'';
+            var gc0 = new arc.GreatCircle(start_coord,end_coord, {'name': 'line', 'color':'#ff7200','description':description});
+            var line0 = gc0.Arc(npoints,{offset:offset});
+            var geojson = line0.json();
+            console.log(JSON.stringify(geojson))
+            document.getElementById("json-dump").value = JSON.stringify(geojson);
+            L.geoJson(geojson, {
+                style: function (feature) {
+                  return {color: feature.properties.color};
+                },
+                onEachFeature: function (feature, layer) {
+                  layer.bindPopup(feature.properties.description);
+                }
+            }).addTo(map);
+        }
+    </script>
+</body>
+</html>
