@@ -43,6 +43,16 @@ An example is provided in the *example* directory. Only the *country* is mandato
 Without a *locations* section, the capital of *country* (or first country if *country*
 is a list) is used for probe selection (see below).
 
+One can set an extra 'location-constraint' config key. The value of this
+configuration directive needs to be an integer. When this is set, the probe
+selection part of the ixp-country-jedi will only select probes that are within
+'location-constraint' kilometers from any of the given locations.
+This can be useful if you only want to measure a specific city. In that case
+set the 'location'-list to that specific city, and set a 'location-constraint'
+to a reasonable value (for instance 50, so you'll cover 50 kilometers from the
+city centre).
+
+
 prepare.py
 ==========
 
