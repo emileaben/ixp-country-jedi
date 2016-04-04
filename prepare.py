@@ -47,7 +47,6 @@ def routed_asns_for_country( cc ):
    except:
       print >>sys.stderr, "problem getting routed ASNs for '%s' from RIPEstat" % ( cc )
    return routed_asns
-   
 
 def get_asns( cand_list ):
    nums = set()
@@ -111,10 +110,19 @@ def do_probe_selection( probes, conf, basedata ):
          print >>sys.stderr, "EEPS system-auto-geoip-country %s" % ( prb_id )
          continue
       dists = {}
+      loc_close_enough = False  ## this is only for location-constrained
       for loc in basedata['locations']:
          loclat = basedata['locations'][loc]['lat']
          loclon = basedata['locations'][loc]['lon']
          dists[ loc ] = haversine_km( loclat, loclon, prb_info['latitude'], prb_info['longitude'] )
+         if 'location-constraint' in basedata:
+            if dists[ loc ] < basedata['location-constraint']:
+                loc_close_enough = True
+      if 'location-constraint' in basedata and loc_close_enough == False:
+        # don't put this probe in the list of probes to consider
+        # it is too far from any of the locations we consider
+        continue
+
       # feed the distance back into the 'probes' data struct too
       probes[prb_id]['dists'] = dists
 
@@ -445,6 +453,9 @@ if __name__ == '__main__':
       for loc in conf['locations']:
          lat,lon = locstr2latlng( loc ) 
          basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
+   # 'constrain to only the probes X km from the location
+   if 'location-constraint' in conf:
+        basedata['location-constraint'] = conf['location-constraint']
    if 'ixps' in conf:
       for ixp in conf['ixps']:
          basedata['ixps'][ ixp['name'] ] = {
