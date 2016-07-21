@@ -13,7 +13,7 @@ def fetch(msm_id, **kwargs):
                 yield( l )
 
 def fetch_latest(msm_id, **kwargs):        
-	kwargs['msm_id']=msm_id
+    kwargs['msm_id']=msm_id
     is_success, results = AtlasLatestRequest(** kwargs).create()
     if(is_success):
 
