@@ -88,7 +88,7 @@ class IPInfoCache():
             self.ips[ip] = {}
         try:  
             asninfo = urllib2.urlopen( "https://stat.ripe.net/data/prefix-overview/data.json?max_related=0&resource=%s" % ( ip ) )
-            asnnjson = json.load( asninfo )
+            asnjson = json.load( asninfo )
             if len( asnjson['data']['asns'] ) > 0:
                 asn = asnjson['data']['asns'][0]['asn']
             else:
