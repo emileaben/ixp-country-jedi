@@ -412,7 +412,7 @@ def do_probetags_printresult( data ):
    }
    for p in PROBES:
       if 'tags' in p:
-         for t in p['tags']:
+         for t in [v for d in p['tags'] for k, v in d.items()]:
             if t.startswith('system-'):
                t = t[7:]
                tags['system'][ t ] += 1
