@@ -8,9 +8,13 @@ import urllib2
 import ripe.atlas.sagan
 import ipaddress
 import re
+import concurrent.futures
+import threading
+from multiprocessing import cpu_count
 #import random
 
 ipinfo = {}
+counter = 1
 
 def get_asnmeta( asn ):
    meta = {'asn': asn, 'as_name': '<unknown>', 'as_description': '<unknown>', 'as_country': 'XX', 'ips_v4': None, '48s_v6': None}
@@ -88,16 +92,26 @@ def main():
    no_ips = len(ips)
    print >>sys.stderr, "ip gathering finished, now analysing. ip count: %s" % ( no_ips )
    ipcache = IPInfoCache.IPInfoCache()
-   counter=1
+   
    ips = list(ips)
    ips.sort()
    asns = set()
-   for ip in ips:
+
+   lock = threading.Lock()
+
+   def findInfo(ip):
+      global counter
       res= ipcache.findIPInfo( ip )
-      print "(%d/%d) %s / %s" % ( counter, no_ips, ip, res )
-      counter += 1
+      with lock:
+         print '(%d/%d) %s / %s' % (counter, no_ips, ip, res)
+         counter += 1
+         sys.stdout.flush()
       if 'asn' in res and res['asn'] != None and res['asn'] != '':
          asns.add( res['asn'] )
+
+   with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_count()) as executor:
+      executor.map(findInfo,ips)
+
    # writes this file
    ipcache.toJsonFragments('ips.json-fragments')
    # RIPEstat API slow/times out on very large ASNs 
