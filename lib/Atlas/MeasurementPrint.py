@@ -77,10 +77,10 @@ def trace2txt( data, **kwargs ):
 
    for hop in res:
       ips = {}
+      err_set = set()
       if not 'result' in hop:
          continue
       for hr in hop['result']:
-         err_set = set()
          if 'from' in hr and 'rtt' in hr:
             if hr['from'] not in ips:
                ips[ hr['from'] ] = [ hr['rtt'] ]
