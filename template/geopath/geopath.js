@@ -28,14 +28,8 @@ function initmap() {
    // set up the map
    //var mapAttrib='Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
    //var mapUrl='http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
-
-    // thunderforest?
-   //var mapUrl='http://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png';
-   //var mapAttrib='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-
-   var mapUrl='http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
-   var mapAttrib='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>';
-
+   var mapUrl='http://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png';
+   var mapAttrib='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
    var map_v4 = new L.Map('map_v4');
    map_v4.setView([20, 0], 12);
