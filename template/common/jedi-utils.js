@@ -22,7 +22,14 @@ function jedi_cell_detail_to_jquery_elt( proto, src_id , dst_id , jquery_elt ) {
    $.ajax({url: json_file, 
       async: true
    }).done(function( data ) {
-      var txt = '<pre>{0}</pre>'.format( data['tracetxt'] );
+      var txt = '<pre>{0}</pre>'.format(data['tracetxt']);
+      if (typeof(data['traixroute']) !== 'undefined') { 
+
+        txt += '<pre>Name of IXP: <b>{0}</b></br>'.format(data['traixroute'][0]['name']);
+        txt += 'IXP on hop: <b>{0}</b></br>'.format(data['traixroute'][0]['hop']); 
+        txt += 'IXP on the same country? <b>{0}</b> </pre>'.format(data['traixroute'][0]['in_country']); 
+
+      }
       jquery_elt.html( txt );
    });
 }

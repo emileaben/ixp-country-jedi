@@ -1,0 +1,42 @@
+{
+   "nodes":[
+      {
+         "name":"Probe 1",
+         "group":1
+      },
+      {
+         "name":"Probe 3",
+         "group":2
+      },
+      {
+         "name":"Probe 2",
+         "group":2
+      },
+      {
+         "name":"Probe 4",
+         "group":3
+      }
+   ],
+   "links":[
+      {
+         "source":1,
+         "target":2,
+         "value":1
+      },
+      {
+         "source":1,
+         "target":2,
+         "value":1
+      },
+      {
+         "source":1,
+         "target":2,
+         "value":1
+      },
+      {
+         "source":1,
+         "target":2,
+         "value":1
+      }
+   ]
+}
