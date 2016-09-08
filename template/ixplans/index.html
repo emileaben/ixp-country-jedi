@@ -1,141 +1,200 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <title>IXP LANs</title>
-  <meta charset="utf-8" />
-</head>
-<script src="../bower_components/underscore/underscore-min.js"></script>
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
-<script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
-<script src="../bower_components/jquery/dist/jquery.min.js"></script>
-<script src="../bower_components/colorbrewer/colorbrewer.js"></script>
-<script src="../common/jedi-utils.js"></script>
-<style>
-.tick line {
-  shape-rendering: crispEdges;
-  stroke: #000;
-}
-line.minor  {
-  stroke: #777;
-  stroke-dasharray: 2,2;
-}
-path.domain {
-  fill: none;
-  stroke: black;
-}
-#vizcontainer {
-   float: left;
-   border: 1px solid grey;
-}
-#details {
-//   border: 1px solid grey;
-   height: 100%
-}
-</style>
-<body>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<!-- <div id="proto_selector">TODO: proto selector</div>  -->
-Rows in this matrix are sources of a traceroute, columns are destinations.
-Both rows and columns are ordered by probe latitude, with North-North being in the top left
-and South-South in the bottom right corner of the matrix. Cells are colored by the IXP peering 
-LAN that was seen in traceroutes between source and destination RIPE Atlas probes.
-For now this only shows IPv4 results (see source code to get IPv6)
-<div id="vizcontainer">
-<svg style="width:1000px;height:1000px;border:1px lightgray solid;" />
-</div>
-<div id="details">
-Hover over cells in the matrix on the left to get detailed information in this window
-</div>
+    <title>IXP Country Jedi - IXP LANs</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../bower_components/underscore/underscore-min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
+    <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/colorbrewer/colorbrewer.js"></script>
+    <script src="../common/jedi-utils.js"></script>
+      
+    <style>
+    .tick line {
+      shape-rendering: crispEdges;
+      stroke: #000;
+    }
+    line.minor  {
+      stroke: #777;
+      stroke-dasharray: 2,2;
+    }
+    path.domain {
+      fill: none;
+      stroke: black;
+    }
+    #vizcontainer {
+       float: left;
+       border: 1px solid grey;
+    }
+    #details {
+    //   border: 1px solid grey;
+       height: 100%
+    }
+    </style>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">IXP Country Jedi</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="../index.html">Main page</a></li>
+            <li><a href="../geopath/index.html">GeoPath</a></li>
+            <li><a href="../asgraph/index.html">AS Graph</a></li>
+            <li><a href="../ixpcountry/index.html">IXP Country</a></li>
+            <li class="active"><a href="#">IXP LANs</a></li>
+            <li><a href="../probetags/index.html">Probe Tags</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+  </head>
+  
+  <body style="margin-top:10px">
+
+    <!-- <div id="proto_selector">TODO: proto selector</div>  -->
+    <p>Rows in this matrix are sources of a traceroute, columns are destinations.
+    Both rows and columns are ordered by probe latitude, with North-North being in the top left
+    and South-South in the bottom right corner of the matrix. Cells are colored by the IXP peering 
+    LAN that was seen in traceroutes between source and destination RIPE Atlas probes.
+    For now this only shows IPv4 results (see source code to get IPv6)</p>
+    
+    <div id="vizcontainer">
+      <svg style="width:1000px;height:1000px;border:1px lightgray solid;" />
+    </div>
+
+    <div id="details">
+      <p>Hover over cells in the matrix on the left to get detailed information in this window</p>
+    </div>
+  
+  </body>
+
   <footer>
-<script type="text/javascript">
-   var proto = 'v4';
-   var height = 900;
-   var width = height;
-   var border_width = 200;
-   var things = d3.select("svg")
-      .append("g")
-      .attr("transform", "translate(200,200)")
-      .attr("id", "adjacencyG")
-      .selectAll("rect")
-   // legend hack. needs proper legend still
-   /*
-   legendg.append("rect").attr('x',0).attr('y',0).attr('width',20).attr('height',20).attr('fill','green');
-   legendg.append("text").attr('x',40).attr('y',20).text("IXP in path");
-   legendg.append("rect").attr('x',0).attr('y',25).attr('width',20).attr('height',20).attr('fill','yellow');
-   legendg.append("text").attr('x',40).attr('y',45).text("IXP NOT in path");
-   legendg.append("rect").attr('x',0).attr('y',50).attr('width',20).attr('height',20).attr('fill','white').attr('stroke','red').attr('stroke-width',2);
-   legendg.append("text").attr('x',40).attr('y',70).text("path leaves country");
-   */
-   //axis
-   d3.select("#adjacencyG").append("text").attr("transform", "translate(-10,-10) rotate(-90)").attr('x',250).attr('y',140) .text("Source (North to South)");
-   d3.select("#adjacencyG").append("text").text("Destination (North to South)").attr('x',250).attr('y',-130);
+    <script type="text/javascript">
+     var proto = 'v4';
+     var height = 900;
+     var width = height;
+     var border_width = 200;
+     var things = d3.select("svg")
+        .append("g")
+        .attr("transform", "translate(200,200)")
+        .attr("id", "adjacencyG")
+        .selectAll("rect")
+     // legend hack. needs proper legend still
+     /*
+     legendg.append("rect").attr('x',0).attr('y',0).attr('width',20).attr('height',20).attr('fill','green');
+     legendg.append("text").attr('x',40).attr('y',20).text("IXP in path");
+     legendg.append("rect").attr('x',0).attr('y',25).attr('width',20).attr('height',20).attr('fill','yellow');
+     legendg.append("text").attr('x',40).attr('y',45).text("IXP NOT in path");
+     legendg.append("rect").attr('x',0).attr('y',50).attr('width',20).attr('height',20).attr('fill','white').attr('stroke','red').attr('stroke-width',2);
+     legendg.append("text").attr('x',40).attr('y',70).text("path leaves country");
+     */
+     //axis
+     d3.select("#adjacencyG").append("text").attr("transform", "translate(-10,-10) rotate(-90)").attr('x',250).attr('y',140) .text("Source (North to South)");
+     d3.select("#adjacencyG").append("text").text("Destination (North to South)").attr('x',250).attr('y',-130);
 
 
-   var xScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
-   var yScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
-   var colorScale = d3.scale.ordinal();
-   var row_count, col_count;
-   var thinglist = [];
-   var probe_info;
-   var count = 0
-   d3.json("ixplans.v4.json", function(error,data) {
-      colorScale.domain( data['ixps'] )
-         .range( colorbrewer.Paired[ d3.max([3,data['ixps'].length]) ]); // #TODO  max no. IXPs? 11?  legend width
-      var legendg = d3.select("svg")
-         .append("g"); // .attr("transform","translate(200,0)");
-      legendg.selectAll('.legendcolor').data( data['ixps'] ).enter().append('rect')
-         .attr('x', 0)
-         .attr('y', function(d,i) { return i*15 })
-         .attr('width',10)
-         .attr('height',10)
-         .attr('stroke','black')
-         .attr('opacity', 0.8)
-         .attr('fill', function(d) { return colorScale( d ) });
-      legendg.selectAll('.legendtext').data( data['ixps'] ).enter().append('text')
-         .attr('x', 13)
-         .attr('y', function(d,i) { return 7 + i*15 })
-         .attr('dominant-baseline','central')
-         .text(function(d) { return d });
-      var nodes = data['nodes'];
-      var n = nodes.length;
-      var rows = data['nodes'];
-      var cols = data['nodes'];
-      var row_count = rows.length;
-      var col_count = cols.length;
-      var orders = {
-         'id':   d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].id, nodes[b].id); }),
-         'asn':  d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].asn, nodes[b].asn); }),
-         'lat':  d3.range(n).sort(function(a, b) { return d3.descending(nodes[a].lat, nodes[b].lat); }),
-         'lon':  d3.range(n).sort(function(a, b) { return d3.descending(nodes[a].lon, nodes[b].lon); })
-      };
-      xScale.domain( orders.lat );
-      yScale.domain( orders.lat );
-      xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
-      yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
-      xAxis.tickFormat(function(d) { return 'AS' + nodes[ d ].asn });
-      yAxis.tickFormat(function(d) { return 'AS' + nodes[ d ].asn });
-      // d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style('font-size',10).style('glyph-orientation-vertical', 0).style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
-      d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style('font-size',10).style('glyph-orientation-vertical', 0).style("text-anchor", "end").style('writing-mode', 'tb');
-      d3.select("#adjacencyG").append("g").call(yAxis).style('font-size',10);
+     var xScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
+     var yScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
+     var colorScale = d3.scale.ordinal();
+     var row_count, col_count;
+     var thinglist = [];
+     var probe_info;
+     var count = 0
+     d3.json("ixplans.v4.json", function(error,data) {
+        colorScale.domain( data['ixps'] )
+           .range( colorbrewer.Paired[ d3.max([3,data['ixps'].length]) ]); // #TODO  max no. IXPs? 11?  legend width
+        var legendg = d3.select("svg")
+           .append("g"); // .attr("transform","translate(200,0)");
+        legendg.selectAll('.legendcolor').data( data['ixps'] ).enter().append('rect')
+           .attr('x', 0)
+           .attr('y', function(d,i) { return i*15 })
+           .attr('width',10)
+           .attr('height',10)
+           .attr('stroke','black')
+           .attr('opacity', 0.8)
+           .attr('fill', function(d) { return colorScale( d ) });
+        legendg.selectAll('.legendtext').data( data['ixps'] ).enter().append('text')
+           .attr('x', 13)
+           .attr('y', function(d,i) { return 7 + i*15 })
+           .attr('dominant-baseline','central')
+           .text(function(d) { return d });
+        var nodes = data['nodes'];
+        var n = nodes.length;
+        var rows = data['nodes'];
+        var cols = data['nodes'];
+        var row_count = rows.length;
+        var col_count = cols.length;
+        var orders = {
+           'id':   d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].id, nodes[b].id); }),
+           'asn':  d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].asn, nodes[b].asn); }),
+           'lat':  d3.range(n).sort(function(a, b) { return d3.descending(nodes[a].lat, nodes[b].lat); }),
+           'lon':  d3.range(n).sort(function(a, b) { return d3.descending(nodes[a].lon, nodes[b].lon); })
+        };
+        xScale.domain( orders.lat );
+        yScale.domain( orders.lat );
+        xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
+        xAxis.tickFormat(function(d) { return 'AS' + nodes[ d ].asn });
+        yAxis.tickFormat(function(d) { return 'AS' + nodes[ d ].asn });
+        // d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style('font-size',10).style('glyph-orientation-vertical', 0).style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
+        d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style('font-size',10).style('glyph-orientation-vertical', 0).style("text-anchor", "end").style('writing-mode', 'tb');
+        d3.select("#adjacencyG").append("g").call(yAxis).style('font-size',10);
 
-      var things_viz = things.data( data['links'] )
-         .enter()
-         .append('rect')
-         .attr('x', function(d) { return xScale( d.target ) } )
-         .attr('y', function(d) { return yScale( d.source ) } )
-         .attr('width', Math.floor(( width - border_width) / col_count ) -1)
-         .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
-         .attr('opacity', 0.8)
-         .style('fill', function(d) { return colorScale( d.ixp ) } )
-         // note that this only creates for the nodes where we have data, need full matrix for all nodes
-         .on('mouseover', function (d) { console.log( d) ; jedi_cell_detail_to_jquery_elt( proto, nodes[ d.source ].probe_id, nodes[ d.target ].probe_id , $("#details") ) } )
-         .on('mouseout', cell_mouseout);
-      function cell_mouseout(p) {
-         //console.log( p );
-      }
-      //things_viz.append('title').text( text_from_datacell );
-   });
-  </script>
+        var things_viz = things.data( data['links'] )
+           .enter()
+           .append('rect')
+           .attr('x', function(d) { return xScale( d.target ) } )
+           .attr('y', function(d) { return yScale( d.source ) } )
+           .attr('width', Math.floor(( width - border_width) / col_count ) -1)
+           .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
+           .attr('opacity', 0.8)
+           .style('fill', function(d) { return colorScale( d.ixp ) } )
+           // note that this only creates for the nodes where we have data, need full matrix for all nodes
+           .on('mouseover', function (d) { console.log( d) ; jedi_cell_detail_to_jquery_elt( proto, nodes[ d.source ].probe_id, nodes[ d.target ].probe_id , $("#details") ) } )
+           .on('mouseout', cell_mouseout);
+        function cell_mouseout(p) {
+           //console.log( p );
+        }
+        //things_viz.append('title').text( text_from_datacell );
+      });
+    </script>
+
   </footer>
-</body>
+
 </html>
