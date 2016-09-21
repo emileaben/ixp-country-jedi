@@ -3,6 +3,8 @@ import urllib2
 import urllib
 import json
 
+from APIConverter import ProbeConverter
+
 #  pip install https://github.com/RIPE-NCC/ripe-atlas-cousteau/zipball/latest
 from ripe.atlas.cousteau import ProbeRequest
 
@@ -28,7 +30,7 @@ def query_archive(**kwargs):
     result = json.load( conn )
     for obj in result['objects']:
         objects[ obj['id'] ] = obj
-    return objects
+    return ProbeConverter(objects)
 
 
 def query(**kwargs):
@@ -40,4 +42,4 @@ def query(**kwargs):
     for probe in probes:
         keyed_objects[probe["id"]] = probe
 
-    return keyed_objects
+    return ProbeConverter(keyed_objects)
