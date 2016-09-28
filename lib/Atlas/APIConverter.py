@@ -7,8 +7,6 @@ def ProbeConverter(obj):
 		try:
 			probe = obj[result]
 
-			probe['latitude'] = None
-			probe['longitude'] = None
 			if probe['geometry']:
 				probe['latitude'] = probe['geometry']['coordinates'][1]
 				probe['longitude'] = probe['geometry']['coordinates'][0]

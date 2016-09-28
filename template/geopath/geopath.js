@@ -26,17 +26,19 @@ var myStyle = {
 
 function initmap() {
    // set up the map
-   var osmAttrib='Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
-   var mapqUrl='http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
+   //var mapAttrib='Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+   //var mapUrl='http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
+   var mapUrl='http://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png';
+   var mapAttrib='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
    var map_v4 = new L.Map('map_v4');
    map_v4.setView([20, 0], 12);
-   var osm4 = new L.TileLayer(mapqUrl, {attribution: osmAttrib});
+   var osm4 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
    map_v4.addLayer(osm4);
 
    var map_v6 = new L.Map('map_v6');
    map_v6.setView([20, 0], 12);
-   var osm6 = new L.TileLayer(mapqUrl, {attribution: osmAttrib});
+   var osm6 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
    map_v6.addLayer(osm6);
    maps = {
       'v4': map_v4,

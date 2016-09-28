@@ -73,17 +73,15 @@ def trace2txt( data, **kwargs ):
     tstring = arrow.get( data['timestamp'] ).format('YYYY-MM-DD HH:mm:ss ZZ')
     txt += "## msm_id:%s prb_id:%s dst:%s ts:%s\n" % (msm_id, data['prb_id'], data['dst_addr'], tstring )
 
-    for hop in res:
-        ips = {}
-        err_set = set()
-        if not 'result' in hop:
-            continue
-        for hr in hop['result']:
-            if 'from' in hr and 'rtt' in hr:
-                if hr['from'] not in ips:
-                    ips[ hr['from'] ] = [ hr['rtt'] ]
-                else:
-                    ips[ hr['from'] ].append( hr['rtt'] )
+   for hop in res:
+      ips = {}
+      err_set = set()
+      if not 'result' in hop:
+         continue
+      for hr in hop['result']:
+         if 'from' in hr and 'rtt' in hr:
+            if hr['from'] not in ips:
+               ips[ hr['from'] ] = [ hr['rtt'] ]
             else:
                 err_set.add( "%s err:%s\n" % ( hop['hop'] , hr ) )
         if len(err_set) > 0:
