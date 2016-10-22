@@ -14,6 +14,7 @@ import os
 import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import ProbeInfo
+import fetch_news_sites
 
 
 ## find connected probes
@@ -23,7 +24,8 @@ MEASUREMENT_TYPES = set([
    'probe-mesh',
    'traceroute',
    'http-traceroute',
-   'https-traceroute'
+   'https-traceroute',
+   'local-news-traceroute',
 ])
 
 sources = {}
@@ -441,6 +443,10 @@ if __name__ == '__main__':
          print >> sys.stderr, "unknown 'targets-from-websites' needs to be a list, baling out"
          sys.exit(1)
       basedata['targets'] = hitlist_from_websites( conf['targets-from-websites'] )
+   elif 'local-news-traceroute' in conf['measurement-type']:
+      pages = fetch_news_sites.fetch_country_pages()
+      basedata['targets'] = [urlparse(url).hostname for url in
+         fetch_news_sites.news_sites_for_country(pages[conf['country']])]
    ####
    # locations
    ####

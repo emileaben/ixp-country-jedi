@@ -15,7 +15,9 @@ def fetch_country_pages():
     country_table = soup.findAll('table')[5]
     country_links = country_table.findAll('a')
     for country in country_links:
-        country_map[country.text.lower()] = BASE_URL + country.attrs['href']
+        if country.text.upper() in iso3166.countries_by_name:
+            alpha2 = iso3166.countries_by_name[country.text.upper()].alpha2
+            country_map[alpha2] = BASE_URL + country.attrs['href']
     return country_map
 
 def news_sites_for_country(country_page):
@@ -36,9 +38,7 @@ if __name__ == '__main__':
     pages = fetch_country_pages()
     country_news_map = {}
     for country, url in pages.items():
-        if country.upper() in iso3166.countries_by_name:
-            alpha2 = iso3166.countries_by_name[country.upper()].alpha2
-            country_news_map[alpha2] = news_sites_for_country(url)
+        country_news_map[country] = news_sites_for_country(url)
     with open('./country_news_map.json', 'w') as f:
         f.write(json.dumps(country_news_map))
 
