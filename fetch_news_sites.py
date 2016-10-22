@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import iso3166
 import json
 import requests
 
@@ -35,7 +36,9 @@ if __name__ == '__main__':
     pages = fetch_country_pages()
     country_news_map = {}
     for country, url in pages.items():
-        country_news_map[country] = news_sites_for_country(url)
+        if country.upper() in iso3166.countries_by_name:
+            alpha2 = iso3166.countries_by_name[country.upper()].alpha2
+            country_news_map[alpha2] = news_sites_for_country(url)
     with open('./country_news_map.json', 'w') as f:
         f.write(json.dumps(country_news_map))
 
