@@ -169,15 +169,15 @@ def do_probe_selection( probes, conf, basedata ):
       selected_asn_set.add( asn )
       selected_asn_probes[asn] = set()
       ### in principle this selects the closest and furthest probe for each of the list of locations
-      if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
+#       if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
          # not enough probes for the fancy selection, just select them all
-         for prb in probes_per_asn[asn]:
-            selected_asn_probes[asn].add( prb['prb_id'] )
-      else: ## we need to do fancy selections
-         for loc in basedata['locations']:
-            loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
-            selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
-            selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
+      for prb in probes_per_asn[asn]:
+         selected_asn_probes[asn].add( prb['prb_id'] )
+#       else: ## we need to do fancy selections
+#          for loc in basedata['locations']:
+#             loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
+#             selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
+#             selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
          asn_multiprobe_count += 1
       print "AS%s %s" % ( asn, list(selected_asn_probes[asn]) )
       prb_per_asn = len(selected_asn_probes[asn])
