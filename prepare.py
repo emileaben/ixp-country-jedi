@@ -81,10 +81,24 @@ def haversine_km(lat1,lon1,lat2,lon2):
     km = 6367 * c
     return km
 
-def find_probes_in_country( cc ):
+def find_probes_in_country(cc, eyeball=False, threshold=90):
    probes = {}
+   base_url = (
+      'http://data.labs.apnic.net/ipv6-measurement/Economies/{}/{}.asns.json'
+   )
+   coverage = 0
    if cc:
-      probes = ProbeInfo.query(country_code=cc, is_public=True)
+      if eyeball:
+         url = base_url.format(cc, cc)
+         eyeball_distribution = json.loads(urllib2.urlopen(url).read())
+         for asn in eyeball_distribution:
+            if coverage >= threshold:
+               break
+            probes.update(ProbeInfo.query(country_code=cc, asn_v4=asn['as'], is_public=True))
+            probes.update(ProbeInfo.query(country_code=cc, asn_v6=asn['as'], is_public=True))
+            coverage += asn['percent']
+      else:
+          probes = ProbeInfo.query(country_code=cc, is_public=True)
    else:
       probes = ProbeInfo.query(is_public=True)
    '''
@@ -477,8 +491,12 @@ if __name__ == '__main__':
    else: 
       selected_probes = []
       for country in basedata['countries']:
+         eyeball_threshold = conf.get('eyeball_threshold')
          print >>sys.stderr, "Preparing country: %s" % ( country )
-         probes_cc = find_probes_in_country( country )
+         if eyeball_threshold:
+            probes_cc = find_probes_in_country(country, True, eyeball_threshold)
+         else:
+            probes_cc = find_probes_in_country( country )
          sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
          selected_probes += sel_probes_for_cc
          print >>sys.stderr, "END country: %s" % ( country )
