@@ -26,6 +26,7 @@ MEASUREMENT_TYPES = set([
    'http-traceroute',
    'https-traceroute',
    'local-news-traceroute',
+   'local-tld-traceroute',
 ])
 
 sources = {}
@@ -385,6 +386,29 @@ def locstr2latlng( locstring ):
       print "could not determine lat/long for '%s'" % ( locstring )
 
 
+def extract_websites_in_tld(country_code, max_results=100):
+   """Given a TLD, fetch a list of the top websites in this TLD for use as
+   targets"""
+   base_url = ("https://domainpunch.com/tlds/topm.php?dtd&draw=3"
+      "&columns[0][data]=0&columns[0][name]=&columns[0][searchable]=true"
+      "&columns[0][orderable]=false&columns[0][search][value]="
+      "&columns[0][search][regex]=false&columns[1][data]=1&columns[1][name]="
+      "&columns[1][searchable]=true&columns[1][orderable]=true"
+      "&columns[1][search][value]=&columns[1][search][regex]=false"
+      "&columns[2][data]=2&columns[2][name]=&columns[2][searchable]=true"
+      "&columns[2][orderable]=true&columns[2][search][value]="
+      "&columns[2][search][regex]=false&columns[3][data]=3&columns[3][name]="
+      "&columns[3][searchable]=true&columns[3][orderable]=true"
+      "&columns[3][search][value]={}&columns[3][search][regex]=false"
+      "&columns[4][data]=4&columns[4][name]=&columns[4][searchable]=true"
+      "&columns[4][orderable]=true&columns[4][search][value]="
+      "&columns[4][search][regex]=false&order[0][column]=2&order[0][dir]=asc"
+      "&start=0&length={}&search[value]=&search[regex]=false"
+   ).format(country_code.lower(), max_results)
+   websites = json.loads(urllib2.urlopen(base_url).read())
+   return [website['1'] for website in websites['data']]
+
+
 def main( args ):
    member_asn_set = set()
    if args.memberlist_url:
@@ -461,6 +485,8 @@ if __name__ == '__main__':
       pages = fetch_news_sites.fetch_country_pages()
       basedata['targets'] = [urlparse(url).hostname for url in
          fetch_news_sites.news_sites_for_country(pages[conf['country']])]
+   elif 'local-tld-traceroute' in conf['measurement-type']:
+      basedata['targets'] = extract_websites_in_tld(conf['country'])
    ####
    # locations
    ####
