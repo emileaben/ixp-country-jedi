@@ -38,7 +38,8 @@ for mtype in basedata['measurement-types']:
             v4dst.append( p['address_v4'] )
          if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-works' in p['tags']:
             v6dst.append( p['address_v6'] )
-   elif mtype in ('traceroute','http-traceroute','https-traceroute', 'local-news-traceroute'):
+   elif mtype in ('traceroute','http-traceroute',
+                    'https-traceroute', 'local-news-traceroute', 'local-tld-traceroute'):
       v4dst += basedata['targets']
       v6dst += basedata['targets']
 
@@ -69,7 +70,8 @@ for mtype in basedata['measurement-types']:
          print >>sys.stderr,"dst:%s msm_id:%s (probe-mesh)" % ( v6target, msm_id, )
          time.sleep(2)
    #TODO refactor http/https and normal traceroute taking
-   if mtype in ('http-traceroute','https-traceroute', 'local-news-traceroute'):
+   if mtype in ('http-traceroute','https-traceroute',
+                    'local-news-traceroute', 'local-tld-traceroute'):
       port = 80
       if mtype == 'https-traceroute': port = 443
       for target in v4dst: ## 
