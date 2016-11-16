@@ -362,8 +362,8 @@ def do_ixplans_entry( data, proto, data_entry ):
    data[ proto ]['nodes'].add( dst_prb_id )
    if 'ixps' in data_entry:
       for ixp in data_entry['ixps']:
-         link_key = '>'.join(map(str,[src_prb_id, dst_prb_id, ixp]))
-         data[ proto ]['links'].add( link_key ) 
+         link_key = u'{}>{}>{}'.format(src_prb_id, dst_prb_id, ixp)
+         data[ proto ]['links'].add( link_key )
          data[ proto ]['ixps'][ ixp ] += 1
 
 def do_ixplans_printresult( data ):
@@ -582,12 +582,12 @@ def main():
       globals()["do_%s_printresult" % analysis]( data[analysis] )
 
 if __name__ == '__main__':
-   try:
+   #try:
       main()
-   except UnicodeEncodeError, e:
-      print e
-      print "If you encounter errors like described here:"
-      print " http://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file"
-      print "Consider setting the env var: PYTHONIOENCODING=UTF-8"
+   #except UnicodeEncodeError, e:
+   #   print e
+   #   print "If you encounter errors like described here:"
+   #   print " http://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file"
+   #   print "Consider setting the env var: PYTHONIOENCODING=UTF-8"
 
 
