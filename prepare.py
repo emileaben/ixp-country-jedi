@@ -14,6 +14,7 @@ import os
 import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import ProbeInfo
+import fetch_news_sites
 
 
 ## find connected probes
@@ -23,7 +24,9 @@ MEASUREMENT_TYPES = set([
    'probe-mesh',
    'traceroute',
    'http-traceroute',
-   'https-traceroute'
+   'https-traceroute',
+   'local-news-traceroute',
+   'local-tld-traceroute',
 ])
 
 sources = {}
@@ -79,10 +82,24 @@ def haversine_km(lat1,lon1,lat2,lon2):
     km = 6367 * c
     return km
 
-def find_probes_in_country( cc ):
+def find_probes_in_country(cc, eyeball=False, threshold=90):
    probes = {}
+   base_url = (
+      'http://data.labs.apnic.net/ipv6-measurement/Economies/{}/{}.asns.json'
+   )
+   coverage = 0
    if cc:
-      probes = ProbeInfo.query(country_code=cc, is_public=True)
+      if eyeball:
+         url = base_url.format(cc, cc)
+         eyeball_distribution = json.loads(urllib2.urlopen(url).read())
+         for asn in eyeball_distribution:
+            if coverage >= threshold:
+               break
+            probes.update(ProbeInfo.query(country_code=cc, asn_v4=asn['as'], is_public=True))
+            probes.update(ProbeInfo.query(country_code=cc, asn_v6=asn['as'], is_public=True))
+            coverage += asn['percent']
+      else:
+          probes = ProbeInfo.query(country_code=cc, is_public=True)
    else:
       probes = ProbeInfo.query(is_public=True)
    '''
@@ -152,15 +169,15 @@ def do_probe_selection( probes, conf, basedata ):
       selected_asn_set.add( asn )
       selected_asn_probes[asn] = set()
       ### in principle this selects the closest and furthest probe for each of the list of locations
-      if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
+#       if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
          # not enough probes for the fancy selection, just select them all
-         for prb in probes_per_asn[asn]:
-            selected_asn_probes[asn].add( prb['prb_id'] )
-      else: ## we need to do fancy selections
-         for loc in basedata['locations']:
-            loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
-            selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
-            selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
+      for prb in probes_per_asn[asn]:
+         selected_asn_probes[asn].add( prb['prb_id'] )
+#       else: ## we need to do fancy selections
+#          for loc in basedata['locations']:
+#             loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
+#             selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
+#             selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
          asn_multiprobe_count += 1
       print "AS%s %s" % ( asn, list(selected_asn_probes[asn]) )
       prb_per_asn = len(selected_asn_probes[asn])
@@ -369,6 +386,29 @@ def locstr2latlng( locstring ):
       print "could not determine lat/long for '%s'" % ( locstring )
 
 
+def extract_websites_in_tld(country_code, max_results=100):
+   """Given a TLD, fetch a list of the top websites in this TLD for use as
+   targets"""
+   base_url = ("https://domainpunch.com/tlds/topm.php?dtd&draw=3"
+      "&columns[0][data]=0&columns[0][name]=&columns[0][searchable]=true"
+      "&columns[0][orderable]=false&columns[0][search][value]="
+      "&columns[0][search][regex]=false&columns[1][data]=1&columns[1][name]="
+      "&columns[1][searchable]=true&columns[1][orderable]=true"
+      "&columns[1][search][value]=&columns[1][search][regex]=false"
+      "&columns[2][data]=2&columns[2][name]=&columns[2][searchable]=true"
+      "&columns[2][orderable]=true&columns[2][search][value]="
+      "&columns[2][search][regex]=false&columns[3][data]=3&columns[3][name]="
+      "&columns[3][searchable]=true&columns[3][orderable]=true"
+      "&columns[3][search][value]={}&columns[3][search][regex]=false"
+      "&columns[4][data]=4&columns[4][name]=&columns[4][searchable]=true"
+      "&columns[4][orderable]=true&columns[4][search][value]="
+      "&columns[4][search][regex]=false&order[0][column]=2&order[0][dir]=asc"
+      "&start=0&length={}&search[value]=&search[regex]=false"
+   ).format(country_code.lower(), max_results)
+   websites = json.loads(urllib2.urlopen(base_url).read())
+   return [website['1'] for website in websites['data']]
+
+
 def main( args ):
    member_asn_set = set()
    if args.memberlist_url:
@@ -441,6 +481,12 @@ if __name__ == '__main__':
          print >> sys.stderr, "unknown 'targets-from-websites' needs to be a list, baling out"
          sys.exit(1)
       basedata['targets'] = hitlist_from_websites( conf['targets-from-websites'] )
+   elif 'local-news-traceroute' in conf['measurement-type']:
+      pages = fetch_news_sites.fetch_country_pages()
+      basedata['targets'] = [urlparse(url).hostname for url in
+         fetch_news_sites.news_sites_for_country(pages[conf['country']])]
+   elif 'local-tld-traceroute' in conf['measurement-type']:
+      basedata['targets'] = extract_websites_in_tld(conf['country'])
    ####
    # locations
    ####
@@ -471,8 +517,12 @@ if __name__ == '__main__':
    else: 
       selected_probes = []
       for country in basedata['countries']:
+         eyeball_threshold = conf.get('eyeball_threshold')
          print >>sys.stderr, "Preparing country: %s" % ( country )
-         probes_cc = find_probes_in_country( country )
+         if eyeball_threshold:
+            probes_cc = find_probes_in_country(country, True, eyeball_threshold)
+         else:
+            probes_cc = find_probes_in_country( country )
          sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
          selected_probes += sel_probes_for_cc
          print >>sys.stderr, "END country: %s" % ( country )

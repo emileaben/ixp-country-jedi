@@ -130,7 +130,10 @@ def main():
          data = filter_cruft( data )
          assert 'edst' not in repr( data ), data
          tr = ripe.atlas.sagan.TracerouteResult( data )
-         tracetxt = MeasurementPrint.trace2txt( data )
+         if 'dst_addr' in data:
+             tracetxt = MeasurementPrint.trace2txt( data )
+         else:
+             continue
          src_prb_id = data['prb_id']
          src_prb = probes_by_id[ src_prb_id ]
          dst_prb_id = None
