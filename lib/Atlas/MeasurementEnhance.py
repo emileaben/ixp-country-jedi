@@ -175,7 +175,14 @@ def aslinksplus( data, teh_radix ):
                link_type = 'd' #direct
                if this_resp_hop_nr - last_resp_hop_nr > 1:
                   link_type = 'i' #indirect
-               link_name = '>'.join(map(str,[last_asn,this_asn,link_type]))
+               try:
+                  #link_name = '>'.join(map(str,[last_asn,this_asn,link_type]))
+                  link_name = u"{}>{}>{}".format(last_asn,this_asn,link_type)
+               except:
+                  print last_asn
+                  print this_asn
+                  print link_type
+                  raise
                aslinks['_nodes'].add( this_asn )
                aslinks['_nodes'].add( last_asn )
                aslinks['_links'].add( link_name )
@@ -191,7 +198,7 @@ def aslinksplus( data, teh_radix ):
             last_resp_hop_nr = this_resp_hop_nr
    aslinks['nodes'] = []
    for asn in aslinks['_nodes']:
-      aslinks['nodes'].append( str(asn) )
+      aslinks['nodes'].append( u"{}".format(asn) )
    aslinks['links'] = []
    for link in aslinks['_links']:
       src,dst,typ= link.split('>')

@@ -1,27 +1,79 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<title>Geopath</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+	    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+	    <meta name="description" content="">
+	    <meta name="author" content="">
 
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
-<!--[if lte IE 8]>
-    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
-<![endif]-->
+	    <title>IXP Country Jedi - GeoPath</title>
 
-<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-<script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
-<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-<script src="../bower_components/Leaflet.Sync/L.Map.Sync.js"></script>
-<link rel="stylesheet" href="mainstyle.css" />
+	    <!-- Bootstrap core CSS -->
+	    <link href="../css/bootstrap.min.css" rel="stylesheet">
 
-<script src="geopath.js" type="text/javascript"></script>
-</head>
-<body onload="initmap()";>
-These maps show the IPv4 paths (left) and IPv6 paths (right) seen in traceroutes.
-Indirect links in traceroutes (ie. with hops inbetween without answer, or no geoloc) are shown 
-with dotted lines, direct links with lines with long-short alternating pattern.
-   <div id="box_v4"><div id="map_v4"></div></div>
-   <div id="box_v6"><div id="map_v6"></div></div>
-</body>
+	    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+	    <link href="../css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+	    <!-- Custom styles for this template -->
+		<link rel="stylesheet" href="mainstyle.css" />
+
+	    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+	    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+	    <script src="../js/ie-emulation-modes-warning.js"></script>
+
+	    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	    <!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+
+	    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.css" />
+	    <!--[if lte IE 8]>
+	        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.ie.css" />
+	    <![endif]-->
+
+	    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="http://cdn.leafletjs.com/leaflet-0.5.1/leaflet.js"></script>
+		<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script src="../bower_components/Leaflet.Sync/L.Map.Sync.js"></script>
+
+	    <script src="geopath.js" type="text/javascript"></script>
+
+	    <nav class="navbar navbar-inverse navbar-fixed-top">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+	            <span class="sr-only">Toggle navigation</span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	            <span class="icon-bar"></span>
+	          </button>
+	          <a class="navbar-brand" href="#">IXP Country Jedi</a>
+	        </div>
+	        <div id="navbar" class="collapse navbar-collapse">
+	          <ul class="nav navbar-nav">
+	            <li><a href="../index.html">Main page</a></li>
+	            <li class="active"><a href="#">GeoPath</a></li>
+	            <li><a href="../asgraph/index.html">AS Graph</a></li>
+	            <li><a href="../ixpcountry/index.html">IXP Country</a></li>
+	            <li><a href="../ixplans/index.html">IXP LANs</a></li>
+	            <li><a href="../probetags/index.html">Probe Tags</a></li>
+	          </ul>
+	        </div><!--/.nav-collapse -->
+	      </div>
+	    </nav>
+
+  	</head>
+
+  	<body onload="initmap()" style="margin-top: 80px">
+		<p>These maps show the IPv4 paths (left) and IPv6 paths (right) seen in traceroutes.
+		Indirect links in traceroutes (ie. with hops inbetween without answer, or no geoloc) are shown 
+		with dotted lines, direct links with lines with long-short alternating pattern.</p>
+	    <div id="box_v4"><div id="map_v4"></div></div>
+	    <div id="box_v6"><div id="map_v6"></div></div>
+	</body>
+	
 </html>
 
