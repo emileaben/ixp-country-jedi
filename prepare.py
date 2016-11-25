@@ -169,15 +169,15 @@ def do_probe_selection( probes, conf, basedata ):
       selected_asn_set.add( asn )
       selected_asn_probes[asn] = set()
       ### in principle this selects the closest and furthest probe for each of the list of locations
-#       if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
+      if len( probes_per_asn[asn] ) <= 2*len( basedata['locations'] ): 
          # not enough probes for the fancy selection, just select them all
-      for prb in probes_per_asn[asn]:
-         selected_asn_probes[asn].add( prb['prb_id'] )
-#       else: ## we need to do fancy selections
-#          for loc in basedata['locations']:
-#             loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
-#             selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
-#             selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
+         for prb in probes_per_asn[asn]:
+            selected_asn_probes[asn].add( prb['prb_id'] )
+      else: ## we need to do fancy selections
+         for loc in basedata['locations']:
+             loc_sorted = sorted( probes_per_asn[asn], key=lambda k: k['dists'][ loc ] ) 
+             selected_asn_probes[asn].add(loc_sorted[0]['prb_id'])
+             selected_asn_probes[asn].add(loc_sorted[-1]['prb_id'])
          asn_multiprobe_count += 1
       print "AS%s %s" % ( asn, list(selected_asn_probes[asn]) )
       prb_per_asn = len(selected_asn_probes[asn])
@@ -473,6 +473,12 @@ if __name__ == '__main__':
    elif 'target-type' in conf:
       if conf['target-type'] == 'alexa-country-top25':
          basedata['targets'] = alexa_country_top25( basedata['countries'] )
+      elif conf['target-type'] == 'local-news-traceroute' in conf['measurement-type']:
+         pages = fetch_news_sites.fetch_country_pages()
+         basedata['targets'] = [urlparse(url).hostname for url in
+         fetch_news_sites.news_sites_for_country(pages[conf['country']])]
+      elif 'local-tld-traceroute' in conf['measurement-type']:
+         basedata['targets'] = extract_websites_in_tld(conf['country'])
       else:
          print >> sys.stderr, "unknown target-type of '%s' in config, bailing out"
          sys.exit(1)
@@ -481,12 +487,6 @@ if __name__ == '__main__':
          print >> sys.stderr, "unknown 'targets-from-websites' needs to be a list, baling out"
          sys.exit(1)
       basedata['targets'] = hitlist_from_websites( conf['targets-from-websites'] )
-   elif 'local-news-traceroute' in conf['measurement-type']:
-      pages = fetch_news_sites.fetch_country_pages()
-      basedata['targets'] = [urlparse(url).hostname for url in
-         fetch_news_sites.news_sites_for_country(pages[conf['country']])]
-   elif 'local-tld-traceroute' in conf['measurement-type']:
-      basedata['targets'] = extract_websites_in_tld(conf['country'])
    ####
    # locations
    ####

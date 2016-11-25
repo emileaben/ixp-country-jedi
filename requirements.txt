@@ -7,3 +7,5 @@ ipaddress==1.0.6
 arrow==0.4.2
 futures==3.0.5
 git+https://github.com/RIPE-NCC/ripe-atlas-cousteau.git@latest#egg=ripe.atlas.cousteau
+iso3166==0.7
+futures-3.0.5
