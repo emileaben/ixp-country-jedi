@@ -1,239 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <meta name="description" content="">
+        <meta name="author" content="">
 
-    <title>IXP Country Jedi - IXP Country</title>
+        <title>IXP Country Jedi - IXP Country</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <!-- Bootstrap core CSS -->
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <link href="../css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <link href="../css/ie10-viewport-bug-workaround.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <script src="../js/ie-emulation-modes-warning.js"></script>
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <script src="../bower_components/underscore/underscore-min.js"></script>
-    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-    <script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
-    <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
-    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../common/jedi-utils.js"></script>
-
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">IXP Country Jedi</a>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="../index.html">Main page</a></li>
-            <li><a href="../geopath/index.html">GeoPath</a></li>
-            <li><a href="../asgraph/index.html">AS Graph</a></li>
-            <li class="active"><a href="#">IXP Country</a></li>
-            <li><a href="../ixplans/index.html">IXP LANs</a></li>
-            <li><a href="../probetags/index.html">Probe Tags</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </nav>
-
-    <style>
-      .tick line {
-        shape-rendering: crispEdges;
-        stroke: #000;
-      }
-      line.minor  {
-        stroke: #777;
-        stroke-dasharray: 2,2;
-      }
-      path.domain {
-        fill: none;
-        stroke: black;
-      }
-
-      .axis text {
-          font-size: 8px;
-      }
-      #vizcontainer {
-         float: left;
-         /* border: 1px solid grey; */
-      }
-      #details {
-         /* border: 1px solid grey;*/
-         height: 100%
-      }
-    </style>
+        <!-- Custom styles for this template -->
+        <link href="style.css" rel="stylesheet">
 
 
-  </head>
+        <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+        <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+        <script src="../js/ie-emulation-modes-warning.js"></script>
 
-  <body style="margin-top:80px">
+        <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../bower_components/underscore/underscore-min.js"></script>
+        <script src="//d3js.org/d3.v3.min.js"></script>
+        <script src="http://d3js.org/queue.v1.min.js" type="text/javascript"></script>
+        <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
+        <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="../common/jedi-utils.js"></script>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">IXP Country Jedi</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="../index.html">Main page</a></li>
+                <li><a href="../geopath/index.html">GeoPath</a></li>
+                <li><a href="../asgraph/index.html">AS Graph</a></li>
+                <li class="active"><a href="#">IXP Country</a></li>
+                <li><a href="../ixplans/index.html">IXP LANs</a></li>
+                <li><a href="../probetags/index.html">Probe Tags</a></li>
+              </ul>
+            </div><!--/.nav-collapse -->
+          </div>
+        </nav>
+    </head>
+
+    <body style="margin-top:80px">
  
-    <div id="vizcontainer">
-      <svg style="width:1000px;height:1000px;border:1px lightgray solid;" />
-    </div>
-    <div id="details">
-      <p>Hover over cells in the matrix on the left to get detailed information in this window</p>
-    </div>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <p>Mouse click on every box to see the traceroute path. | Showing <b id="infoASNtext"> </b>.</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                        <div class="btn-group" role="group">
+                           <button id="displayFilter" type="button" class="btn btn-default">Show Filter ASNs</button>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <button id="displayLegend" type="button" class="btn btn-default">Hide Legend</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="legends" style="display:block;">
+                </br>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="legend">
+                            <p><span class="ixp_no_and_out_of_country_no"></span> IXP IPs: NO, out-of-country IPs: NO</p>
+                        </div>
+                    </div>
 
-  </body>
+                    <div class="col-md-4 col-md-offset-1">
+                        <div class="legend">
+                            <p><span class="ixp_yes_and_out_of_country_no"></span> IXP IPs: YES, out-of-country IPs: NO</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-md-offset-2">
+                        <div class="legend">
+                            <p><span class="ixp_yes_and_out_of_country_yes"></span> IXP IPs: YES, out-of-country IPs: YES</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-md-offset-1">
+                        <div class="legend">
+                            <p><span class="ixp_no_and_out_of_country_yes"></span> IXP IPs: NO, out-of-country IPs: YES</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="filterASNs" style="display:none;">
+                </br>
+                <div class="col-xs-3 col-xs-offset-1">
+                    <div class="well" style="max-height: 150px;overflow: auto;">
+                        <ul id="listASNs" class="list-group checked-list-box"></ul>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div style="margin-top:30px; float:left;">
+                        <a href="javascript:void(0)" onclick="applyClearAll()" id="applyClearAll" class="btn btn-warning btn-xs" style="" role="button">Clear all</a>
+                    </div>
+                    <div style="margin-top:30px; margin-left: 80px; ">
+                        <a href="javascript:void(0)" onclick="applySelectAll()" id="applySelectAll" class="btn btn-warning btn-xs" style="" role="button">Select all</a>
+                    </div>
+                    <div style="margin-top:20px; margin-left: 25px;">
+                        <a href="javascript:void(0)" onclick="applyFilter()" id="applyFilter" class="btn btn-primary btn-lg" style="" role="button">Apply</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 
-  <footer>
+    <footer>
+        <div id="shareDiv" style="position:fixed; bottom:0; right:0; margin-right:30px; margin-bottom:5px;" onclick="showShareLink('show')">
+            <img src="share_button.png" style="margin-left: 9px;"/>
+            <p> Share link </p>
+        </div>
+        <div id="shareDetails" style="position:absolute; display:none; bottom:0; right:0; margin-right:60px; z-index: 1000; width:380px;">
 
-  <script type="text/javascript">
-     // .format() for strings
-     // First, checks if it isn't implemented yet.
-     if (!String.prototype.format) {
-       String.prototype.format = function() {
-         var args = arguments;
-         return this.replace(/{(\d+)}/g, function(match, number) { 
-           return typeof args[number] != 'undefined'
-             ? args[number]
-             : match
-           ;
-         });
-       };
-     }
-
-     var proto = 'v4';
-     var height = 900;
-     var width = height;
-     var border_width = 200;
-     var things = d3.select("svg")
-        .append("g")
-        .attr("transform", "translate(200,200)")
-        .attr("id", "adjacencyG")
-        .selectAll("rect")
-     var legendg = d3.select("svg")
-        .append("g").attr("transform","translate(20,20)");
-     // legend hack. needs proper legend still
-     legendg.append("rect").attr('x',0).attr('y',0).attr('width',20).attr('height',20).attr('fill','green');
-     legendg.append("text").attr('x',40).attr('y',20).text("IXP IPs: YES, out-of-country IPs:  NO");
-     legendg.append("rect").attr('x',0).attr('y',20).attr('width',20).attr('height',20).attr('fill','orange');
-     legendg.append("text").attr('x',40).attr('y',40).text("IXP IPs:  NO, out-of-country IPs:  NO");
-     legendg.append("rect").attr('x',0).attr('y',40).attr('width',20).attr('height',20).attr('fill','blue');
-     legendg.append("text").attr('x',40).attr('y',60).text("IXP IPs: YES, out-of-country IPs: YES");
-     legendg.append("rect").attr('x',0).attr('y',60).attr('width',20).attr('height',20).attr('fill','red');
-     legendg.append("text").attr('x',40).attr('y',80).text("IXP IPs:  NO, out-of-country IPs:  YES");
-     //axis
-     d3.select("#adjacencyG").append("text").attr("transform", "translate(-10,-10) rotate(90)").attr('x',250).attr('y',140) .text("Source (by ASN)");
-     d3.select("#adjacencyG").append("text").text("Destination (by ASN)").attr('x',250).attr('y',-130);
-
-     var xScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
-     var yScale = d3.scale.ordinal().rangeBands([0,width-border_width]);
-     var row_count, col_count;
-     var thinglist = [];
-     var probe_info;
-     var count = 0
-     d3.json("ixpcountry.{0}.json".format( proto ), function(error,data) {
-        var rows = data['rows'];
-        var cols = data['cols'];
-        var cells = data['cells'];
-        var row_count = rows.length;
-        var col_count = cols.length;
-        var row_by_idx = _.indexBy(rows, 'id'); 
-        var sort_orders = {
-           'id':     _.pluck( rows.sort( function(a,b) { return d3.ascending( a.id, b.id ) } ), 'id'),
-           'asn_v4': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v4, b.asn_v4 ) } ), 'id'),
-           'asn_v6': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v6, b.asn_v6 ) } ), 'id')
-        };
-        xScale.domain( sort_orders.asn_v4 )
-        yScale.domain( sort_orders.asn_v4 )
-        xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
-        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
-        xAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
-        yAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
-        d3.select("#adjacencyG").append("g").attr("class",'axis').call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
-        d3.select("#adjacencyG").append("g").attr("class",'axis').call(yAxis);
-
-        function text_from_datacell( d ) {
-           var txt = [];
-           
-           txt.push(d.data.in_country ? 'incc: yes' : 'incc: no');
-           txt.push(d.data.via_ixp    ? 'ixp: yes' : 'ixp: no');
-           txt.push("srcAS" + row_by_idx[ d.row ].asn_v4);
-           txt.push("dstAS" + row_by_idx[ d.col ].asn_v4);
-           txt.push("srcPrb" + d.row);
-           txt.push("dstPrb" + d.col);
-           return txt.join("\n");
-        };
-        /*var fisheye = d3.fisheye.circular()
-           .radius(100)
-           .distortion(3); */
-        function cellcolor( d ) {
-           if (  d.data.via_ixp &&   d.data.in_country) { return "green"; }
-           if (! d.data.via_ixp &&   d.data.in_country) { return "orange";}
-           if (  d.data.via_ixp && ! d.data.in_country) { return "blue";}
-           if (! d.data.via_ixp && ! d.data.in_country) { return "red";}
-           return "pink"; // should not happen
-           
-        };
-        /*
-        function mouseover_evt( d ) {
-           var txt = [];
-           //json_file = "details/{0}.{1}.{2}.json".format( d.row , d.col, proto );
-           json_file = "../common/details/{0}/{1}/{2}/latest.json".format( proto, d.row, d.col );
-           $.ajax({url: json_file, 
-              async: false
-           }).done(function( data ) {
-              txt.push('<pre>{0}</pre>'.format( data['tracetxt'] ));
-              console.log( data );;
-           });
-           var nodeSelection = d3.select(this).style({'stroke-width':2});
-           $("#details").html( txt.join("<br>") );
-        }
-        */
-        var things_viz = things.data( cells )
-           .enter()
-           .append('rect')
-           // fisheye needs attrs called d.x and d.y
-           .datum( function(d) { d.x = xScale( d.col ), d.y = yScale( d.row ) ; return d } )
-           .attr('x', function(d) { return d.x } )
-           .attr('y', function(d) { return d.y } )
-           .attr('width', Math.floor(( width - border_width) / col_count ) -1)
-           .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
-           .on('mouseover', function (d) { jedi_cell_detail_to_jquery_elt( proto, d.row, d.col , $("#details") ) } ) 
-           .style('fill', cellcolor );
-           //.style('stroke-width', function(d) { return d.data.in_country ? 0 : 0.5 } )
-           //.style('stroke', function(d) { return d.data.in_country ? "grey" : "red" } );
-        things_viz.append('title').text( text_from_datacell );
-        /*
-        d3.select('svg').on('mousemove', function() {
-           mcoord = d3.mouse(this);
-           mcoord[0] -= border_width;
-           mcoord[1] -= border_width;
-           fisheye.focus( mcoord );
-           things_viz.each( function(d) { d.fisheye = fisheye(d); })
-              .attr("x", function(d) { return d.fisheye.x; })
-              .attr("y", function(d) { return d.fisheye.y; })
-              .attr("width", function(d) { return d.fisheye.z * 3; })
-              .attr("height", function(d) { return d.fisheye.z * 3; });
-        });
-        */
-     });
-    </script>
-  </footer>
-
+            <div class="panel panel-info"> 
+                <div class="panel-heading" onclick="showShareLink('hide')"> 
+                    <h3 class="panel-title">Hide Share Link</h3> 
+                </div> 
+                <div id="shareURL" class="panel-body" style="overflow: auto;">  </div> 
+                <button style="margin-left:145px; margin-bottom:10px;" id="copyButton">Copy Link</button>
+            </div>
+        </div> 
+    </footer>
+    <script src="code.js"></script>
 </html>

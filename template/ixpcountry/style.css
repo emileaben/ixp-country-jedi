@@ -1,0 +1,67 @@
+.tick line {
+        shape-rendering: crispEdges;
+        stroke: #000;
+      }
+      line.minor  {
+        stroke: #777;
+        stroke-dasharray: 2,2;
+      }
+      path.domain {
+        fill: none;
+        stroke: black;
+      }
+
+      .axis text {
+          font-size: 8px;
+      }
+      #vizcontainer {
+         float: left;
+         /* border: 1px solid grey; */
+      }
+    .tooltipASNs {
+        display: none;
+        background-color: #337ab7;
+        border-color: #2e6da4;
+        margin-left: 28px;
+        padding: .2em .6em .3em;
+        position: absolute;
+        z-index: 1000;
+        width:170px;
+        height:30px;
+        color:#fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: baseline;
+        border-radius: .25em;
+    }
+      .tooltipTraceroutes {
+        position: absolute;
+        width: 680px;
+        height: auto;
+        padding: 5px;
+        border-radius: 3px;
+        font: 13.5px sans-serif;
+        z-index: 1000;
+
+      }
+
+        .legend p { float: left; margin-right: 10px; }
+        .legend span { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
+        /* your colors */
+        .legend .ixp_yes_and_out_of_country_no { background-color: green; }
+        .legend .ixp_no_and_out_of_country_no { background-color: orange; }
+        .legend .ixp_yes_and_out_of_country_yes { background-color: blue; }
+        .legend .ixp_no_and_out_of_country_yes { background-color: red; }
+
+    .state-icon {
+        left: -5px;
+    }
+    .list-group-item-primary {
+        color: rgb(255, 255, 255);
+        background-color: rgb(66, 139, 202);
+    }
+
+    /* DEMO ONLY - REMOVES UNWANTED MARGIN */
+    .well .list-group {
+        margin-bottom: 0px;
+    }
