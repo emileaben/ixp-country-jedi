@@ -43,7 +43,7 @@ analysing the results.  It can contain various parts:
 * *locations*: List of cities on which probe selection will be based (if applicable)
 * *probetag*: Probetag on which probe selection criteria is based.
 
-An example is provided in the _example_ directory. It is mandatory to either have _country_ , or _probetag_.  
+examples are provided in the _examples_ directory. It is mandatory to either have _country_ , or _probetag_.  
 Without a *locations* section, the capital of *country* (or the first country, if *country*
 is a list) is used for probe selection (see below).
 
