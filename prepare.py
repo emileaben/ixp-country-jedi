@@ -18,7 +18,6 @@ import fetch_news_sites
 
 
 ## find connected probes
-PROBE_URL = 'https://atlas.ripe.net/api/v1/probe/?limit=100'
 
 MEASUREMENT_TYPES = set([
    'probe-mesh',
@@ -113,6 +112,10 @@ def find_probes_in_country(cc, eyeball=False, threshold=90):
    return asns_v4,asns_v6,probes
    '''
    return probes
+
+def do_probe_selection_from_tag( tag ):
+   probes = ProbeInfo.query(tags=tag)
+   return map( _to_probedata, probes.values() )
 
 def do_probe_selection( probes, conf, basedata ):
    probes_per_asn={}
@@ -217,19 +220,24 @@ def do_probe_selection( probes, conf, basedata ):
    
    outdata = []
    for prb_id in selected_probes:
-      outdata.append({
-         'probe_id': prb_id,
-         'lat': probes[prb_id]['latitude'],
-         'lon': probes[prb_id]['longitude'],
-         'asn_v4': probes[prb_id]['asn_v4'],
-         'asn_v6': probes[prb_id]['asn_v6'],
-         'dists': probes[prb_id]['dists'],
-         'tags': probes[prb_id]['tags'],
-         'address_v4': probes[prb_id]['address_v4'],
-         'address_v6': probes[prb_id]['address_v6'],
-         'country_code': probes[prb_id]['country_code']
-      })
+      outdata.append( _to_probedata( probes[prb_id] ) )
    return outdata
+
+def _to_probedata( prb_dict ):
+      struct = {
+         'probe_id': prb_dict['id'],
+         'lat': prb_dict['latitude'],
+         'lon': prb_dict['longitude'],
+         'asn_v4': prb_dict['asn_v4'],
+         'asn_v6': prb_dict['asn_v6'],
+         'tags': prb_dict['tags'],
+         'address_v4': prb_dict['address_v4'],
+         'address_v6': prb_dict['address_v6'],
+         'country_code': prb_dict['country_code']
+      }
+      if 'dists' in prb_dict:
+         struct['dists'] = prb_dict['dists']
+      return struct
 
 def get_memberlist( murl ):
    try:
@@ -429,23 +437,27 @@ if __name__ == '__main__':
       'targets': [], ## list of targets (if not probe-mesh)
    }  ## auxiliary info that we want saved
    ####
-   # country
+   # country / or other probe selection
    ####
-   if not 'country' in conf:
-      print "need a country, exiting"
-      sys.exit(1)
-   # 'list'-ify country
-   if type( conf['country'] ) != list:
-      basedata['countries'] = [ conf['country'] ]
+   if 'country' in conf:
+      # 'list'-ify country
+      if type( conf['country'] ) != list:
+         basedata['countries'] = [ conf['country'] ]
+      else:
+         basedata['countries'] = conf['country']
+      # uppercase all
+      basedata['countries'] = map(lambda x:x.upper(), basedata['countries'])
+      ####
+      # stats per country
+      ####
+      for cc in basedata['countries']:
+         basedata['country-stats'][ cc ] = country_stats( cc )
+   elif 'probetag' in conf:
+      # selects probes with certain probetag and looks at their connectivity
+      basedata['probetag'] = conf['probetag']
    else:
-      basedata['countries'] = conf['country']
-   # uppercase all
-   basedata['countries'] = map(lambda x:x.upper(), basedata['countries'])
-   ####
-   # stats per country
-   ####
-   for cc in basedata['countries']:
-      basedata['country-stats'][ cc ] = country_stats( cc )
+      print >>sys.stderr, "need 'country' or 'probetag'"
+      sys.exit(1)
    ####
    # measurement-types
    ####
@@ -488,20 +500,23 @@ if __name__ == '__main__':
          sys.exit(1)
       basedata['targets'] = hitlist_from_websites( conf['targets-from-websites'] )
    ####
-   # locations
+   # locations (only applies when 'countries' is in basedata
    ####
    ## If no location present, select the capital of the first country in list
-   if not 'locations' in conf or len( conf['locations'] ) == 0:
-      capital_str,lat,lon = capital_city_for_country( basedata['countries'][0] )
-      print >> sys.stderr, "No location info available for probe selection, defaulting to capital city of country (%s)" % ( capital_str )
-      basedata['locations'][ capital_str ] = {'lat': lat, 'lon': lon} 
-   else:
-      for loc in conf['locations']:
-         lat,lon = locstr2latlng( loc ) 
-         basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
-   # 'constrain to only the probes X km from the location
-   if 'location-constraint' in conf:
-        basedata['location-constraint'] = conf['location-constraint']
+   if len(basedata['countries']) > 0:
+      print basedata
+      if not 'locations' in conf or len( conf['locations'] ) == 0:
+         capital_str,lat,lon = capital_city_for_country( basedata['countries'][0] )
+         print >> sys.stderr, "No location info available for probe selection, defaulting to capital city of country (%s)" % ( capital_str )
+         basedata['locations'][ capital_str ] = {'lat': lat, 'lon': lon} 
+      else:
+         for loc in conf['locations']:
+            lat,lon = locstr2latlng( loc ) 
+            basedata['locations'][ loc ] = {'lat': lat, 'lon': lon} 
+      # 'constrain to only the probes X km from the location
+      if 'location-constraint' in conf:
+           basedata['location-constraint'] = conf['location-constraint']
+   ### IXPs
    if 'ixps' in conf:
       for ixp in conf['ixps']:
          basedata['ixps'][ ixp['name'] ] = {
@@ -516,16 +531,20 @@ if __name__ == '__main__':
       print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
    else: 
       selected_probes = []
-      for country in basedata['countries']:
-         eyeball_threshold = conf.get('eyeball_threshold')
-         print >>sys.stderr, "Preparing country: %s" % ( country )
-         if eyeball_threshold:
-            probes_cc = find_probes_in_country(country, True, eyeball_threshold)
-         else:
-            probes_cc = find_probes_in_country( country )
-         sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
-         selected_probes += sel_probes_for_cc
-         print >>sys.stderr, "END country: %s" % ( country )
+      if len(basedata['countries']) > 0:
+         for country in basedata['countries']:
+            eyeball_threshold = conf.get('eyeball_threshold')
+            print >>sys.stderr, "Preparing country: %s" % ( country )
+            if eyeball_threshold:
+               probes_cc = find_probes_in_country(country, True, eyeball_threshold)
+            else:
+               probes_cc = find_probes_in_country( country )
+            sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
+            selected_probes += sel_probes_for_cc
+            print >>sys.stderr, "END country: %s" % ( country )
+      elif 'probetag' in basedata:
+         print >>sys.stderr, "finding probes for tag: %s" % ( basedata['probetag'] )
+         selected_probes = do_probe_selection_from_tag( basedata['probetag'] )
       ## writing to probeset.json
       print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
       with open('probeset.json','w') as outfile:
@@ -533,18 +552,3 @@ if __name__ == '__main__':
       print >>sys.stderr, "writing basedata (locations/ixps) to basedata.json"
    with open('./basedata.json','w') as bdfile:
       json.dump( basedata, bdfile, indent=2 )
-
-'''
-if __name__ == '__main__':
-   parser = argparse.ArgumentParser()
-   parser.add_argument('-m','--memberlist_url', help="URL for IXP memberlist (optional)")
-   parser.add_argument('-l','--location', help="Location string (that can be geocoded to a lat/lon)")
-   parser.add_argument('-r','--radius', type=int, help="Select only probes in this radius (km) around <location>")
-   parser.add_argument('-c','--country',help="Select only probes in this country")
-   args = parser.parse_args()
-   if args.location:
-      lat,lon = locstr2latlng( args.location )
-      args.lat = lat
-      args.lon = lon
-   main( args )
-'''
