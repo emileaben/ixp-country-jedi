@@ -36,14 +36,14 @@ mesh you'd want to do.
 ##config.json
 
 This file contains base data used for creating measurements and
-analysing the results.  It currently contains 3 parts:
+analysing the results.  It can contain various parts:
 
 * *country*:   ISO 2 letter code for the country under analysis, or list of countries under analysis (ie. NL, IT, CH);
 * *ixps*: List of IXPs one wants to detect/report on;
+* *locations*: List of cities on which probe selection will be based (if applicable)
+* *probetag*: Probetag on which probe selection criteria is based.
 
-* *locations*: List of cities on which probe selection will be based.
-
-An example is provided in the _example_ directory. Only the _country_ is mandatory. 
+An example is provided in the _example_ directory. It is mandatory to either have _country_ , or _probetag_.  
 Without a *locations* section, the capital of *country* (or the first country, if *country*
 is a list) is used for probe selection (see below).
 
