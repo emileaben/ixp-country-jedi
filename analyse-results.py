@@ -233,19 +233,29 @@ def do_incountry_printresult( data ):
 
 ### ixpcountry
 def init_ixpcountry( basedata, probes ):
-   rows = []
-   for p in PROBES:
-      rows.append({
-         'id': p['probe_id'],
-         'asn_v4': p['asn_v4'],
-         'asn_v6': p['asn_v6']
-      })
+
+   rows = { 'v4' : list(), 'v6' : list() }
+   
+   for probe in PROBES:
+      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
+         rows['v4'].append({
+            'id': probe['probe_id'],
+            'asn_v4': probe['asn_v4'],
+            'asn_v6': probe['asn_v6']
+         })
+      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
+         rows['v6'].append({
+            'id': probe['probe_id'],
+            'asn_v4': probe['asn_v4'],
+            'asn_v6': probe['asn_v6']
+         })
+
    ## can do data reduction step here if data is too big
    d = {'summary':{},'details':{}}
    for proto in ('v4','v6'):
       d['summary'][proto] = {
-         'rows': rows,
-         'cols': rows,
+         'rows': rows[proto],
+         'cols': rows[proto],
          'cells': [],
       }
       d['details'][proto] = {}
