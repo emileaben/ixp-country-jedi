@@ -56,6 +56,11 @@ set the 'location'-list to that specific city, and set a 'location-constraint'
 to a reasonable value (for instance 50, so you'll cover 50 kilometers from the
 city centre).
 
+Note: The interaction between various of the configuration settings hasn't been
+thoroughly tested, so beware of combining. What is known to work is _probetag_
+as a stand-alone probe selection option, and _country_ is known to work well
+together with all other config options.
+
 ## prepare.py
 
 This script reads _config.json_ and generates two output files:
