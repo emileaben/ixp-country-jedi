@@ -16,6 +16,8 @@ sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import ProbeInfo
 import fetch_news_sites
 
+# One-off traceroute msm cost 
+COST_OF_TRACEROUTE = 60
 
 ## find connected probes
 
@@ -124,6 +126,9 @@ def do_probe_selection( probes, conf, basedata ):
       status = prb_info['status']
       ## down probes are not useful:
       if status != 1:
+         continue
+      ## Exclude probes with system tag IPv4 or IPv4 not working
+      if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
          continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
       if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
@@ -416,6 +421,18 @@ def extract_websites_in_tld(country_code, max_results=100):
    websites = json.loads(urllib2.urlopen(base_url).read())
    return [website['1'] for website in websites['data']]
 
+def calculate_cost_of_measurement(selected_probes):
+   ## Calculate the number of IPv4 and IPv6 addresses
+   number_of_addresses = {"ipv4" : 0, "ipv6" : 0}
+   for probe in selected_probes:
+      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
+         number_of_addresses['ipv4'] += 1
+      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
+         number_of_addresses['ipv6'] += 1
+   credits_ipv4 = ( int(number_of_addresses['ipv4']) * (int(number_of_addresses['ipv4'])) ) * COST_OF_TRACEROUTE
+   credits_ipv6 = ( int(number_of_addresses['ipv6']) * (int(number_of_addresses['ipv6'])) ) * COST_OF_TRACEROUTE
+   print "* * *\nThe IXP Country Jedi will consume " + str(credits_ipv4+credits_ipv6) + " credits,"
+   print str(credits_ipv4) + " and " + str(credits_ipv6) + " for IPv4 and IPv6 measurements, respectively. \n * * *"
 
 def main( args ):
    member_asn_set = set()
@@ -545,6 +562,8 @@ if __name__ == '__main__':
       elif 'probetag' in basedata:
          print >>sys.stderr, "finding probes for tag: %s" % ( basedata['probetag'] )
          selected_probes = do_probe_selection_from_tag( basedata['probetag'] )
+      ## estimate the cost of measurement
+      calculate_cost_of_measurement(selected_probes)
       ## writing to probeset.json
       print "writing probe selection to probeset.json (%s probes)" % ( len( selected_probes ) )
       with open('probeset.json','w') as outfile:
