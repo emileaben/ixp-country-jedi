@@ -28,17 +28,34 @@ function initmap() {
    // set up the map
    //var mapAttrib='Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
    //var mapUrl='http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg';
-   var mapUrl='http://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png';
-   var mapAttrib='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+   //var mapUrl='http://{s}.tile.thunderforest.com/pioneer/{z}/{x}/{y}.png';
+   //var mapAttrib='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+   /*var osm4 = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+   });
+   var osm6 = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+    subdomains: 'abcd',
+    maxZoom: 19
+   });
+   */
+   var osm4 = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+   });
+   var osm6 = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+   });
 
    var map_v4 = new L.Map('map_v4');
    map_v4.setView([20, 0], 12);
-   var osm4 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
+   //var osm4 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
    map_v4.addLayer(osm4);
 
    var map_v6 = new L.Map('map_v6');
    map_v6.setView([20, 0], 12);
-   var osm6 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
+   //var osm6 = new L.TileLayer(mapUrl, {attribution: mapAttrib});
    map_v6.addLayer(osm6);
    maps = {
       'v4': map_v4,
