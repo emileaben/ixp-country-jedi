@@ -86,6 +86,50 @@ def do_common_printresult( data ):
          with open(latest_file, 'w') as outfile:
             json.dump( data_latest, outfile )
 
+### perasn
+def init_perasn( basedata, probes ):
+    d = {'asns': {}}
+    return d
+
+def do_perasn_entry( asns_d , proto, data ):
+    terminal_asns = set()
+    try:
+        src_asn = PROBES_BY_ID[ data['src_prb_id'] ]['asn_%s' % proto ]
+        if src_asn != None:
+            terminal_asns.add( src_asn )
+        dst_asn = PROBES_BY_ID[ data['dst_prb_id'] ]['asn_%s' % proto ]
+        if dst_asn != None:
+            terminal_asns.add( dst_asn )
+    except:
+        # remove for now
+        pass
+    if len(terminal_asns) != 2:
+        return
+    for asn in terminal_asns:
+        other_asn = filter(lambda x: x != asn, terminal_asns)[0]
+        asns_d['asns'].setdefault( asn, {'facets': {'out_of_country': {'asns': {}, 'path_count': 0} } } )
+        ## process the facet: 'out_of_country'
+        if data['in_country'] == False:
+            asns_d['asns'][ asn ]['facets']['out_of_country']['asns'].setdefault( other_asn, [] )
+            asns_d['asns'][ asn ]['facets']['out_of_country']['asns'][ other_asn ].append(
+                {'src_prb_id': data['src_prb_id'],
+                 'dst_prb_id': data['dst_prb_id']
+                }
+            )
+            asns_d['asns'][ asn ]['facets']['out_of_country']['path_count'] += 1
+        ## process next facet
+
+def do_perasn_printresult( asns_d ):
+   DATAPATH='./analysis/perasn/'
+   if not os.path.exists( DATAPATH ):
+      os.makedirs( DATAPATH )
+   for asn,asn_data in asns_d['asns'].iteritems():
+      asn_file = "%s/%s.json" % ( DATAPATH, asn)
+      # see ixpcountry template for example of how to use these latest.json files
+      with open(asn_file, 'w') as outfile:
+         json.dump( asn_data, outfile, indent=2 )
+
+
 ### ixpcount
 def init_ixpcount( basedata, probes ):
    ixps = {
@@ -558,7 +602,9 @@ def main():
       'ixplans': True,
       'probetags': True,
       'viaanchor': False, ## buggy
+      'perasn': True
    }
+   #defs={'perasn': True}
 
    if len( sys.argv ) > 1:
       # take defs from stdin arguments
