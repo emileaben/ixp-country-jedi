@@ -59,16 +59,21 @@ def data_line_generator():
             else:
                print >>sys.stderr," error on msm entry: %s " % ( msm_entry )
 
+
 ### common . For stuff general enough to apply to multiple analyses.
 ### example is text representation for traces, indexed by srcprb.dstprb
 def init_common( basedata, probes ):
-  return {'v4': {}, 'v6': {}} 
+  return {'v4': {}, 'v6': {}, 'timestamps': set() } 
 
 def do_common_entry( data, proto, data_entry ):
    detail_key = '.'.join(map(str,[ data_entry['src_prb_id'] , data_entry['dst_prb_id'] ]))
    if not detail_key in data[proto]:
       data[proto][detail_key] = []
    data[proto][detail_key].append( data_entry )
+
+   ## support timestamps
+   data['timestamps'].add(data_entry['ts'])
+   
 
 def do_common_printresult( data ):
    COMMONPATH='./analysis/common/details'
@@ -85,6 +90,43 @@ def do_common_printresult( data ):
          # see ixpcountry template for example of how to use these latest.json files
          with open(latest_file, 'w') as outfile:
             json.dump( data_latest, outfile )
+
+   ## CommonInit
+   CommonFormat = {} 
+
+   ## Timestamp period (Alex ixp tools codespring)     
+   # Inits    
+   ts_Start =  sys.maxint   
+   ts_End   = -sys.maxint 
+   from datetime import datetime
+
+   for time in data['timestamps']:
+      if time < ts_Start:
+         ts_Start = time
+      if time > ts_End:
+         ts_End = time
+   CommonFormat["StartTime"] = ts_Start
+   CommonFormat["EndTime"]   = ts_End
+   CommonFormat["StartUTC"] = str(datetime.utcfromtimestamp(ts_Start))
+   CommonFormat["EndUTC"]   = str(datetime.utcfromtimestamp(ts_End))
+   print "\nTimestamp period: %d - %d "%(CommonFormat["StartTime"],CommonFormat["EndTime"])
+   print "UTC time period : %s - %s "%(CommonFormat["StartUTC"],CommonFormat["EndUTC"])
+
+   ## Unique AS list calculation (Alex ixp tools codespring) 
+   ASV4 = set()
+   ASV6 = set()
+   for p in PROBES:
+      if p['asn_v4'] is not None:
+         ASV4.add(p['asn_v4'])
+      if p['asn_v6'] is not None:
+         ASV6.add(p['asn_v6'])
+   CommonFormat["ASV4"] = list(ASV4)
+   CommonFormat["ASV6"] = list(ASV6)
+
+   ## Printing to file
+   with open(COMMONPATH+'/MsmDescr.json','w') as outfile:
+      json.dump( CommonFormat, outfile, indent=2 )
+   print "CommonInfo at: '%s'" % (COMMONPATH+'MsmDescr.json')
 
 ### perasn
 def init_perasn( basedata, probes ):
