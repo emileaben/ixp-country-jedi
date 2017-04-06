@@ -107,7 +107,10 @@ def do_perasn_entry( asns_d , proto, data ):
         return
     for asn in terminal_asns:
         other_asn = filter(lambda x: x != asn, terminal_asns)[0]
-        asns_d['asns'].setdefault( asn, {'facets': {'out_of_country': {'asns': {}, 'path_count': 0} } } )
+        asns_d['asns'].setdefault( asn, {'facets': {
+            'out_of_country': {'asns': {}, 'path_count': 0},
+            'intermediates':  {'asns': {}, 'path_count': 0}
+        } } )
         ## process the facet: 'out_of_country'
         if data['in_country'] == False:
             asns_d['asns'][ asn ]['facets']['out_of_country']['asns'].setdefault( other_asn, [] )
@@ -117,7 +120,25 @@ def do_perasn_entry( asns_d , proto, data ):
                 }
             )
             asns_d['asns'][ asn ]['facets']['out_of_country']['path_count'] += 1
-        ## process next facet
+        ## process next facet. did we detect extra ASNs between src and dst
+        src_dst_with_intermediates = set() #need this because of duplicates
+        for intermediate in data['as_links']['nodes']:
+            if intermediate in terminal_asns:
+                continue
+            if intermediate.startswith('_'): # it's an IXP
+                continue
+            src_dst_with_intermediates.add( ( data['src_prb_id'], data['dst_prb_id'] ) )
+        for sdwi in src_dst_with_intermediates:
+            asns_d['asns'][ asn ]['facets']['intermediates']['asns'].setdefault( other_asn, [] )
+            asns_d['asns'][ asn ]['facets']['intermediates']['asns'][ other_asn ].append(
+                {'src_prb_id': sdwi[0],
+                 'dst_prb_id': sdwi[1]
+                }
+            )
+            asns_d['asns'][ asn ]['facets']['intermediates']['path_count'] += 1
+        ## process next facet, symmetry?
+        ## hmmm. would need a lot of caching and put it in printresult?
+
 
 def do_perasn_printresult( asns_d ):
    DATAPATH='./analysis/perasn/'
@@ -604,7 +625,7 @@ def main():
       'viaanchor': False, ## buggy
       'perasn': True
    }
-   #defs={'perasn': True}
+   defs={'perasn': True}
 
    if len( sys.argv ) > 1:
       # take defs from stdin arguments
