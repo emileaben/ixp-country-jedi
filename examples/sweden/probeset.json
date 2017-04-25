@@ -1,0 +1,2360 @@
+[
+  {
+    "dists": {
+      "Stockholm,SE": 2.841801399550124, 
+      "Kiruna,SE": 994.9899105441448, 
+      "Gothenburg,SE": 394.11755488599937
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "datacentre", 
+      "no-nat", 
+      "native-ipv6", 
+      "system-anchor", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-doesnt-work", 
+      "aivivid", 
+      "sweden", 
+      "swedish-anchor", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3305, 
+    "asn_v4": 59521, 
+    "asn_v6": 59521, 
+    "lon": 18.0185, 
+    "address_v6": "2a01:5540::2", 
+    "probe_id": 6037, 
+    "address_v4": "5.134.196.14"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 12.132405141961065, 
+      "Kiruna,SE": 982.7680203551673, 
+      "Gothenburg,SE": 401.74866364622534
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.4385, 
+    "asn_v4": 21250, 
+    "asn_v6": null, 
+    "lon": 18.0675, 
+    "address_v6": null, 
+    "probe_id": 14012, 
+    "address_v4": "178.174.228.58"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 1.875682320274282, 
+      "Kiruna,SE": 993.3557665226002, 
+      "Gothenburg,SE": 398.38897338332936
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3415, 
+    "asn_v4": 21250, 
+    "asn_v6": null, 
+    "lon": 18.0915, 
+    "address_v6": null, 
+    "probe_id": 13988, 
+    "address_v4": "178.174.161.57"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 59.11995595195146, 
+      "Kiruna,SE": 996.4740262278366, 
+      "Gothenburg,SE": 346.8395668100006
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3795, 
+    "asn_v4": 21250, 
+    "asn_v6": null, 
+    "lon": 17.0295, 
+    "address_v6": null, 
+    "probe_id": 28454, 
+    "address_v4": "213.164.199.44"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.584082946507012, 
+      "Kiruna,SE": 993.2406653357101, 
+      "Gothenburg,SE": 392.84810745889934
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "datacentre", 
+      "ixp", 
+      "core", 
+      "native-ipv6", 
+      "multihomed", 
+      "system-anchor", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3485, 
+    "asn_v4": 49515, 
+    "asn_v6": 49515, 
+    "lon": 17.9775, 
+    "address_v6": "2a02:ca80:1:46::2:2", 
+    "probe_id": 6102, 
+    "address_v4": "188.95.32.34"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 49.36745732060417, 
+      "Kiruna,SE": 968.2357531381338, 
+      "Gothenburg,SE": 377.55306743350235
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "office", 
+      "nat", 
+      "system-v3", 
+      "system-resolver-mangles-case", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.6105, 
+    "asn_v4": 13189, 
+    "asn_v6": null, 
+    "lon": 17.3915, 
+    "address_v6": null, 
+    "probe_id": 16087, 
+    "address_v4": "83.172.76.171"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 517.247782028195, 
+      "Kiruna,SE": 1456.4304161449968, 
+      "Gothenburg,SE": 243.47676517134136
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 55.5815, 
+    "asn_v4": 39302, 
+    "asn_v6": null, 
+    "lon": 12.9285, 
+    "address_v6": null, 
+    "probe_id": 28638, 
+    "address_v4": "212.112.2.30"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 409.9826700848001, 
+      "Kiruna,SE": 1278.627481091368, 
+      "Gothenburg,SE": 42.55362066596927
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 57.3375, 
+    "asn_v4": 12552, 
+    "asn_v6": null, 
+    "lon": 12.1485, 
+    "address_v6": null, 
+    "probe_id": 12830, 
+    "address_v4": "193.183.145.190"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 514.8568154704063, 
+      "Kiruna,SE": 1457.858760580666, 
+      "Gothenburg,SE": 249.30829970053574
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "satellite", 
+      "datacentre", 
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.5495, 
+    "asn_v4": 42732, 
+    "asn_v6": null, 
+    "lon": 13.0815, 
+    "address_v6": null, 
+    "probe_id": 19385, 
+    "address_v4": "80.78.16.51"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 13.165736388036137, 
+      "Kiruna,SE": 989.2533287172939, 
+      "Gothenburg,SE": 389.3479942550651
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3905, 
+    "asn_v4": 44034, 
+    "asn_v6": 44034, 
+    "lon": 17.8695, 
+    "address_v6": "2a02:aa0:0:1:220:4aff:fee0:25d8", 
+    "probe_id": 2957, 
+    "address_v4": "80.251.201.187"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 382.0701158595327, 
+      "Kiruna,SE": 1363.250259454669, 
+      "Gothenburg,SE": 278.316825644423
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "datacentre", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "multihomed", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "native-ipv4", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 56.1575, 
+    "asn_v4": 42695, 
+    "asn_v6": 42695, 
+    "lon": 15.5795, 
+    "address_v6": "2a00:16d8:0:39:c66e:1fff:fe3a:e1f6", 
+    "probe_id": 27350, 
+    "address_v4": "91.123.207.46"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.603043116708153, 
+      "Kiruna,SE": 990.6092599018824, 
+      "Gothenburg,SE": 395.62944144069945
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "datacentre", 
+      "core", 
+      "no-nat", 
+      "native-ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3705, 
+    "asn_v4": 33837, 
+    "asn_v6": 33837, 
+    "lon": 18.0115, 
+    "address_v6": "2a00:16b0:1:2:c24a:ff:fe09:4fe6", 
+    "probe_id": 19287, 
+    "address_v4": "88.80.0.100"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 244.12530363967835, 
+      "Kiruna,SE": 786.677614613311, 
+      "Gothenburg,SE": 474.6261864712258
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "datacentre", 
+      "core", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "native-ipv4", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "noc"
+    ], 
+    "lat": 61.3575, 
+    "asn_v4": 20625, 
+    "asn_v6": 20625, 
+    "lon": 16.3615, 
+    "address_v6": "2a02:ae8:102:133::2", 
+    "probe_id": 24891, 
+    "address_v4": "62.108.192.118"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 240.49427858771065, 
+      "Kiruna,SE": 789.6235415983666, 
+      "Gothenburg,SE": 472.6389042752774
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 61.3275, 
+    "asn_v4": 20625, 
+    "asn_v6": null, 
+    "lon": 16.3885, 
+    "address_v6": null, 
+    "probe_id": 19621, 
+    "address_v4": "91.145.9.11"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 160.43217003680434, 
+      "Kiruna,SE": 862.4285239478427, 
+      "Gothenburg,SE": 423.72226407376115
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 60.6215, 
+    "asn_v4": 20626, 
+    "asn_v6": null, 
+    "lon": 16.7815, 
+    "address_v6": null, 
+    "probe_id": 14699, 
+    "address_v4": "83.216.107.27"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 347.08154508583993, 
+      "Kiruna,SE": 1225.1950315834115, 
+      "Gothenburg,SE": 57.229627157869515
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 57.7205, 
+    "asn_v4": 43096, 
+    "asn_v6": null, 
+    "lon": 12.9385, 
+    "address_v6": null, 
+    "probe_id": 24437, 
+    "address_v4": "185.61.236.2"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 496.3188344919672, 
+      "Kiruna,SE": 1439.1336268251296, 
+      "Gothenburg,SE": 234.3474657766715
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 55.7085, 
+    "asn_v4": 8473, 
+    "asn_v6": null, 
+    "lon": 13.1915, 
+    "address_v6": null, 
+    "probe_id": 2183, 
+    "address_v4": "212.85.88.53"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 94.59948944735386, 
+      "Kiruna,SE": 903.2209964726702, 
+      "Gothenburg,SE": 467.2097863825287
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 60.1305, 
+    "asn_v4": 8473, 
+    "asn_v6": null, 
+    "lon": 18.6395, 
+    "address_v6": null, 
+    "probe_id": 22557, 
+    "address_v4": "37.123.154.176"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 385.5475168591838, 
+      "Kiruna,SE": 1238.9903819678582, 
+      "Gothenburg,SE": 13.387545140207257
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 57.7005, 
+    "asn_v4": 8473, 
+    "asn_v6": null, 
+    "lon": 12.1995, 
+    "address_v6": null, 
+    "probe_id": 846, 
+    "address_v4": "37.123.154.144"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 160.29601271684083, 
+      "Kiruna,SE": 851.9547547026641, 
+      "Gothenburg,SE": 441.35352757467916
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 60.6895, 
+    "asn_v4": 8473, 
+    "asn_v6": null, 
+    "lon": 17.1075, 
+    "address_v6": null, 
+    "probe_id": 15614, 
+    "address_v4": "155.4.218.59"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 0.055674196427553516, 
+      "Kiruna,SE": 994.8072554940122, 
+      "Gothenburg,SE": 396.70258348055586
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3295, 
+    "asn_v4": 8473, 
+    "asn_v6": null, 
+    "lon": 18.0695, 
+    "address_v6": null, 
+    "probe_id": 2455, 
+    "address_v4": "155.4.59.85"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 333.6451417008234, 
+      "Kiruna,SE": 1266.8272741636079, 
+      "Gothenburg,SE": 137.2138071952358
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 57.1915, 
+    "asn_v4": 31642, 
+    "asn_v6": null, 
+    "lon": 14.0585, 
+    "address_v6": null, 
+    "probe_id": 28329, 
+    "address_v4": "92.244.223.181"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 332.9309971590875, 
+      "Kiruna,SE": 1292.169236928748, 
+      "Gothenburg,SE": 193.55237032716258
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 56.8775, 
+    "asn_v4": 35100, 
+    "asn_v6": 35100, 
+    "lon": 14.8075, 
+    "address_v6": "2a01:7900:40:20:220:4aff:fee0:21d7", 
+    "probe_id": 2010, 
+    "address_v4": "31.44.238.67"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 332.61130769800906, 
+      "Kiruna,SE": 1291.9064982935458, 
+      "Gothenburg,SE": 193.65350795948868
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 56.8795, 
+    "asn_v4": 35100, 
+    "asn_v6": null, 
+    "lon": 14.8115, 
+    "address_v6": null, 
+    "probe_id": 694, 
+    "address_v4": "193.27.192.2"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 8.1599678173128, 
+      "Kiruna,SE": 1002.605100650203, 
+      "Gothenburg,SE": 394.98330531798393
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.2575, 
+    "asn_v4": 158, 
+    "asn_v6": 158, 
+    "lon": 18.0985, 
+    "address_v6": "2001:1b70:a1:612::212", 
+    "probe_id": 20721, 
+    "address_v4": "192.176.1.212"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 420.1441531898101, 
+      "Kiruna,SE": 1302.3196307254739, 
+      "Gothenburg,SE": 70.07267666234581
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "office", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 57.0985, 
+    "asn_v4": 48803, 
+    "asn_v6": null, 
+    "lon": 12.2685, 
+    "address_v6": null, 
+    "probe_id": 28423, 
+    "address_v4": "217.73.102.97"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 224.54459456020007, 
+      "Kiruna,SE": 1036.3075132992776, 
+      "Gothenburg,SE": 217.4175522303083
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3175, 
+    "asn_v4": 44581, 
+    "asn_v6": null, 
+    "lon": 14.1075, 
+    "address_v6": null, 
+    "probe_id": 410, 
+    "address_v4": "83.209.91.204"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 198.78926068343296, 
+      "Kiruna,SE": 875.894772385659, 
+      "Gothenburg,SE": 383.36019108734104
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 60.6195, 
+    "asn_v4": 44581, 
+    "asn_v6": null, 
+    "lon": 15.5915, 
+    "address_v6": null, 
+    "probe_id": 15884, 
+    "address_v4": "83.209.43.189"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 16.37709821952768, 
+      "Kiruna,SE": 1000.6877130438215, 
+      "Gothenburg,SE": 380.50964358564534
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.2915, 
+    "asn_v4": 44581, 
+    "asn_v6": null, 
+    "lon": 17.7895, 
+    "address_v6": null, 
+    "probe_id": 22158, 
+    "address_v4": "87.241.125.12"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 495.4496287779333, 
+      "Kiruna,SE": 1438.5842820345965, 
+      "Gothenburg,SE": 234.360997286155
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 55.7115, 
+    "asn_v4": 15782, 
+    "asn_v6": 15782, 
+    "lon": 13.2085, 
+    "address_v6": "2001:7a0:1:4:220:4aff:febf:fbef", 
+    "probe_id": 539, 
+    "address_v4": "81.186.241.8"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 1.4917474680097067, 
+      "Kiruna,SE": 993.5490072645528, 
+      "Gothenburg,SE": 396.63605000542236
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "academic", 
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3415, 
+    "asn_v4": 2603, 
+    "asn_v6": null, 
+    "lon": 18.0575, 
+    "address_v6": null, 
+    "probe_id": 17609, 
+    "address_v4": "109.105.104.168"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.388682864214177, 
+      "Kiruna,SE": 999.7316812905815, 
+      "Gothenburg,SE": 392.2566802900572
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.2875, 
+    "asn_v4": 43948, 
+    "asn_v6": 43948, 
+    "lon": 18.0205, 
+    "address_v6": "2a02:750:7:666:eade:27ff:fe69:de28", 
+    "probe_id": 23160, 
+    "address_v4": "195.20.206.78"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 2.354037839790066, 
+      "Kiruna,SE": 992.4968440781582, 
+      "Gothenburg,SE": 397.56790672488535
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "cable", 
+      "core", 
+      "nat", 
+      "hackerspace", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "known-ipv6-issues", 
+      "makerspace", 
+      "non-profit", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3505, 
+    "asn_v4": 50989, 
+    "asn_v6": null, 
+    "lon": 18.0675, 
+    "address_v6": null, 
+    "probe_id": 20106, 
+    "address_v4": "178.16.218.12"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.1427980185630995, 
+      "Kiruna,SE": 991.7730891916926, 
+      "Gothenburg,SE": 394.64451303345265
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "core", 
+      "no-nat", 
+      "multihomed", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3605, 
+    "asn_v4": 50989, 
+    "asn_v6": null, 
+    "lon": 18.0015, 
+    "address_v6": null, 
+    "probe_id": 1486, 
+    "address_v4": "178.16.216.2"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 2.1765501359340957, 
+      "Kiruna,SE": 993.6581661784386, 
+      "Gothenburg,SE": 395.65735642100896
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "office", 
+      "no-nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "native-ipv4", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3415, 
+    "asn_v4": 12381, 
+    "asn_v6": null, 
+    "lon": 18.0385, 
+    "address_v6": null, 
+    "probe_id": 428, 
+    "address_v4": "194.71.25.134"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 157.5803053455462, 
+      "Kiruna,SE": 853.8465917508184, 
+      "Gothenburg,SE": 441.0317700790633
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "no-nat", 
+      "native-ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 60.6695, 
+    "asn_v4": 16117, 
+    "asn_v6": 16117, 
+    "lon": 17.1415, 
+    "address_v6": "2001:b48:10:ffff:6666:b3ff:feb0:e122", 
+    "probe_id": 14295, 
+    "address_v4": "213.141.76.246"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 346.78264269866185, 
+      "Kiruna,SE": 1164.4435619220817, 
+      "Gothenburg,SE": 77.41923243226937
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 58.3815, 
+    "asn_v4": 12597, 
+    "asn_v6": null, 
+    "lon": 12.3175, 
+    "address_v6": null, 
+    "probe_id": 2619, 
+    "address_v4": "212.3.6.183"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 214.51367000909713, 
+      "Kiruna,SE": 1145.1822249209351, 
+      "Gothenburg,SE": 189.3073747295684
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 58.1995, 
+    "asn_v4": 28854, 
+    "asn_v6": null, 
+    "lon": 15.0495, 
+    "address_v6": null, 
+    "probe_id": 20755, 
+    "address_v4": "88.206.129.6"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 291.7679363201236, 
+      "Kiruna,SE": 1236.6453033553987, 
+      "Gothenburg,SE": 164.32704503212594
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 57.4005, 
+    "asn_v4": 28854, 
+    "asn_v6": null, 
+    "lon": 14.6705, 
+    "address_v6": null, 
+    "probe_id": 4566, 
+    "address_v4": "88.206.245.4"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 480.63782418818323, 
+      "Kiruna,SE": 1438.1276012173885, 
+      "Gothenburg,SE": 257.05010722301375
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "native-ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 55.6405, 
+    "asn_v4": 33980, 
+    "asn_v6": 34244, 
+    "lon": 13.8605, 
+    "address_v6": "2a02:80:3ffc:0:a2f3:c1ff:fec4:5bf0", 
+    "probe_id": 10777, 
+    "address_v4": "192.165.72.126"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 480.7031803250329, 
+      "Kiruna,SE": 1438.2246992790924, 
+      "Gothenburg,SE": 257.17745540561964
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "no-nat", 
+      "native-ipv6", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 55.6395, 
+    "asn_v4": 33980, 
+    "asn_v6": 34244, 
+    "lon": 13.8615, 
+    "address_v6": "2a02:80:3ffc:0:220:4aff:fec8:20a6", 
+    "probe_id": 395, 
+    "address_v4": "192.165.72.19"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 430.6485492589276, 
+      "Kiruna,SE": 1388.730516123199, 
+      "Gothenburg,SE": 226.6550145213234
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 56.0595, 
+    "asn_v4": 34622, 
+    "asn_v6": null, 
+    "lon": 14.1715, 
+    "address_v6": null, 
+    "probe_id": 20795, 
+    "address_v4": "85.197.139.197"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 438.32566552458314, 
+      "Kiruna,SE": 1400.2509221165674, 
+      "Gothenburg,SE": 241.60486424307203
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "dsl", 
+      "home", 
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.9415, 
+    "asn_v4": 34622, 
+    "asn_v6": null, 
+    "lon": 14.2895, 
+    "address_v6": null, 
+    "probe_id": 18559, 
+    "address_v4": "85.197.138.34"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 379.77635539417366, 
+      "Kiruna,SE": 1360.9603193561848, 
+      "Gothenburg,SE": 277.3786398832358
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 56.1775, 
+    "asn_v4": 1653, 
+    "asn_v6": null, 
+    "lon": 15.5895, 
+    "address_v6": null, 
+    "probe_id": 14650, 
+    "address_v4": "194.47.151.71"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 0.40185466556941785, 
+      "Kiruna,SE": 994.8528471915131, 
+      "Gothenburg,SE": 396.28953685381447
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3295, 
+    "asn_v4": 1653, 
+    "asn_v6": null, 
+    "lon": 18.0615, 
+    "address_v6": null, 
+    "probe_id": 11684, 
+    "address_v4": "193.10.0.11"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 3.2669706669116034, 
+      "Kiruna,SE": 991.646653219569, 
+      "Gothenburg,SE": 397.63140315053926
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "office", 
+      "no-nat", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3585, 
+    "asn_v4": 1653, 
+    "asn_v6": 1653, 
+    "lon": 18.0615, 
+    "address_v6": "2001:6b0:5:1095:c66e:1fff:fe3a:da74", 
+    "probe_id": 24893, 
+    "address_v4": "130.237.95.229"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 486.546936927852, 
+      "Kiruna,SE": 1441.0473323557687, 
+      "Gothenburg,SE": 253.7443671469368
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 55.6315, 
+    "asn_v4": 34244, 
+    "asn_v6": 34244, 
+    "lon": 13.7005, 
+    "address_v6": "2a02:80:3fff:0:220:4aff:fec8:2710", 
+    "probe_id": 169, 
+    "address_v4": "85.30.131.37"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 7.595213583733466, 
+      "Kiruna,SE": 1001.994703229511, 
+      "Gothenburg,SE": 390.8916223344702
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.2675, 
+    "asn_v4": 197430, 
+    "asn_v6": 197430, 
+    "lon": 18.0115, 
+    "address_v6": "2a02:2a48:0:110:eade:27ff:fec9:6ff6", 
+    "probe_id": 24990, 
+    "address_v4": "46.22.121.130"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 3.28512140448036, 
+      "Kiruna,SE": 997.4687305935781, 
+      "Gothenburg,SE": 393.62968647664826
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "iwantbcp38compliancetesting", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3075, 
+    "asn_v4": 2119, 
+    "asn_v6": null, 
+    "lon": 18.0295, 
+    "address_v6": null, 
+    "probe_id": 40, 
+    "address_v4": "83.226.3.254"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 394.4001344930898, 
+      "Kiruna,SE": 1241.136927919425, 
+      "Gothenburg,SE": 2.6088540089749195
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "cable", 
+      "home", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918", 
+      "ups"
+    ], 
+    "lat": 57.7085, 
+    "asn_v4": 2119, 
+    "asn_v6": null, 
+    "lon": 12.0185, 
+    "address_v6": null, 
+    "probe_id": 23223, 
+    "address_v4": "62.65.126.46"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 13.144368830356212, 
+      "Kiruna,SE": 1006.6368439095058, 
+      "Gothenburg,SE": 395.97698708920865
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "core", 
+      "nat", 
+      "ipv6-tunnel", 
+      "ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.2185, 
+    "asn_v4": 2119, 
+    "asn_v6": null, 
+    "lon": 18.1495, 
+    "address_v6": null, 
+    "probe_id": 20743, 
+    "address_v4": "213.112.59.107"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 484.2922286765053, 
+      "Kiruna,SE": 1408.8487719523173, 
+      "Gothenburg,SE": 189.1914002050351
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 56.0515, 
+    "asn_v4": 2119, 
+    "asn_v6": null, 
+    "lon": 12.6875, 
+    "address_v6": null, 
+    "probe_id": 3918, 
+    "address_v4": "84.216.70.171"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 91.05944614371698, 
+      "Kiruna,SE": 974.112485977585, 
+      "Gothenburg,SE": 339.52417458526054
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "datacentre", 
+      "nat", 
+      "native-ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.6205, 
+    "asn_v4": 2119, 
+    "asn_v6": 2119, 
+    "lon": 16.5605, 
+    "address_v6": "2a02:7720:172:2026:c24a:ff:fe09:4994", 
+    "probe_id": 20767, 
+    "address_v4": "213.204.179.66"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 433.2491112551617, 
+      "Kiruna,SE": 1395.6508377428866, 
+      "Gothenburg,SE": 240.0039908088664
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 55.9785, 
+    "asn_v4": 44746, 
+    "asn_v6": 44746, 
+    "lon": 14.3385, 
+    "address_v6": "2a05:b880:0:3:eade:27ff:fe69:c74a", 
+    "probe_id": 21733, 
+    "address_v4": "91.202.156.69"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 262.23947900063274, 
+      "Kiruna,SE": 748.3844960856146, 
+      "Gothenburg,SE": 521.9324210772542
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 61.6385, 
+    "asn_v4": 51132, 
+    "asn_v6": null, 
+    "lon": 17.0805, 
+    "address_v6": null, 
+    "probe_id": 19472, 
+    "address_v4": "83.68.236.17"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 2.3004110220938974, 
+      "Kiruna,SE": 992.6531073023207, 
+      "Gothenburg,SE": 397.1097080164533
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3495, 
+    "asn_v4": 29518, 
+    "asn_v6": 29518, 
+    "lon": 18.0595, 
+    "address_v6": "2a00:1598:a:8:6666:b3ff:feb0:cda0", 
+    "probe_id": 14154, 
+    "address_v4": "83.219.200.10"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 385.1356343436102, 
+      "Kiruna,SE": 1239.6565621678283, 
+      "Gothenburg,SE": 14.554253073439993
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 57.6915, 
+    "asn_v4": 29518, 
+    "asn_v6": null, 
+    "lon": 12.2175, 
+    "address_v6": null, 
+    "probe_id": 23618, 
+    "address_v4": "31.208.230.59"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 95.07626631830303, 
+      "Kiruna,SE": 975.8731382687937, 
+      "Gothenburg,SE": 335.23940345313144
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.6115, 
+    "asn_v4": 29518, 
+    "asn_v6": null, 
+    "lon": 16.4785, 
+    "address_v6": null, 
+    "probe_id": 28238, 
+    "address_v4": "83.233.114.196"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 517.4172468813149, 
+      "Kiruna,SE": 1456.7154705741025, 
+      "Gothenburg,SE": 243.84485336721679
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.5785, 
+    "asn_v4": 29518, 
+    "asn_v6": null, 
+    "lon": 12.9315, 
+    "address_v6": null, 
+    "probe_id": 20383, 
+    "address_v4": "82.209.164.195"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 61.022241387648464, 
+      "Kiruna,SE": 939.8486798596117, 
+      "Gothenburg,SE": 406.72419554275683
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.8475, 
+    "asn_v4": 49232, 
+    "asn_v6": 8473, 
+    "lon": 17.7095, 
+    "address_v6": "2001:9b0:101:7:280:a3ff:fe91:440d", 
+    "probe_id": 4751, 
+    "address_v4": "193.169.164.126"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 394.2335608506183, 
+      "Kiruna,SE": 1239.3066414514235, 
+      "Gothenburg,SE": 2.669938465159139
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-anchor", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 57.7285, 
+    "asn_v4": 50168, 
+    "asn_v6": 50168, 
+    "lon": 12.0005, 
+    "address_v6": "2a02:4b07:0:8000::2", 
+    "probe_id": 6063, 
+    "address_v4": "185.47.192.253"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 251.88070493801303, 
+      "Kiruna,SE": 1105.5634378244968, 
+      "Gothenburg,SE": 155.57425172561136
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 58.7105, 
+    "asn_v4": 42318, 
+    "asn_v6": null, 
+    "lon": 13.8315, 
+    "address_v6": null, 
+    "probe_id": 13996, 
+    "address_v4": "80.254.244.36"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 1.6561228586501693, 
+      "Kiruna,SE": 996.1433549879948, 
+      "Gothenburg,SE": 395.1141844852282
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3185, 
+    "asn_v4": 1880, 
+    "asn_v6": 1880, 
+    "lon": 18.0485, 
+    "address_v6": "2001:440:1880:1012:a2f3:c1ff:fec4:40e0", 
+    "probe_id": 12932, 
+    "address_v4": "192.108.214.56"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 15.809318784814439, 
+      "Kiruna,SE": 989.4676197721367, 
+      "Gothenburg,SE": 386.75842110765706
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3915, 
+    "asn_v4": 3292, 
+    "asn_v6": null, 
+    "lon": 17.8175, 
+    "address_v6": null, 
+    "probe_id": 16108, 
+    "address_v4": "195.84.96.243"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 391.75050460587397, 
+      "Kiruna,SE": 1146.7605196600873, 
+      "Gothenburg,SE": 118.56520435820181
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "datacentre", 
+      "academic", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "native-ipv4", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 58.7185, 
+    "asn_v4": 3292, 
+    "asn_v6": 3292, 
+    "lon": 11.3195, 
+    "address_v6": "2001:67c:13f4:0:ee08:6bff:fe73:303a", 
+    "probe_id": 29642, 
+    "address_v4": "194.68.124.6"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 167.12778105726204, 
+      "Kiruna,SE": 876.3185228516162, 
+      "Gothenburg,SE": 399.24588784764717
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 60.5405, 
+    "asn_v4": 3292, 
+    "asn_v6": null, 
+    "lon": 16.2885, 
+    "address_v6": null, 
+    "probe_id": 23236, 
+    "address_v4": "87.255.165.31"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 2.08895499336084, 
+      "Kiruna,SE": 993.6466362263691, 
+      "Gothenburg,SE": 395.76034684340664
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3415, 
+    "asn_v4": 33885, 
+    "asn_v6": 33885, 
+    "lon": 18.0405, 
+    "address_v6": "2a01:3b8:1477:fe00:280:a3ff:fe91:40ba", 
+    "probe_id": 3968, 
+    "address_v4": "212.107.149.50"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 4.046008419755308, 
+      "Kiruna,SE": 997.264670686601, 
+      "Gothenburg,SE": 392.62928237996647
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3105, 
+    "asn_v4": 33885, 
+    "asn_v6": null, 
+    "lon": 18.0075, 
+    "address_v6": null, 
+    "probe_id": 28417, 
+    "address_v4": "178.78.213.33"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 513.5451026011607, 
+      "Kiruna,SE": 1454.282507371641, 
+      "Gothenburg,SE": 243.60037865041974
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-doesnt-work", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv6-ula", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.5915, 
+    "asn_v4": 33885, 
+    "asn_v6": null, 
+    "lon": 13.0075, 
+    "address_v6": "fdd2:a466:17d6:0:6666:b3ff:fec4:fe1e", 
+    "probe_id": 17918, 
+    "address_v4": "109.104.12.87"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 10.939597513974281, 
+      "Kiruna,SE": 1005.0434547956893, 
+      "Gothenburg,SE": 388.174516119285
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.2415, 
+    "asn_v4": 44641, 
+    "asn_v6": null, 
+    "lon": 17.9815, 
+    "address_v6": null, 
+    "probe_id": 22189, 
+    "address_v4": "193.183.253.9"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 512.7158123165053, 
+      "Kiruna,SE": 1453.3053848706647, 
+      "Gothenburg,SE": 242.6326015727992
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "cable", 
+      "home", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.6005, 
+    "asn_v4": 39651, 
+    "asn_v6": null, 
+    "lon": 13.0075, 
+    "address_v6": null, 
+    "probe_id": 24817, 
+    "address_v4": "83.249.19.137"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.547603946138725, 
+      "Kiruna,SE": 996.6382733672906, 
+      "Gothenburg,SE": 400.31008017331146
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.3085, 
+    "asn_v4": 39651, 
+    "asn_v6": null, 
+    "lon": 18.1575, 
+    "address_v6": null, 
+    "probe_id": 28402, 
+    "address_v4": "80.216.98.141"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 2.2882417416160905, 
+      "Kiruna,SE": 996.9618696782645, 
+      "Gothenburg,SE": 396.3089424623179
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3095, 
+    "asn_v4": 39651, 
+    "asn_v6": null, 
+    "lon": 18.0795, 
+    "address_v6": null, 
+    "probe_id": 22155, 
+    "address_v4": "80.216.240.148"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 6.349616442925916, 
+      "Kiruna,SE": 989.7250115014077, 
+      "Gothenburg,SE": 396.0088860188032
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "home", 
+      "nat", 
+      "ipv6-tunnel", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3785, 
+    "asn_v4": 39651, 
+    "asn_v6": null, 
+    "lon": 18.0115, 
+    "address_v6": "2002:97b1:2851:0:220:4aff:fee0:233d", 
+    "probe_id": 2583, 
+    "address_v4": "151.177.40.81"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 396.5645968948385, 
+      "Kiruna,SE": 1247.0621266201554, 
+      "Gothenburg,SE": 7.673059867926472
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "nat", 
+      "ipv4", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 57.6495, 
+    "asn_v4": 3301, 
+    "asn_v6": null, 
+    "lon": 12.0405, 
+    "address_v6": null, 
+    "probe_id": 23264, 
+    "address_v4": "90.230.94.107"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 725.3130808415002, 
+      "Kiruna,SE": 302.34835514421127, 
+      "Gothenburg,SE": 1023.8432095160722
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 65.5795, 
+    "asn_v4": 3301, 
+    "asn_v6": null, 
+    "lon": 22.1605, 
+    "address_v6": null, 
+    "probe_id": 22174, 
+    "address_v4": "90.224.208.15"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 4.161546621805949, 
+      "Kiruna,SE": 994.0012475715948, 
+      "Gothenburg,SE": 393.55236915591394
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3405, 
+    "asn_v4": 3301, 
+    "asn_v6": 1299, 
+    "lon": 17.9985, 
+    "address_v6": "2001:2002:4e48:add4:6666:b3ff:feb0:ec4a", 
+    "probe_id": 14926, 
+    "address_v4": "78.72.173.212"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 489.71719390132273, 
+      "Kiruna,SE": 1435.7584052685443, 
+      "Gothenburg,SE": 236.34298355709706
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 55.7205, 
+    "asn_v4": 3301, 
+    "asn_v6": null, 
+    "lon": 13.3505, 
+    "address_v6": null, 
+    "probe_id": 2677, 
+    "address_v4": "213.67.156.31"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 512.7540659482347, 
+      "Kiruna,SE": 489.03059903508483, 
+      "Gothenburg,SE": 814.4433724692161
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 63.8195, 
+    "asn_v4": 2833, 
+    "asn_v6": null, 
+    "lon": 20.3075, 
+    "address_v6": null, 
+    "probe_id": 22505, 
+    "address_v4": "130.239.206.150"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 0.20268840300574603, 
+      "Kiruna,SE": 995.0340734744251, 
+      "Gothenburg,SE": 396.5593065270369
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3275, 
+    "asn_v4": 29672, 
+    "asn_v6": 29672, 
+    "lon": 18.0685, 
+    "address_v6": "2a03:c780:0:101:220:4aff:fee0:20dc", 
+    "probe_id": 2331, 
+    "address_v4": "217.21.224.173"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 229.01317830706935, 
+      "Kiruna,SE": 884.7458939307533, 
+      "Gothenburg,SE": 363.72831260442996
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 60.6275, 
+    "asn_v4": 1257, 
+    "asn_v6": 6939, 
+    "lon": 14.8685, 
+    "address_v6": "2001:470:df6f:0:a62b:b0ff:fee0:1498", 
+    "probe_id": 31931, 
+    "address_v4": "37.196.192.1"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 271.9260616745953, 
+      "Kiruna,SE": 738.0560066905272, 
+      "Gothenburg,SE": 531.1632019144636
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 61.7305, 
+    "asn_v4": 49770, 
+    "asn_v6": null, 
+    "lon": 17.1095, 
+    "address_v6": null, 
+    "probe_id": 2956, 
+    "address_v4": "194.28.121.190"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 271.8382627167615, 
+      "Kiruna,SE": 738.1850042402517, 
+      "Gothenburg,SE": 531.0117913378972
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 61.7295, 
+    "asn_v4": 49770, 
+    "asn_v6": null, 
+    "lon": 17.1075, 
+    "address_v6": null, 
+    "probe_id": 3005, 
+    "address_v4": "95.143.207.190"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 22.112816760130865, 
+      "Kiruna,SE": 976.6312787080575, 
+      "Gothenburg,SE": 416.69380086062466
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "home", 
+      "no-nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable"
+    ], 
+    "lat": 59.4815, 
+    "asn_v4": 51815, 
+    "asn_v6": null, 
+    "lon": 18.3205, 
+    "address_v6": null, 
+    "probe_id": 378, 
+    "address_v4": "213.185.246.182"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.680338695943736, 
+      "Kiruna,SE": 991.0415740183978, 
+      "Gothenburg,SE": 402.2079287111965
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3595, 
+    "asn_v4": 51815, 
+    "asn_v6": null, 
+    "lon": 18.1495, 
+    "address_v6": null, 
+    "probe_id": 11155, 
+    "address_v4": "176.56.245.98"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 14.323859778819742, 
+      "Kiruna,SE": 983.2955627498163, 
+      "Gothenburg,SE": 395.41056315864125
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.4405, 
+    "asn_v4": 28908, 
+    "asn_v6": null, 
+    "lon": 17.9405, 
+    "address_v6": null, 
+    "probe_id": 12376, 
+    "address_v4": "217.72.61.40"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 513.3748046295709, 
+      "Kiruna,SE": 487.8469500701298, 
+      "Gothenburg,SE": 814.0216226127746
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv4-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 63.8305, 
+    "asn_v4": 28908, 
+    "asn_v6": null, 
+    "lon": 20.2605, 
+    "address_v6": null, 
+    "probe_id": 22466, 
+    "address_v4": "80.244.80.201"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 13.101232272590455, 
+      "Kiruna,SE": 985.7430432592255, 
+      "Gothenburg,SE": 393.30901874727107
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "datacentre", 
+      "core", 
+      "no-nat", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "multihomed", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "native-ipv4", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.4195, 
+    "asn_v4": 62094, 
+    "asn_v6": 62094, 
+    "lon": 17.9195, 
+    "address_v6": "2a01:9560:1001:1001::101:ca75", 
+    "probe_id": 24854, 
+    "address_v4": "185.48.80.10"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 256.81415258895873, 
+      "Kiruna,SE": 1045.4810463474203, 
+      "Gothenburg,SE": 199.88188213167587
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "datacentre", 
+      "core", 
+      "no-nat", 
+      "system-v1", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "iwantbcp38compliancetesting", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3115, 
+    "asn_v4": 39029, 
+    "asn_v6": 39029, 
+    "lon": 13.5385, 
+    "address_v6": "2a02:c0:303::1", 
+    "probe_id": 138, 
+    "address_v4": "87.238.56.246"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 5.8997928919500175, 
+      "Kiruna,SE": 993.2761817546054, 
+      "Gothenburg,SE": 392.5401552071532
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 59.3485, 
+    "asn_v4": 15991, 
+    "asn_v6": 15991, 
+    "lon": 17.9715, 
+    "address_v6": "2a03:b100:0:1f:c24a:ff:fecc:993e", 
+    "probe_id": 19493, 
+    "address_v4": "137.61.238.46"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 194.95559873973733, 
+      "Kiruna,SE": 892.8662975457931, 
+      "Gothenburg,SE": 365.69918234467974
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "no-nat", 
+      "system-v2", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable"
+    ], 
+    "lat": 60.4815, 
+    "asn_v4": 49272, 
+    "asn_v6": 49272, 
+    "lon": 15.4295, 
+    "address_v6": "2a00:1300:0:11:220:4aff:fee0:207f", 
+    "probe_id": 2458, 
+    "address_v4": "188.121.94.9"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 1.2935488734295657, 
+      "Kiruna,SE": 993.7701212692913, 
+      "Gothenburg,SE": 396.5436266654109
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "nat", 
+      "native-ipv6", 
+      "ipv4", 
+      "ipv6", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "cgn", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.3395, 
+    "asn_v4": 42303, 
+    "asn_v6": 42303, 
+    "lon": 18.0575, 
+    "address_v6": "2a02:470:0:10:ea94:f6ff:fe48:c780", 
+    "probe_id": 23214, 
+    "address_v4": "46.182.207.16"
+  }, 
+  {
+    "dists": {
+      "Stockholm,SE": 15.357061988691774, 
+      "Kiruna,SE": 987.0518353348697, 
+      "Gothenburg,SE": 389.4196547000423
+    }, 
+    "country_code": "SE", 
+    "tags": [
+      "fibre", 
+      "office", 
+      "nat", 
+      "system-v3", 
+      "system-resolves-a-correctly", 
+      "system-resolves-aaaa-correctly", 
+      "system-ipv4-works", 
+      "system-ipv6-works", 
+      "system-ipv4-capable", 
+      "system-ipv6-capable", 
+      "system-ipv4-rfc1918"
+    ], 
+    "lat": 59.4115, 
+    "asn_v4": 21503, 
+    "asn_v6": 16150, 
+    "lon": 17.8505, 
+    "address_v6": "2001:16d8:beef:507:a2f3:c1ff:fea6:719c", 
+    "probe_id": 10179, 
+    "address_v4": "80.252.173.98"
+  }
+]

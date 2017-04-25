@@ -1,0 +1,95 @@
+{
+  "countries": [
+    "SE"
+  ], 
+  "locations": {
+    "Stockholm,SE": {
+      "lat": 59.32932349999999, 
+      "lon": 18.0685808
+    }, 
+    "Kiruna,SE": {
+      "lat": 68.2196536, 
+      "lon": 20.4820366
+    }, 
+    "Gothenburg,SE": {
+      "lat": 57.70887, 
+      "lon": 11.97456
+    }
+  }, 
+  "measurement-types": [
+    "probe-mesh"
+  ], 
+  "country-stats": {
+    "SE": {
+      "routed_asns": 500
+    }
+  }, 
+  "ixps": {
+    "NETNOD-GBG-B-1500": {
+      "peeringlans": [
+        "194.68.130.0/24"
+      ]
+    }, 
+    "NETNOD-STH-A-4470": {
+      "peeringlans": [
+        "195.245.240.0/24"
+      ]
+    }, 
+    "NETNOD-SVL-B-4470": {
+      "peeringlans": [
+        "194.68.135.0/24"
+      ]
+    }, 
+    "NETNOD-GBG-B-4470": {
+      "peeringlans": [
+        "195.69.116.0/24"
+      ]
+    }, 
+    "NETNOD-LUL-B-4470": {
+      "peeringlans": [
+        "194.68.132.0/24"
+      ]
+    }, 
+    "NETNOD-IPv6": {
+      "peeringlans": [
+        "2001:7f8:d::/48"
+      ]
+    }, 
+    "NETNOD-MMO-B-1500": {
+      "peeringlans": [
+        "195.69.117.0/24"
+      ]
+    }, 
+    "NETNOD-LUL-B-1500": {
+      "peeringlans": [
+        "194.68.131.0/24"
+      ]
+    }, 
+    "NETNOD-MMO-B-4470": {
+      "peeringlans": [
+        "195.69.118.0/24"
+      ]
+    }, 
+    "NETNOD-STH-B-1500": {
+      "peeringlans": [
+        "194.68.128.0/24"
+      ]
+    }, 
+    "NETNOD-STH-B-4470": {
+      "peeringlans": [
+        "195.69.119.0/24"
+      ]
+    }, 
+    "NETNOD-STH-A-1500": {
+      "peeringlans": [
+        "194.68.123.0/24"
+      ]
+    }, 
+    "NETNOD-SVL-B-1500": {
+      "peeringlans": [
+        "194.68.133.0/24"
+      ]
+    }
+  }, 
+  "targets": []
+}
