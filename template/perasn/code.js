@@ -1,18 +1,30 @@
 d3.select("body").append("div").attr("class", "tooltipTraceroutes").style("display", "none");
 var traceroute_details = d3.select("body").append("div").attr("class", "tooltipTraceroutes").style("display", "none");
 
+function sortNumber(a,b) {
+  return a - b;
+}
 
 $(function () {
 
   d3.json("../common/details/MsmDescr.json", function(error,data) {
 
     var load_first_asn = null
-    console.log(data)
+    
+    var asns_list = []
+
     for (i in data["ASV4"]){
-      if(i==0) load_first_asn = data["ASV4"][i]
-      $('#selectASN').append('<option value="'+ data["ASV4"][i] +'">AS ' + data["ASV4"][i] +'</option>');
+      asns_list.push(data["ASV4"][i])
     
     }
+    asns_list = asns_list.sort(sortNumber)
+    console.log(asns_list)
+    for (i in asns_list){
+      if(i==0) load_first_asn = data["ASV4"][i]
+      
+      $('#selectASN').append('<option value="'+ asns_list[i] +'">AS ' + asns_list[i] +'</option>');
+    }
+
     loadASN(load_first_asn);
   });
     
