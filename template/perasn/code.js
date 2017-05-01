@@ -18,7 +18,6 @@ $(function () {
     
     }
     asns_list = asns_list.sort(sortNumber)
-    console.log(asns_list)
     for (i in asns_list){
       if(i==0) load_first_asn = data["ASV4"][i]
       
@@ -38,14 +37,14 @@ function fetchTraceroute(proto, src_id, dst_id, traceroute_detail, pageX, pageY)
     $.ajax({url: json_file, 
       async: true
     }).done(function( data_forward ) {
-      data_fwd = JSON.parse(data_forward);
+      data_fwd = data_forward
       msm_id_forward = data_fwd.msm_id
 
       json_file = "../common/details/{0}/{1}/{2}/latest.json".format( proto, dst_id, src_id );
             $.ajax({url: json_file, 
               async: true
             }).done(function( data_reverse ) {
-              data_rv = JSON.parse(data_reverse);
+              data_rv = data_reverse
               msm_id_reverse = data_rv.msm_id
 
               var txt = '<button style="text-align:center" type="button" onclick="close_details()">Close</button> <pre>{0}</b><b>Reverse path</b></br>{1}</pre>'.format(data_fwd["tracetxt"], data_rv["tracetxt"]);
