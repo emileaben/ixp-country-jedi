@@ -18,7 +18,6 @@ $(function () {
     
     }
     asns_list = asns_list.sort(sortNumber)
-    console.log(asns_list)
     for (i in asns_list){
       if(i==0) load_first_asn = data["ASV4"][i]
       
