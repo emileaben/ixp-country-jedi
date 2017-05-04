@@ -146,7 +146,8 @@ def aslinksplus( data, teh_radix ):
    extra_nets_radix is an optional Radix object (for instance for IXP peering LANs) that specifies non-ASes prefixes that
    should be considered before origin-ASes.
    '''
-   aslinks = {'_nodes': set(), '_links': set() }
+
+   aslinks = {'_nodes': set(), '_links': set(), '_ordered_as_path': list() }
    has_radix = False
    if isinstance(teh_radix, Radix):
       has_radix = True
@@ -159,8 +160,9 @@ def aslinksplus( data, teh_radix ):
          ips = __ipsetforhop( hop )
          this_hop_ases = set()
          for ip in ips:
-            if has_radix and teh_radix.search_best( ip ):
-               node = teh_radix.search_best( ip )
+            ip_res_node = teh_radix.search_best( ip )
+            if has_radix and ip_res_node != None:
+               node = ip_res_node
                nodename = node.data['name']
                ## prepend with '_' to be able to disambiguate from 'AS'
                this_hop_ases.add( '_%s' % (nodename) )
@@ -168,6 +170,7 @@ def aslinksplus( data, teh_radix ):
                info = getipinfo( ip )
                if 'asn' in info and info['asn'] != '':
                   this_hop_ases.add( 'AS%d' % (info['asn']) )
+         
          if len(this_hop_ases) == 1 and len(last_resp_hop_ases) == 1:
             this_asn = list(this_hop_ases)[0]
             last_asn = list(last_resp_hop_ases)[0]
@@ -186,6 +189,12 @@ def aslinksplus( data, teh_radix ):
                aslinks['_nodes'].add( this_asn )
                aslinks['_nodes'].add( last_asn )
                aslinks['_links'].add( link_name )
+            else:
+               aslinks['_nodes'].add( this_asn )
+            
+            if (this_asn not in aslinks['_ordered_as_path']):
+               aslinks['_ordered_as_path'].append( this_asn )
+               
          elif len(this_hop_ases) == 0 or len(last_resp_hop_ases) == 0:
             pass #uninteresting
          else:
@@ -203,8 +212,14 @@ def aslinksplus( data, teh_radix ):
    for link in aslinks['_links']:
       src,dst,typ= link.split('>')
       aslinks['links'].append( {'src': src, 'dst': dst, 'type': typ } )
+
+   aslinks["ordered_as_path"] = list() 
+   for asn in aslinks['_ordered_as_path']:
+      aslinks["ordered_as_path"].append( u"{}".format(asn) )
+
    del(aslinks['_links'])
    del(aslinks['_nodes'])
+   del(aslinks['_ordered_as_path'])
    return aslinks
 
 def trace2txt( data ):
