@@ -1,10 +1,19 @@
 
 # IXP Country Jedi
 
+IXP Country Jedi is a project that shows if the Internet traffic paths stay within the country, and if the paths between two networks within the country go through an Internet eXchange Point (IXP). 
+
+You can get the pre-procesed data here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
+
+You cna read more about the use-cases in these articles:
+* https://labs.ripe.net/Members/emileaben/looking-at-france-ix-with-ripe-atlas-and-ris
+* https://labs.ripe.net/Members/emileaben/improving-ripe-atlas-coverage-what-networks-are-missing
+* https://labs.ripe.net/Members/emileaben/measuring-countries-and-ixps-in-the-see-region
+* https://labs.ripe.net/Members/emileaben/measuring-ixps-with-ripe-atlas 
+
 ## Probe mesh measurements
 
-This codebase contains a couple of scripts to make probe mesh
-measurements feasible/easy.
+This codebase contains a couple of scripts to make probe mesh measurements feasible/easy.
 
 Monthly runs of this code for all countries with enough diversity in RIPE Atlas probes can be found here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
 
