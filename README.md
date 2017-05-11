@@ -6,6 +6,8 @@
 This codebase contains a couple of scripts to make probe mesh
 measurements feasible/easy.
 
+Monthly runs of this code for all countries with enough diversity in RIPE Atlas probes can be found here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
+
 The way the scripts are used/tested is to first create a directory for
 your measurement campaign, and run the scripts as follows:
 
