@@ -406,8 +406,21 @@ def init_asgraph( basedata, probes ):
    return d
 
 def do_asgraph_entry( d, proto, entry ):
-#   print entry['as_links']['nodes']
-#   print entry['as_links']['links']
+   # 'meta'-characters:
+   ## '#': probe
+   ## '_': ixp
+
+   # make sure source probe is a link in the viz too
+   src_prb_meta = '#probe_%s' % entry['src_prb_id']
+   src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
+   if src_prb_asn != None:
+      src_prb_asn = "AS%s" % src_prb_asn
+      d['nodes'][ src_prb_meta ] += 1
+      d['nodes'][ src_prb_asn ] += 0
+      link_key = '>'.join([ src_prb_meta, src_prb_asn, 'prb' ])
+      d['links'][ link_key ] += 1
+
+   # now the AS links
    for n in entry['as_links']['nodes']:
       d['nodes'][ n ] += 1
    for l in entry['as_links']['links']:
@@ -429,11 +442,17 @@ def do_asgraph_printresult( d ):
       if n.startswith('_'):
          typ = 'ixp'
          n = n.lstrip('_');
+      elif n.startswith('#'):
+         typ = 'prb'
+         n = n.lstrip('#');
       result['nodes'].append({'id': idx, 'name': n, 'type': typ, 'count': count })
       idx += 1
    for l in d['links']:
       src,dst,typ = l.split('>',2)
-      result['edges'].append({'source': name2idx[src], 'target': name2idx[dst], 'type': typ})
+      if src in name2idx and dst in name2idx:
+        result['edges'].append({'source': name2idx[src], 'target': name2idx[dst], 'type': typ})
+      else: 
+        print >>sys.stderr, "problem with this src/dst: %s/%s" % ( src, dst )
    with open('%s/asgraph.json' % ( VIZPATH), 'w') as outfile:
       json.dump( result , outfile )
    print "ASGRAPH viz results in '%s'" % ( VIZPATH )

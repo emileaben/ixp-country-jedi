@@ -41,14 +41,17 @@
       var config = {
           dataSource: "asgraph.json",
           nodeCaptionsOnByDefault: true,
-          nodeTypes: {type: ["ixp", "asn"]},
+          nodeTypes: {type: ["ixp", "asn", "prb"]},
           nodeStyle: {
              "ixp": {
-                "color"  : "#EE5511"
+                "color"  : "#7570b3"
              },
              "asn": {
+                "color"  : "#1b9e77"
+             },
+             "prb": {
                 "color"  : "#EEEEFF"
-             }
+             },
           },
           nodeCaption: "name"
       };
