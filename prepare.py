@@ -116,19 +116,26 @@ def find_probes_in_country(cc, eyeball=False, threshold=90):
    return probes
 
 def do_probe_selection_from_tag( tag ):
-   probes = ProbeInfo.query(tags=tag)
+   probes = ProbeInfo.query(tags=tag, status=1)
+   return map( _to_probedata, probes.values() )
+
+def do_probe_selection_from_ids( ids ):
+   probes = ProbeInfo.query(id__in=ids, status=1)
    return map( _to_probedata, probes.values() )
 
 def do_probe_selection( probes, conf, basedata ):
    probes_per_asn={}
    for prb_id in probes:
       prb_info = probes[prb_id]
+      print >>sys.stderr, "%s" % (prb_info)
       status = prb_info['status']
       ## down probes are not useful:
       if status != 1:
          continue
       ## Exclude probes with system tag IPv4 or IPv4 not working
-      if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
+      #if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
+      #   continue
+      if("system-ipv4-stable-1d" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
          continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
       if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
@@ -229,20 +236,30 @@ def do_probe_selection( probes, conf, basedata ):
    return outdata
 
 def _to_probedata( prb_dict ):
-      struct = {
+    struct = {
          'probe_id': prb_dict['id'],
-         'lat': prb_dict['latitude'],
-         'lon': prb_dict['longitude'],
          'asn_v4': prb_dict['asn_v4'],
          'asn_v6': prb_dict['asn_v6'],
-         'tags': prb_dict['tags'],
          'address_v4': prb_dict['address_v4'],
          'address_v6': prb_dict['address_v6'],
-         'country_code': prb_dict['country_code']
-      }
-      if 'dists' in prb_dict:
-         struct['dists'] = prb_dict['dists']
-      return struct
+         'country_code': prb_dict['country_code'],
+         'description': prb_dict['description']
+    }
+    try:
+        if 'latitude' in prb_dict: #v1 api, or a shim pretending to be v1 api:
+            struct['lat'] = prb_dict['latitude']
+            struct['lon'] = prb_dict['longitude']
+            struct['tags'] = prb_dict['tags']
+        else:
+            struct['lat'] = prb_dict['geometry']['coordinates'][1]
+            struct['lon'] = prb_dict['geometry']['coordinates'][0]
+            struct['tags'] = map(lambda x: x['slug'], prb_dict['tags'] )
+        if 'dists' in prb_dict:
+            struct['dists'] = prb_dict['dists']
+    except:
+        print prb_dict
+        raise
+    return struct
 
 def get_memberlist( murl ):
    try:
@@ -456,6 +473,8 @@ if __name__ == '__main__':
    ####
    # country / or other probe selection
    ####
+   ####### would be nice if we could do both country+probetag
+   has_sources = False
    if 'country' in conf:
       # 'list'-ify country
       if type( conf['country'] ) != list:
@@ -469,11 +488,16 @@ if __name__ == '__main__':
       ####
       for cc in basedata['countries']:
          basedata['country-stats'][ cc ] = country_stats( cc )
-   elif 'probetag' in conf:
+      has_sources = True
+   if 'probetag' in conf:
       # selects probes with certain probetag and looks at their connectivity
       basedata['probetag'] = conf['probetag']
-   else:
-      print >>sys.stderr, "need 'country' or 'probetag'"
+      has_sources = True
+   if 'probe_ids' in conf:
+      basedata['probe_ids'] = conf['probe_ids']
+      has_sources = True
+   if not has_sources:
+      print >>sys.stderr, "need 'country' and/or 'probetag' or a list of probe ids ('probe_ids')"
       sys.exit(1)
    ####
    # measurement-types
@@ -544,11 +568,21 @@ if __name__ == '__main__':
             print member_asn_set
             basedata['ixps'][ ixp['name'] ]['memberlist'] = ixp['memberlist']
             basedata['ixps'][ ixp['name'] ]['memberlist_asns'] = sorted( list( member_asn_set ) )
+   else:
+      # get them all?
+      # get them for countries, or if no country specified, get them all?
+      pass
    if os.path.isfile('probeset.json'):
       print >>sys.stderr, "probeset.json file exists, not making a new probe selection"
    else: 
       selected_probes = []
-      if len(basedata['countries']) > 0:
+      if 'probetag' in basedata and len(basedata['countries']) > 0:
+         ## only take probes in these countries
+         country_set = set( basedata['countries'] )
+         print >>sys.stderr, "finding probes for tag: %s AND countries: %s" % ( basedata['probetag'], country_set )
+         selected_probes = do_probe_selection_from_tag( basedata['probetag'] )
+         selected_probes = filter( lambda x: x['country_code'] in country_set, selected_probes )
+      elif len(basedata['countries']) > 0:
          for country in basedata['countries']:
             eyeball_threshold = conf.get('eyeball_threshold')
             print >>sys.stderr, "Preparing country: %s" % ( country )
@@ -556,12 +590,20 @@ if __name__ == '__main__':
                probes_cc = find_probes_in_country(country, True, eyeball_threshold)
             else:
                probes_cc = find_probes_in_country( country )
+               print >>sys.stderr, "preselected %d probes for %s" % ( len( probes_cc ), country )
             sel_probes_for_cc = do_probe_selection( probes_cc, conf, basedata )
+            print >>sys.stderr, "selected %d probes for %s" % ( len(sel_probes_for_cc), country )
             selected_probes += sel_probes_for_cc
-            print >>sys.stderr, "END country: %s" % ( country )
+         print >>sys.stderr, "found: %d probes" % ( len( sel_probes_for_cc ) )
+         print >>sys.stderr, "END country: %s" % ( country )
       elif 'probetag' in basedata:
          print >>sys.stderr, "finding probes for tag: %s" % ( basedata['probetag'] )
-         selected_probes = do_probe_selection_from_tag( basedata['probetag'] )
+         selected_probes = do_probe_selection_from_tag( basedata['probetag'] ) 
+      elif 'probe_ids' in basedata:
+         print >>sys.stderr, "finding probes for probe_ids list"
+         selected_probes = do_probe_selection_from_ids( basedata['probe_ids'] ) 
+        
+      print >>sys.stderr, "found %s probes!" % ( len( selected_probes ) )
       ## estimate the cost of measurement
       calculate_cost_of_measurement(selected_probes)
       ## writing to probeset.json

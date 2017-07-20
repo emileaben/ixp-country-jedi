@@ -19,8 +19,8 @@ def ProbeConverter(obj):
 				probe['status_since'] = status_since
 				probe['status'] = probe['status']['id']
 
-			if probe['description']:
-				del(probe['description'])
+#			if probe['description']:
+#				del(probe['description'])
 
 			if probe['tags'] and isinstance(probe['tags'],list):
 				probe['tags'] = [tag['slug'] for tag in probe['tags']]

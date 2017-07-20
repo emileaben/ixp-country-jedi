@@ -260,7 +260,8 @@ def init_incountry( basedata, probes ):
    }
    for cc in basedata['country-stats']:
       if 'routed_asns' in basedata['country-stats'][ cc ]:
-         data['routed_asns'] += basedata['country-stats'][ cc ]['routed_asns']
+         if basedata['country-stats'][ cc ]['routed_asns'] != None:
+            data['routed_asns'] += basedata['country-stats'][ cc ]['routed_asns']
    for proto in ('v4','v6'):
       data[ proto ] = {
          'path_count': 0,
@@ -411,7 +412,8 @@ def do_asgraph_entry( d, proto, entry ):
    ## '_': ixp
 
    # make sure source probe is a link in the viz too
-   src_prb_meta = '#probe_%s' % entry['src_prb_id']
+   #src_prb_meta = '#probe_%s' % entry['src_prb_id']
+   src_prb_meta = '#%s' % PROBES_BY_ID[ entry['src_prb_id'] ]['description']
    src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
    if src_prb_asn != None:
       src_prb_asn = "AS%s" % src_prb_asn
