@@ -19,11 +19,11 @@ with open("basedata.json",'r') as infile:
 v6src=[] # src are probe IDs
 v4src=[]
 for p in probes:
-   if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-works' in p['tags']:
+   if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-stable-1d' in p['tags']:
       v4src.append( p['probe_id'] )
    else:
       print "skipping v4 measurements for probe: %s" % ( p['probe_id'] )
-   if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-works' in p['tags']:
+   if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags']:
       v6src.append( p['probe_id'] )
    else:
       print "skipping v6 measurements for probe: %s" % ( p['probe_id'] )
@@ -34,9 +34,9 @@ v6dst=[]
 for mtype in basedata['measurement-types']:
    if mtype == 'probe-mesh':
       for p in probes:
-         if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-works' in p['tags']:
+         if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-stable-1d' in p['tags']:
             v4dst.append( p['address_v4'] )
-         if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-works' in p['tags']:
+         if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags']:
             v6dst.append( p['address_v6'] )
    elif mtype in ('traceroute','http-traceroute',
                     'https-traceroute', 'local-news-traceroute', 'local-tld-traceroute'):
