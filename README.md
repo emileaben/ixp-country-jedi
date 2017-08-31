@@ -3,9 +3,9 @@
 
 IXP Country Jedi is a project that shows if the Internet traffic paths stay within the country, and if the paths between two networks within the country go through an Internet eXchange Point (IXP). 
 
-You can get the pre-procesed data here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
+You can get the pre-processed data here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
 
-You cna read more about the use-cases in these articles:
+You can read more about the use-cases in these articles:
 * https://labs.ripe.net/Members/emileaben/looking-at-france-ix-with-ripe-atlas-and-ris
 * https://labs.ripe.net/Members/emileaben/improving-ripe-atlas-coverage-what-networks-are-missing
 * https://labs.ripe.net/Members/emileaben/measuring-countries-and-ixps-in-the-see-region
@@ -42,9 +42,9 @@ pip install -r requirements.txt
 to fulfill these.
 
 Before you use the scripts, create a config file specifying what
-mesh you'd want to do.
+mesh you would like to do.
 
-##config.json
+## config.json
 
 This file contains base data used for creating measurements and
 analysing the results.  It can contain various parts:
@@ -110,7 +110,7 @@ This script runs one-off measurements for the probes specified in
 _probeset.json_ and stores their results in _measurementset.json_
 
 This uses the RIPE Atlas measurement API for measurement creation,
-and it needs a valid measurement creation API key in ~/.atlas/auth
+and it needs a valid measurement creation API key in _~/.atlas/auth_
 . 
 
 For more information on RIPE Atlas API keys see https://atlas.ripe.net/docs/keys/
@@ -149,9 +149,10 @@ cd analysis ; python -m SimpleHTTPServer 3333
 
 ```
 
-and then pointing your browser at localhost:3333/<viz-name> Note
-that some visualisations use libraries in a common directory located
-in the 'analysis' directory, so the webserver needs to run with the
+and then pointing your browser at localhost:3333/<viz-name> 
+
+Note that some visualisations use libraries in a common directory located
+in the _analysis_ directory, so the webserver needs to run with the
 'analysis'-directory (or lower) as root.
 
 Templates (HTML,javascript,CSS) for webpages are in the _templates_
