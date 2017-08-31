@@ -135,7 +135,7 @@ def do_probe_selection( probes, conf, basedata ):
       ## Exclude probes with system tag IPv4 or IPv4 not working
       #if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
       #   continue
-      if("system-ipv4-stable-1d" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
+      if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
          continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
       if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
