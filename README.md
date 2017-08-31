@@ -53,8 +53,11 @@ analysing the results.  It can contain various parts:
 * *ixps*: List of IXPs one wants to detect/report on;
 * *locations*: List of cities on which probe selection will be based (if applicable)
 * *probetag*: Probetag on which probe selection criteria is based.
+* *probe_ids*: List of probes you want to measure from.
 
-examples are provided in the _examples_ directory. It is mandatory to either have _country_ , or _probetag_.  
+examples are provided in the _examples_ directory. For probe selection it is mandatory to either have _country_ , _probetag_ , or _probe_ids_
+defined. It is possible to combine _probetab_ and _country_ (which will take
+all the probes with that probetag in the specified country/countries).
 Without a *locations* section, the capital of *country* (or the first country, if *country*
 is a list) is used for probe selection (see below).
 
