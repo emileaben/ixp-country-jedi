@@ -346,14 +346,19 @@ def do_incountry_printresult( data ):
 def init_ixpcountry( basedata, probes ):
 
    rows = { 'v4' : list(), 'v6' : list() }
-   
+   _6to4 = []
    for probe in PROBES:
+      if(probe['asn_v6'] == None and 'address_v6' in probe.keys() and probe['address_v6'] != None):
+        if(probe['address_v6'][:4] == '2002'):
+          _6to4.append(probe['probe_id'])
+
       if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
          rows['v4'].append({
             'id': probe['probe_id'],
             'asn_v4': probe['asn_v4'],
             'asn_v6': probe['asn_v6']
          })
+
       if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
          rows['v6'].append({
             'id': probe['probe_id'],
@@ -368,6 +373,7 @@ def init_ixpcountry( basedata, probes ):
          'rows': rows[proto],
          'cols': rows[proto],
          'cells': [],
+         '_6to4': _6to4,
       }
       d['details'][proto] = {}
    return d

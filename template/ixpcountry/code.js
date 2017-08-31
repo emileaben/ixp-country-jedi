@@ -1,9 +1,8 @@
 
 //Global Variables
-var rows, cols, cells, row_count, col_count, row_by_idx, data_n, proto = 'v4', uniq_asns = [], filter_ASNs;
+var rows, cols, cells, row_count, col_count, row_by_idx, data_n, proto, uniq_asns = [], filter_ASNs, _6to4;
 
 var rows_f = [], cols_f = [], row_count_f, col_count_f, row_by_idx_f, ids_of_rows = [], ids_of_cols = [], cells_f = [];
-
 
 // BEGIN CODE FOR SHARE LINK
 
@@ -35,24 +34,51 @@ function shareLink(ASN_LIST){
     }else if(ASN_LIST.length == 0){
         shareLink += "?ASNS=none";
     }
-    document.getElementById('shareURL').innerHTML = shareLink;
+    shareLink = shareLink + '&ipv=' + proto
+    document.getElementById('shareURL').innerHTML = shareLink ;
     return;
 }
 
 // END CODE FOR SHARE LINK
 
 
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
 //Display the number of selected ASNs
 function numberOfASNshowingText(selectedASN){
-    document.getElementById("infoASNtext").innerHTML =  selectedASN.length + " of " + uniq_asns.length + " ASNs";
+    total_of_asns = uniq_asns.length + tmp_6to4.length
+    document.getElementById("infoASNtext").innerHTML =  selectedASN.length + " of " + total_of_asns + " ASNs";
+}
+
+function filter_arguments(asn){
+    //Remove AS from ASXXX
+    if(Number.isInteger(Number(asn))){
+        return asn
+    
+    }else if('AS' == asn.substring(0, 2)){
+        return asn.substring(2,asn.length)
+    
+    }else{
+        return asn
+    }
 }
 
 function asn_list_from_url(){
+        
+    asns_list = getParameterByName('ASNS')
 
-    var ASNS_url =  window.location.search.split("=");//<?=json_encode($_GET['ASNS'])?>;
-    
-    if(ASNS_url != null && ASNS_url.length == 2){
-        ASNS_url = ASNS_url[1].split(",");
+    if(asns_list != null){
+        asns_list = asns_list.split(",");
     }else{
         return "all";
     }
@@ -60,13 +86,17 @@ function asn_list_from_url(){
     var valid_ASNS_from_url = []
 
     //Check if url contains all ASNs 
-    if (ASNS_url[0] == "all"){
+    if (asns_list[0] == "all"){
         return "all";
     }else{
         //Check if given ASNs are valid numbers
-        for (i in ASNS_url){
-            if (! isNaN(ASNS_url[i]))
-                valid_ASNS_from_url.push(Number(ASNS_url[i]))
+        for (i in asns_list){
+            asns_list[i] = filter_arguments(asns_list[i])
+            if (! isNaN(asns_list[i])){
+                valid_ASNS_from_url.push(Number(asns_list[i]))
+            }else if(asns_list[i].substring(0,4) == '6to4'){
+                valid_ASNS_from_url.push(asns_list[i])
+            }
         }
         return valid_ASNS_from_url;
     }
@@ -79,26 +109,50 @@ function start_processing(){
     function sortNumber(a,b) {
         return a - b;
     }
+    tmp_6to4 = []
+    if(proto == 'v4'){ 
+        for (i in rows){
+            if (!(uniq_asns.includes(Number(rows[i].asn_v4)))){
+                uniq_asns.push(rows[i].asn_v4);
+            }
+        }
+    }else{
+        for (i in rows){
 
-    for (i in rows){
-        if (!(Number(rows[i].asn_v4) in uniq_asns)){
-            uniq_asns.push(Number(rows[i].asn_v4));
+            if(rows[i].asn_v6 == null && _6to4.includes(Number(rows[i].id))){
+                tmp_6to4.push('6to4' +  ' (v4: AS' + rows[i].asn_v4 + ')')
+            }
+
+            if (!(Number(rows[i].asn_v6) in uniq_asns)){
+                uniq_asns.push(rows[i].asn_v6);
+            }
         }
     }
-
     uniq_asns = Array.from(new Set(uniq_asns));
     uniq_asns.sort(sortNumber)
 
-    for (i in uniq_asns){
+    for ( i in uniq_asns){
         if( (isInArray(uniq_asns[i], asns_url) || asns_url == "all") && asns_url != "none"){
-            $("#listASNs").append(' <li class="list-group-item" data-checked="true">' + uniq_asns[i] + '</li>');
+            $("#listASNs").append(' <li class="list-group-item" data-checked="true">AS' + uniq_asns[i] + '</li>');
         }else{
-            $("#listASNs").append(' <li class="list-group-item">' + uniq_asns[i] + '</li>');
+            $("#listASNs").append(' <li class="list-group-item">AS' + uniq_asns[i] + '</li>');
         }
     }
     
+    tmp_6to4 = Array.from(new Set(tmp_6to4));
+    for ( i in tmp_6to4){
+        if( (isInArray(tmp_6to4[i], asns_url) || asns_url == "all") && asns_url != "none"){
+            $("#listASNs").append(' <li class="list-group-item" data-checked="true">' + tmp_6to4[i] + '</li>');
+        }else{
+            $("#listASNs").append(' <li class="list-group-item">' + tmp_6to4[i] + '</li>');
+        }
+    }
+
     init_filter_options();
     filter_ASNs = ret_checked_values().get();
+    for (i in filter_ASNs){
+        filter_ASNs[i] = filter_arguments(filter_arguments(filter_ASNs[i]))
+    }
     numberOfASNshowingText(filter_ASNs);
 
     if(window.location.href.indexOf("all") > -1) {
@@ -128,20 +182,26 @@ function applySelectAll(){
 function ret_checked_values(){
     return $(".list-group.checked-list-box .list-group-item").map(function () {
         if($(this).attr('class') == "list-group-item list-group-item-primary active"){
-            return $(this).text();
+            asn = $(this).text()
+            return asn;
         }
     });
 }
 
+
 function applyFilter(){
     var checkedValues = $(".list-group.checked-list-box .list-group-item").map(function () {
-
         if($(this).attr('class') == "list-group-item list-group-item-primary active"){
             return $(this).text();
         }
 
     });
     filter_ASNs = ret_checked_values().get();
+    
+    for (i in filter_ASNs){
+        filter_ASNs[i] = filter_arguments(filter_arguments(filter_ASNs[i]))
+    }
+
     initVariables();
     numberOfASNshowingText(filter_ASNs);
 
@@ -167,17 +227,51 @@ function isInArray(value, array) {
 }
 
 function redraw(){
-   
-    for (i in data_n['rows']){
-        if( isInArray( (data_n['rows'][i].asn_v4).toString(),filter_ASNs)) {
+    if(proto == 'v4'){
+        for (i in data_n['rows']){
+            if( isInArray( (data_n['rows'][i].asn_v4).toString(),filter_ASNs)) {
 
-            rows_f.push(data_n['rows'][i])
-            ids_of_rows.push(data_n['rows'][i].id)
+                rows_f.push(data_n['rows'][i])
+                ids_of_rows.push(data_n['rows'][i].id)
+            }
+            if( isInArray( (data_n['cols'][i].asn_v4).toString(),filter_ASNs)) {
+
+                cols_f.push(data_n['cols'][i])
+                ids_of_cols.push(data_n['cols'][i].id)
+            }
         }
-        if( isInArray( (data_n['cols'][i].asn_v4).toString(),filter_ASNs)) {
+    }else{
+        for (i in data_n['rows']){
+            if (data_n['rows'][i].asn_v6 == null && _6to4.includes(data_n['rows'][i].id)){
 
-            cols_f.push(data_n['cols'][i])
-            ids_of_cols.push(data_n['cols'][i].id)
+                tmp_str = '6to4' +  ' (v4: AS' + data_n['rows'][i].asn_v4 + ')'
+                if(isInArray(tmp_str,filter_ASNs)){
+                    rows_f.push(data_n['rows'][i])
+                    ids_of_rows.push(data_n['rows'][i].id)
+                }
+
+            }else{
+                if( isInArray( (data_n['rows'][i].asn_v6).toString(),filter_ASNs)) {
+
+                    rows_f.push(data_n['rows'][i])
+                    ids_of_rows.push(data_n['rows'][i].id)
+                }
+            }
+
+            if (data_n['cols'][i].asn_v6 == null && _6to4.includes(data_n['cols'][i].id)){
+
+                tmp_str = '6to4' +  ' (v4: AS' + data_n['cols'][i].asn_v4 + ')'
+                if(isInArray(tmp_str,filter_ASNs)){
+                    cols_f.push(data_n['cols'][i])
+                    ids_of_cols.push(data_n['cols'][i].id)
+                }
+
+            }else{
+                if( isInArray( (data_n['cols'][i].asn_v6).toString(),filter_ASNs)) {
+                    cols_f.push(data_n['cols'][i])
+                    ids_of_cols.push(data_n['cols'][i].id)
+                }
+            }
         }
     }
     for (i in cells){
@@ -232,9 +326,20 @@ legends_button.onclick = function() {
 
 //END CODE FOR MENU
 
+
+if( getParameterByName('ipv') == null || getParameterByName('ipv') == 'v4'){
+    proto = 'v4'
+    document.getElementById("infoIPv").innerHTML = "(IPv4)";
+    document.getElementById("info_viewIPv").innerHTML = "<a href=\"index.html?ipv=v6\">IPv6</a>"
+}else{
+    proto = 'v6'
+    document.getElementById("infoIPv").innerHTML = "(IPv6)";
+    document.getElementById("info_viewIPv").innerHTML = "<a href=\"index.html?ipv=v4\">IPv4</a>"
+}
    
 //Read the main .json file 
 d3.json("ixpcountry.{0}.json".format( proto ), function(error,data) {
+
     rows = data['rows'];
     cols = data['cols'];
     cells = data['cells'];
@@ -242,6 +347,7 @@ d3.json("ixpcountry.{0}.json".format( proto ), function(error,data) {
     col_count = cols.length;
     row_by_idx = _.indexBy(rows, 'id'); 
     data_n = data;
+    _6to4 = data['_6to4']
 
     start_processing();
 });
@@ -316,17 +422,58 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
          'asn_v6': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v6, b.asn_v6 ) } ), 'id')
         };
 
-    xScale.domain( sort_orders.asn_v4 )
-    yScale.domain( sort_orders.asn_v4 )
+    if(proto == 'v4'){
+        xScale.domain( sort_orders.asn_v4 )
+        yScale.domain( sort_orders.asn_v4 )
 
-    xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
-    yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
-    xAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
-    yAxis.tickFormat(function(d) { return "AS" + row_by_idx[ d ].asn_v4 });
+        xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
+        xAxis.tickFormat(function(d) { 
+            if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4 && row_by_idx[d].asn_v6 != null){
+                return "AS" + row_by_idx[ d ].asn_v4 + ' (v6: AS' + row_by_idx[d].asn_v6 +')'
+            }else{
+                return "AS" + row_by_idx[ d ].asn_v4
+            }
+        });
+        yAxis.tickFormat(function(d) { 
+            if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4 && row_by_idx[d].asn_v6 != null){
+                return "AS" + row_by_idx[ d ].asn_v4 + ' (v6: AS' + row_by_idx[d].asn_v6 +')'
+            }else{
+                return "AS" + row_by_idx[ d ].asn_v4
+            }
+        });
+    }else{
+        xScale.domain( sort_orders.asn_v6 )
+        yScale.domain( sort_orders.asn_v6 )
+
+        xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
+        yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
+
+        xAxis.tickFormat(function(d) { 
+            if(row_by_idx[d].asn_v6 == null && _6to4.includes(row_by_idx[d].id)){
+                tmp_str = '6to4' + ' (v4: AS' + row_by_idx[d].asn_v4 + ')'
+                return tmp_str
+            }else if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4){
+                return 'AS' + row_by_idx[d].asn_v6 + ' (v4: AS' + row_by_idx[d].asn_v4 +')'
+            }else{
+                return "AS" + row_by_idx[ d ].asn_v6 
+            }
+        });
+        yAxis.tickFormat(function(d) { 
+            if(row_by_idx[d].asn_v6 == null && _6to4.includes(row_by_idx[d].id)){
+                tmp_str = '6to4' + ' (v4: AS' + row_by_idx[d].asn_v4 + ')'
+                return tmp_str
+            }else if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4){
+                return 'AS' + row_by_idx[d].asn_v6 + ' (v4: AS' + row_by_idx[d].asn_v4 +')'
+            }else{
+                return "AS" + row_by_idx[ d ].asn_v6 
+            }
+        });
+    }
 
     d3.select("#adjacencyG").append("g").attr("class",'axis').call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
     d3.select("#adjacencyG").append("g").attr("class",'axis').call(yAxis);
-
+    /*
     function text_from_datacell( d ) {
         var txt = [];
         txt.push(d.data.in_country ? 'incc: yes' : 'incc: no');
@@ -337,7 +484,7 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         txt.push("dstPrb" + d.col);
         return txt.join("\n");
     };
- 
+    */
     function cellcolor( d ) {
         if (  d.data.via_ixp &&   d.data.in_country) { return "green"; }
         if (! d.data.via_ixp &&   d.data.in_country) { return "orange";}
@@ -358,9 +505,13 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         .attr('width', Math.floor(( width - border_width) / col_count ) -1)
         .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
         .on('mouseover', function (d) { 
-
-            jedi_cell_show_source_dest_asn(proto, row_by_idx[d.row].asn_v4, row_by_idx[d.col].asn_v4 , row_details,
-            col_details, d3.event.pageX, d3.event.pageY)
+            if(proto == 'v4'){
+                jedi_cell_show_source_dest_asn(proto, row_by_idx[d.row].asn_v4, row_by_idx[d.col].asn_v4 , row_details,
+                col_details, d3.event.pageX, d3.event.pageY)
+            }else{
+                jedi_cell_show_source_dest_asn(proto, row_by_idx[d.row].asn_v6, row_by_idx[d.col].asn_v6 , row_details,
+                col_details, d3.event.pageX, d3.event.pageY)
+            }
          } )
 
         .on('mouseout', function (d) { 
