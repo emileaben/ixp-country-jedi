@@ -135,7 +135,7 @@ def do_probe_selection( probes, conf, basedata ):
       ## Exclude probes with system tag IPv4 or IPv4 not working
       #if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
       #   continue
-      if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
+      if("system-ipv4-stable-1d" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
          continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
       if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
@@ -442,9 +442,9 @@ def calculate_cost_of_measurement(selected_probes):
    ## Calculate the number of IPv4 and IPv6 addresses
    number_of_addresses = {"ipv4" : 0, "ipv6" : 0}
    for probe in selected_probes:
-      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
+      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-stable-1d" in probe['tags']):
          number_of_addresses['ipv4'] += 1
-      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
+      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-stable-1d" in probe['tags']):
          number_of_addresses['ipv6'] += 1
    credits_ipv4 = ( int(number_of_addresses['ipv4']) * (int(number_of_addresses['ipv4'])) ) * COST_OF_TRACEROUTE
    credits_ipv6 = ( int(number_of_addresses['ipv6']) * (int(number_of_addresses['ipv6'])) ) * COST_OF_TRACEROUTE

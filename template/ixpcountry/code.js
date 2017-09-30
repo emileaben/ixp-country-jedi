@@ -377,7 +377,7 @@ window.onresize = function() {
   
 function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx) {
 
-    var height = 900;
+    var height = 1200;
     var width = height;
     var border_width = 200;
 
@@ -422,6 +422,26 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
          'asn_v6': _.pluck( rows.sort( function(a,b) { return d3.ascending( a.asn_v6, b.asn_v6 ) } ), 'id')
         };
 
+    function get_label(proto, index, prefix){
+
+        if(proto == 'v4'){
+            if(row_by_idx[index].asn_v6 != row_by_idx[index].asn_v4 && row_by_idx[index].asn_v6 != null){
+                return prefix + row_by_idx[ index ].asn_v4 + ' (v6: ' + prefix + row_by_idx[index].asn_v6 +')'
+            }else{
+                return prefix + row_by_idx[ index ].asn_v4
+            }
+        }else{
+            if(row_by_idx[index].asn_v6 == null && _6to4.includes(row_by_idx[index].id)){
+                tmp_str = '6to4' + ' (v4: AS' + row_by_idx[index].asn_v4 + ')'
+                return tmp_str
+            }else if(row_by_idx[index].asn_v6 != row_by_idx[index].asn_v4){
+                return prefix + row_by_idx[index].asn_v6 + ' (v4: ' + prefix + row_by_idx[index].asn_v4 +')'
+            }else{
+                return prefix + row_by_idx[ index ].asn_v6 
+            }
+        }
+    }
+
     if(proto == 'v4'){
         xScale.domain( sort_orders.asn_v4 )
         yScale.domain( sort_orders.asn_v4 )
@@ -429,18 +449,10 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         xAxis = d3.svg.axis().scale(xScale).orient("top").tickSize(2);
         yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
         xAxis.tickFormat(function(d) { 
-            if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4 && row_by_idx[d].asn_v6 != null){
-                return "AS" + row_by_idx[ d ].asn_v4 + ' (v6: AS' + row_by_idx[d].asn_v6 +')'
-            }else{
-                return "AS" + row_by_idx[ d ].asn_v4
-            }
+            return get_label(proto, d, 'AS');
         });
         yAxis.tickFormat(function(d) { 
-            if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4 && row_by_idx[d].asn_v6 != null){
-                return "AS" + row_by_idx[ d ].asn_v4 + ' (v6: AS' + row_by_idx[d].asn_v6 +')'
-            }else{
-                return "AS" + row_by_idx[ d ].asn_v4
-            }
+            return get_label(proto, d, 'AS');
         });
     }else{
         xScale.domain( sort_orders.asn_v6 )
@@ -450,24 +462,10 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         yAxis = d3.svg.axis().scale(yScale).orient("left").tickSize(2);
 
         xAxis.tickFormat(function(d) { 
-            if(row_by_idx[d].asn_v6 == null && _6to4.includes(row_by_idx[d].id)){
-                tmp_str = '6to4' + ' (v4: AS' + row_by_idx[d].asn_v4 + ')'
-                return tmp_str
-            }else if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4){
-                return 'AS' + row_by_idx[d].asn_v6 + ' (v4: AS' + row_by_idx[d].asn_v4 +')'
-            }else{
-                return "AS" + row_by_idx[ d ].asn_v6 
-            }
+            return get_label(proto, d, 'AS');
         });
         yAxis.tickFormat(function(d) { 
-            if(row_by_idx[d].asn_v6 == null && _6to4.includes(row_by_idx[d].id)){
-                tmp_str = '6to4' + ' (v4: AS' + row_by_idx[d].asn_v4 + ')'
-                return tmp_str
-            }else if(row_by_idx[d].asn_v6 != row_by_idx[d].asn_v4){
-                return 'AS' + row_by_idx[d].asn_v6 + ' (v4: AS' + row_by_idx[d].asn_v4 +')'
-            }else{
-                return "AS" + row_by_idx[ d ].asn_v6 
-            }
+            return get_label(proto, d, 'AS');
         });
     }
 
@@ -505,20 +503,13 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         .attr('width', Math.floor(( width - border_width) / col_count ) -1)
         .attr('height', Math.ceil(( height - border_width) / col_count ) -1) 
         .on('mouseover', function (d) { 
-            if(proto == 'v4'){
-                jedi_cell_show_source_dest_asn(proto, row_by_idx[d.row].asn_v4, row_by_idx[d.col].asn_v4 , row_details,
-                col_details, d3.event.pageX, d3.event.pageY)
-            }else{
-                jedi_cell_show_source_dest_asn(proto, row_by_idx[d.row].asn_v6, row_by_idx[d.col].asn_v6 , row_details,
-                col_details, d3.event.pageX, d3.event.pageY)
-            }
+            jedi_cell_show_source_dest_asn(proto, get_label(proto, d.row, ''), get_label(proto, d.col, '') , row_details,
+            col_details, d3.event.pageX, d3.event.pageY)
          } )
-
-        .on('mouseout', function (d) { 
+        .on('mouseout', function (d){
             row_details.style("display", "none");
             col_details.style("display", "none");
         })
-
         .on('click', function (d){
 
             jedi_cell_show_traceroute_on_click( proto, d.row, d.col , traceroute_details, d3.event.pageX, d3.event.pageY)

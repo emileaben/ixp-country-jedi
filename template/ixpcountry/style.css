@@ -1,67 +1,170 @@
 .tick line {
-        shape-rendering: crispEdges;
-        stroke: #000;
-      }
-      line.minor  {
-        stroke: #777;
-        stroke-dasharray: 2,2;
-      }
-      path.domain {
-        fill: none;
-        stroke: black;
-      }
+  shape-rendering: crispEdges;
+  stroke: #000;
+}
+line.minor  {
+  stroke: #777;
+  stroke-dasharray: 2,2;
+}
+path.domain {
+  fill: none;
+  stroke: black;
+}
 
-      .axis text {
-          font-size: 8px;
-      }
-      #vizcontainer {
-         float: left;
-         /* border: 1px solid grey; */
-      }
-    .tooltipASNs {
-        display: none;
-        background-color: #337ab7;
-        border-color: #2e6da4;
-        margin-left: 28px;
-        padding: .2em .6em .3em;
-        position: absolute;
-        z-index: 1000;
-        width:170px;
-        height:30px;
-        color:#fff;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: baseline;
-        border-radius: .25em;
-    }
-      .tooltipTraceroutes {
-        position: absolute;
-        width: 680px;
-        height: auto;
-        padding: 5px;
-        border-radius: 3px;
-        font: 13.5px sans-serif;
-        z-index: 1000;
+.axis text {
+    font-size: 8px;
+}
+#vizcontainer {
+   float: left;
+   /* border: 1px solid grey; */
+}
+.tooltipASNs {
+    display: none;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+    margin-left: 28px;
+    padding: .2em .6em .3em;
+    position: absolute;
+    z-index: 1000;
+    width:220px;
+    height:30px;
+    color:#fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+}
+.tooltipTraceroutes {
+  position: absolute;
+  width: 860px;
+  height: auto;
+  padding: 5px;
+  border-radius: 3px;
+  font: 13.5px sans-serif;
+  z-index: 1000;
 
-      }
+}
 
-        .legend p { float: left; margin-right: 10px; }
-        .legend span { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
-        /* your colors */
-        .legend .ixp_yes_and_out_of_country_no { background-color: green; }
-        .legend .ixp_no_and_out_of_country_no { background-color: orange; }
-        .legend .ixp_yes_and_out_of_country_yes { background-color: blue; }
-        .legend .ixp_no_and_out_of_country_yes { background-color: red; }
+  .legend p { float: left; margin-right: 10px; }
+  .legend span { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
+  /* your colors */
+  .legend .ixp_yes_and_out_of_country_no { background-color: green; }
+  .legend .ixp_no_and_out_of_country_no { background-color: orange; }
+  .legend .ixp_yes_and_out_of_country_yes { background-color: blue; }
+  .legend .ixp_no_and_out_of_country_yes { background-color: red; }
 
-    .state-icon {
-        left: -5px;
-    }
-    .list-group-item-primary {
-        color: rgb(255, 255, 255);
-        background-color: rgb(66, 139, 202);
-    }
+.state-icon {
+    left: -5px;
+}
+.list-group-item-primary {
+    color: rgb(255, 255, 255);
+    background-color: rgb(66, 139, 202);
+}
 
-    /* DEMO ONLY - REMOVES UNWANTED MARGIN */
-    .well .list-group {
-        margin-bottom: 0px;
-    }
+/* DEMO ONLY - REMOVES UNWANTED MARGIN */
+.well .list-group {
+    margin-bottom: 0px;
+}
+
+.as_path {
+  margin-left: 5px;
+}
+
+
+.bar-chart {
+    position: relative;
+    width: 100%;
+}
+
+.bar-chart > .legend {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    margin-bottom: -45px;
+    border-top: 1px solid #000;
+}
+
+.bar-chart > .legend > .item {
+    position: relative;
+    display: inline-block;
+    float: left;
+    width: 25%;
+}
+
+.bar-chart > .legend > .item:before {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 1px;
+    height: 8px;
+    background-color: #000;
+    margin-top: -8px;
+}
+
+.bar-chart > .legend > .item.text-right:before {
+    right: 0;
+    left: auto;
+}
+
+.bar-chart > .legend > .item h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.bar-chart > .chart {
+    position: relative;
+    width: 100%;
+}
+
+.bar-chart > .chart > .item {
+    position: relative;
+    width: 100%;
+    height: 15px;
+    margin-bottom: 4px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.bar-chart > .chart > .item > .bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #a2a2a2;
+    z-index: 5;
+}
+
+.bar-chart > .chart > .item > .bar > .percent {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 40px;
+    line-height: 40px;
+    padding-right: 12px;
+    z-index: 15;
+}
+
+.bar-chart > .chart > .item > .bar > .item-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #3e50b4;
+    z-index: 10;
+}
+
+.bar-chart > .chart > .item > .bar > .item-progress > .title {
+    display: block;
+    position: absolute;
+    padding-left: 12px;
+    letter-spacing: 2px;
+    z-index: 15;
+    width:250%;
+}
