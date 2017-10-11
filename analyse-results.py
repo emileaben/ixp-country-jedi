@@ -405,6 +405,68 @@ def do_ixpcountry_printresult( ixpcountry ):
             json.dump( ixpcountry['details'][ proto ][ detail_key ], outfile )
    print "IXPCOUNTRY viz results available in %s" % ( VIZPATH )
 
+### rttmesh
+def init_rttmesh( basedata, probes ):
+
+   rows = { 'v4' : list(), 'v6' : list() }
+   _6to4 = []
+   for probe in PROBES:
+      if(probe['asn_v6'] == None and 'address_v6' in probe.keys() and probe['address_v6'] != None):
+        if(probe['address_v6'][:4] == '2002'):
+          _6to4.append(probe['probe_id'])
+
+      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
+         rows['v4'].append({
+            'id': probe['probe_id'],
+            'asn_v4': probe['asn_v4'],
+            'asn_v6': probe['asn_v6']
+         })
+
+      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
+         rows['v6'].append({
+            'id': probe['probe_id'],
+            'asn_v4': probe['asn_v4'],
+            'asn_v6': probe['asn_v6']
+         })
+
+   ## can do data reduction step here if data is too big
+   d = {'summary':{},'details':{}}
+   for proto in ('v4','v6'):
+      d['summary'][proto] = {
+         'rows': rows[proto],
+         'cols': rows[proto],
+         'cells': [],
+         '_6to4': _6to4,
+      }
+      d['details'][proto] = {}
+   return d
+
+def do_rttmesh_entry( rttmesh, proto, data ):
+   my_cells = rttmesh['summary'][proto]['cells']
+   my_cells.append({
+      'row': data['src_prb_id'],
+      'col': data['dst_prb_id'],
+      'data': {'dst_rtts': data['dst_rtts']}
+   })
+   details = rttmesh['details'][proto]
+   detail_key = '.'.join(map(str,[ data['src_prb_id'] , data['dst_prb_id'] ]))
+   details[ detail_key ] = data
+
+def do_rttmesh_printresult( rttmesh ):
+   VIZPATH='./analysis/rttmesh/'
+   VIZDETAILSPATH='./analysis/rttmesh/details'
+   if not os.path.exists( VIZPATH ):
+      os.makedirs( VIZPATH )
+   if not os.path.exists( VIZDETAILSPATH ):
+      os.makedirs( VIZDETAILSPATH )
+   for proto in ('v4','v6'):
+      with open('%s/rttmesh.%s.json' % (VIZPATH,proto), 'w') as outfile:
+         json.dump( rttmesh['summary'][ proto ], outfile )
+      for detail_key in rttmesh['details'][ proto ].keys():
+         with open('%s/%s.%s.json' % ( VIZDETAILSPATH, detail_key, proto ), 'w') as outfile:
+            json.dump( rttmesh['details'][ proto ][ detail_key ], outfile )
+   print "RTTMESH viz results available in %s" % ( VIZPATH )
+
 ### aspath
 def init_asgraph( basedata, probes ):
    d = {'nodes': Counter(),
@@ -690,6 +752,7 @@ def main():
       'ixpcount': True,
       'incountry': True,
       'ixpcountry': True,
+      'rttmesh': True,
       'cities': True,
       'asgraph': True,
       'geopath': True,
