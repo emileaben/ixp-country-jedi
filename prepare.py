@@ -596,6 +596,18 @@ if __name__ == '__main__':
             selected_probes += sel_probes_for_cc
          print >>sys.stderr, "found: %d probes" % ( len( sel_probes_for_cc ) )
          print >>sys.stderr, "END country: %s" % ( country )
+         # If there are probes manually selected in config.json, add them as well
+         if 'probe_ids' in basedata:
+            probes_from_ids = []
+            selected_probeids = []
+            print >>sys.stderr, "Adding probes from probe_ids list"
+            for sel_prb in selected_probes:
+               selected_probeids.append(sel_prb['probe_id'])
+            probes_from_ids = do_probe_selection_from_ids( basedata['probe_ids'] )
+            # Add probes from probe_ids without duplicates
+            for prb in probes_from_ids:
+               if prb['probe_id'] not in selected_probeids:
+                  selected_probes.append(prb)
       elif 'probetag' in basedata:
          print >>sys.stderr, "finding probes for tag: %s" % ( basedata['probetag'] )
          selected_probes = do_probe_selection_from_tag( basedata['probetag'] ) 
