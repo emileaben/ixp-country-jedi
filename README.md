@@ -58,6 +58,9 @@ analysing the results.  It can contain various parts:
 examples are provided in the _examples_ directory. For probe selection it is mandatory to either have _country_ , _probetag_ , or _probe_ids_
 defined. It is possible to combine _probetab_ and _country_ (which will take
 all the probes with that probetag in the specified country/countries).
+It is also possible to combine _probe_ids_ and _country_: after selecting the probes
+in the specified country/ies, the _probe_ids_ specified will be added (any duplicates
+will be removed).
 Without a *locations* section, the capital of *country* (or the first country, if *country*
 is a list) is used for probe selection (see below).
 
