@@ -483,15 +483,11 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
         return txt.join("\n");
     };
     */
-
     function cellcolor( d ) {
         median_rtt = get_median(d.data.dst_rtts);
-        if (median_rtt > 0) { /* if the median RTT exists */
-            if (median_rtt < 10) { return "green"; }
-            if (median_rtt > 50) { return "red"; }
-            return "orange";
-        }
-        else { return "grey"; } /* No RTT to destination or something went wrong */
+        if (median_rtt < 10) { return "green"; }
+        if (median_rtt > 50) { return "red"; }
+        return "orange"; 
     };
 
     var boxes_viz = map.append('g')
