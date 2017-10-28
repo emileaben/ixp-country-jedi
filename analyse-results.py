@@ -353,14 +353,14 @@ def init_ixpcountry( basedata, probes ):
         if(probe['address_v6'][:4] == '2002'):
           _6to4.append(probe['probe_id'])
 
-      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-works" in probe['tags']):
+      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-stable-1d" in probe['tags']):
          rows['v4'].append({
             'id': probe['probe_id'],
             'asn_v4': probe['asn_v4'],
             'asn_v6': probe['asn_v6']
          })
 
-      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-works" in probe['tags']):
+      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-stable-1d" in probe['tags']):
          rows['v6'].append({
             'id': probe['probe_id'],
             'asn_v4': probe['asn_v4'],
