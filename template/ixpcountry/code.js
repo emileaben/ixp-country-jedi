@@ -484,10 +484,11 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
     };
     */
     function cellcolor( d ) {
-        if (  d.data.via_ixp &&   d.data.in_country) { return "green"; }
-        if (! d.data.via_ixp &&   d.data.in_country) { return "orange";}
-        if (  d.data.via_ixp && ! d.data.in_country) { return "blue";}
-        if (! d.data.via_ixp && ! d.data.in_country) { return "red";}
+        // http://colorbrewer2.org/#type=diverging&scheme=BrBG&n=4
+        if (  d.data.via_ixp &&   d.data.in_country) { return "#018571"; }
+        if (! d.data.via_ixp &&   d.data.in_country) { return "#80cdc1";}
+        if (  d.data.via_ixp && ! d.data.in_country) { return "#a6611a";}
+        if (! d.data.via_ixp && ! d.data.in_country) { return "#dfc27d";}
         return "pink"; // should not happen
     };
 

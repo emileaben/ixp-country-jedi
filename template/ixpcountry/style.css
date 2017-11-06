@@ -48,10 +48,11 @@ path.domain {
   .legend p { float: left; margin-right: 10px; }
   .legend span { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
   /* your colors */
-  .legend .ixp_yes_and_out_of_country_no { background-color: green; }
-  .legend .ixp_no_and_out_of_country_no { background-color: orange; }
-  .legend .ixp_yes_and_out_of_country_yes { background-color: blue; }
-  .legend .ixp_no_and_out_of_country_yes { background-color: red; }
+  /* http://colorbrewer2.org/#type=diverging&scheme=BrBG&n=4 */
+  .legend .ixp_yes_and_out_of_country_no { background-color: #018571; }
+  .legend .ixp_no_and_out_of_country_no { background-color: #80cdc1; }
+  .legend .ixp_yes_and_out_of_country_yes { background-color: #a6611a; }
+  .legend .ixp_no_and_out_of_country_yes { background-color: #dfc27d; }
 
 .state-icon {
     left: -5px;
