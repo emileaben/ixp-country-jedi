@@ -475,15 +475,15 @@ def init_eyeballasgraph( basedata, probes ):
    if len( basedata['countries'] ) != 1:
        print >>sys.stderr, "can't do an eyeball graph if countries != 1"
        return None
-   try:
+   if 1: # try:
        with open( EYEBALL_FILE ) as inf:
            eb = json.load( inf )
            cc = basedata['countries'][0]
            eyeball_data = {}
-           for entry in eb['countries'][ eb ]['apnic']:
+           for entry in eb['countries'][ cc ]['apnic']:
                #key it by the asn. as a string ...
                eyeball_data[ "AS%s" % entry['as'] ] = entry
-   except:
+   if 0 : #except:
        print >>sys.stderr, "can't do an eyeball graph without eyeball data in %s" % EYEBALL_FILE
        return None
    d = {'nodes': Counter(),
@@ -499,12 +499,12 @@ def do_eyeballasgraph_entry( d, proto, entry ):
       return
    src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
    dst_prb_asn =  PROBES_BY_ID[ entry['dst_prb_id'] ]['asn_v4']
-   if src_prb_asn in d['eyeball_asns'] and dst_prb_asn in d['eyeball_asns']:
+   src_asn_str = "AS%s" % src_prb_asn # string versions
+   dst_asn_str = "AS%s" % dst_prb_asn
+   if src_asn_str in d['eyeball_asns'] and dst_asn_str in d['eyeball_asns']:
       ## we can also do a version of this where it only counts if you are in both directions in the path
       ## ie. with the tuple above we find all the things that are on the path
       ## now cummulate over all the non src
-      src_asn_str = "AS%s" % src_prb_asn # string versions
-      dst_asn_str = "AS%s" % dst_prb_asn
       asn_pair = tuple( sorted( [src_asn_str, dst_asn_str ] ) )
       d['cumm_between'].setdefault( asn_pair, set() ) # covers the set of things between src and dst
       for n in entry['as_links']['nodes']:
@@ -512,12 +512,14 @@ def do_eyeballasgraph_entry( d, proto, entry ):
           if n == src_asn_str or n == dst_asn_str:
              continue
           d['cumm_between'][ asn_pair ].add( n )
+   #else:
+   #   print "%s -> %s, not eyeballs?" % ( src_prb_asn , dst_prb_asn )
 
-def do_asgraph_printresult( d ):
+def do_eyeballasgraph_printresult( d ):
    # loop over all in eyeball_asns
    cummulative=0
    asn_between = Counter()
-   for eye_asn,eye_data in d['eyeball_asns'].values():
+   for eye_asn,eye_data in d['eyeball_asns'].iteritems():
        fract = eye_data['percent']/100 # percent->fraction
        cummulative += fract
        betweenness = 1-(1-fract)**2
@@ -525,10 +527,10 @@ def do_asgraph_printresult( d ):
        # we could even separate out the betweenness due to hosting users from btwness due to transit function
 
    ## now add a 'blob' for 1-cummaliteve that we couldn't map
-   asn_between[ '_other' ] = 1-(1-cummulative)**2
+   asn_between[ '_other' ] = 1-(cummulative)**2
 
    ## now iterate over everything that was between a source and a dest
-   for pair, btw_set in d['cumm_between'].values():
+   for pair, btw_set in d['cumm_between'].iteritems():
       (src,dst) = pair
       src_frac = d['eyeball_asns'][ src ]['percent']/100
       dst_frac = d['eyeball_asns'][ dst ]['percent']/100
@@ -539,7 +541,10 @@ def do_asgraph_printresult( d ):
 
    ## now print all the things in ASN_between
    for asn,weight in asn_between.most_common():
-       print "%s %s" % (asn,weight)
+       eyeball_fract = 0
+       if asn in d['eyeball_asns']:
+          eyeball_fract = d['eyeball_asns'][ asn ]['percent']/100
+       print "%s %s %s" % ( asn,weight,eyeball_fract )
 
 ### aspath
 def init_asgraph( basedata, probes ):
@@ -835,7 +840,7 @@ def main():
       'viaanchor': False, ## buggy
       'perasn': True
    }
-   #defs={'perasn': True}
+   #defs={'eyeballasgraph': True}
 
    if len( sys.argv ) > 1:
       # take defs from stdin arguments
