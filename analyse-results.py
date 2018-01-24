@@ -475,22 +475,24 @@ def init_eyeballasgraph( basedata, probes ):
    if len( basedata['countries'] ) != 1:
        print >>sys.stderr, "can't do an eyeball graph if countries != 1"
        return None
-   if 1: # try:
+   try:
        with open( EYEBALL_FILE ) as inf:
            eb = json.load( inf )
            cc = basedata['countries'][0]
            eyeball_data = {}
            for entry in eb['countries'][ cc ]['apnic']:
                #key it by the asn. as a string ...
-               eyeball_data[ "AS%s" % entry['as'] ] = entry
-   if 0 : #except:
-       print >>sys.stderr, "can't do an eyeball graph without eyeball data in %s" % EYEBALL_FILE
+               ## use a 1% threshold
+               if entry['percent'] > 1:
+                   eyeball_data[ "AS%s" % entry['as'] ] = entry
+   except:
+       print >>sys.stderr, "can't do an eyeball graph without eyeball data in file: '%s'" % EYEBALL_FILE
        return None
    d = {'nodes': Counter(),
         'links': Counter(),
         'countries': basedata['countries'][0],
         'eyeball_asns': eyeball_data,
-        'cumm_between': {}, # stores (src_dstpair) -> set of things inbetween mappings
+        'things_between': {}, # stores (src_dstpair) -> set of things inbetween mappings
        }
    return d
 
@@ -506,12 +508,20 @@ def do_eyeballasgraph_entry( d, proto, entry ):
       ## ie. with the tuple above we find all the things that are on the path
       ## now cummulate over all the non src
       asn_pair = tuple( sorted( [src_asn_str, dst_asn_str ] ) )
-      d['cumm_between'].setdefault( asn_pair, set() ) # covers the set of things between src and dst
+      d['things_between'].setdefault( asn_pair, set() ) # covers the set of things between src and dst
       for n in entry['as_links']['nodes']:
           ## not src and dst
           if n == src_asn_str or n == dst_asn_str:
              continue
-          d['cumm_between'][ asn_pair ].add( n )
+          d['things_between'][ asn_pair ].add( n )
+      # and also keep track of the graph (like in asgraph)
+      for n in entry['as_links']['nodes']:
+          d['nodes'][ n ] += 1
+      for l in entry['as_links']['links']:
+          ## {u'src': u'NETNOD-MMO-B-1500', u'dst': u'AS29518', u'type': u'd'}
+          link_key = '>'.join([ l['src'], l['dst'], l['type'] ])
+          d['links'][ link_key ] += 1
+   
    #else:
    #   print "%s -> %s, not eyeballs?" % ( src_prb_asn , dst_prb_asn )
 
@@ -530,7 +540,7 @@ def do_eyeballasgraph_printresult( d ):
    asn_between[ '_other' ] = 1-(cummulative)**2
 
    ## now iterate over everything that was between a source and a dest
-   for pair, btw_set in d['cumm_between'].iteritems():
+   for pair, btw_set in d['things_between'].iteritems():
       (src,dst) = pair
       src_frac = d['eyeball_asns'][ src ]['percent']/100
       dst_frac = d['eyeball_asns'][ dst ]['percent']/100
@@ -540,11 +550,44 @@ def do_eyeballasgraph_printresult( d ):
           asn_between[ between ] += weight
 
    ## now print all the things in ASN_between
+   ## now all nodes should have a betweenness
    for asn,weight in asn_between.most_common():
        eyeball_fract = 0
        if asn in d['eyeball_asns']:
           eyeball_fract = d['eyeball_asns'][ asn ]['percent']/100
        print "%s %s %s" % ( asn,weight,eyeball_fract )
+   print json.dumps( d['nodes'] )
+   print json.dumps( d['links'] )
+   result = {'nodes': [], 'edges': []}
+   VIZPATH='./analysis/eyeballasgraph/'
+   if not os.path.exists( VIZPATH ):
+      os.makedirs( VIZPATH )
+   name2idx={}
+   idx=0
+   for n in d['nodes']:
+      count = d['nodes'][n]
+      name2idx[ n ] = idx
+      typ = 'asn'
+      if n.startswith('_'):
+         typ = 'ixp'
+         n = n.lstrip('_');
+      elif n.startswith('#'):
+         typ = 'prb'
+         n = n.lstrip('#');
+      result['nodes'].append({'id': idx, 'name': n, 'type': typ, 'count': asn_between[ n ] })
+      idx += 1
+   for l in d['links']:
+      src,dst,typ = l.split('>',2)
+      if src in name2idx and dst in name2idx:
+        result['edges'].append({'source': name2idx[src], 'target': name2idx[dst], 'type': typ})
+      else: 
+        print >>sys.stderr, "problem with this src/dst: %s/%s" % ( src, dst )
+   with open('%s/asgraph.json' % ( VIZPATH), 'w') as outfile:
+      #print >> outfile, "var data=%s ;" % json.dumps( result );
+      print >> outfile, json.dumps( result );
+   print "EYEBALLGRAPH viz results in '%s'" % ( VIZPATH )
+
+
 
 ### aspath
 def init_asgraph( basedata, probes ):
