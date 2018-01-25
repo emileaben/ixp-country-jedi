@@ -11,20 +11,25 @@ const nodeClass = d =>
 d3.json("asgraph.json", function(error, data) {
   console.log((error && error) || "loaded without errors");
   console.log(data);
-  const ticked = () => {
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
-    node
-      .attr("cx", function(d) {
-        return d.x;
-      })
-      .attr("cy", function(d) {
-        return d.y;
-      });
-  };
+  //   const ticked = () => {
+  //     link
+  //       .attr("x1", d => d.source.x)
+  //       .attr("y1", d => d.source.y)
+  //       .attr("x2", d => d.target.x)
+  //       .attr("y2", d => d.target.y);
+  //     node
+  //       .attr("cx", function(d) {
+  //         return d.x;
+  //       })
+  //       .attr("cy", function(d) {
+  //         return d.y;
+  //       });
+  //   };
+
+  function ticked() {
+    link.attr("d", positionLink);
+    node.attr("transform", positionNode);
+  }
 
   function positionLink(d) {
     return (
@@ -54,18 +59,34 @@ d3.json("asgraph.json", function(error, data) {
     .append("div")
     .attr("class", "tooltip");
 
+  var nodes = data.nodes,
+    nodeById = d3.map(nodes, function(d) {
+      return d.id;
+    }),
+    links = data.edges,
+    bilinks = [];
+
+  links.forEach(function(link) {
+    var s = (link.source = nodeById.get(link.source)),
+      t = (link.target = nodeById.get(link.target)),
+      i = {}; // intermediate node
+    nodes.push(i);
+    //links.push({ source: s, target: i }, { source: i, target: t });
+    bilinks.push([s, i, t, link.source.type, link.target.type]);
+  });
+
   var link = svg
     //.append("g")
     .selectAll(".link")
-    .data(data.edges)
+    .data(bilinks.map(l => [l[0],l[1],l[2]]))
     .enter()
-    .append("line")
-    .attr("class", "link");
+    .append("path")
+    .attr("class", d => { console.log(d); return `link ${d[2].type}` });
 
   var node = svg
-    .append("g")
+    //.append("g")
     .selectAll(".circle")
-    .data(data.nodes)
+    .data(nodes.filter(d => d.id))
     .enter()
     .append("circle")
     .attr("r", function(d) {
@@ -83,43 +104,26 @@ d3.json("asgraph.json", function(error, data) {
     .on("mouseout", function(d) {
       div.style("opacity", 0);
     });
-
-  var nodes = data.nodes,
-    nodeById = d3.map(nodes, function(d) {
-      return d.id;
-    }),
-    links = data.edges,
-    bilinks = [];
-
-  links.forEach(function(link) {
-    var s = (link.source = nodeById.get(link.source)),
-      t = (link.target = nodeById.get(link.target)),
-      i = {}; // intermediate node
-    nodes.push(i);
-    links.push({ source: s, target: i }, { source: i, target: t });
-    bilinks.push([s, i, t]);
-  });
-
   //node.append("text").text(d => `${d.name} ${d.count}`);
   // .append("text")
   // .attr("")
 
   var simulation = d3
     .forceSimulation()
-    .force("charge", d3.forceCollide().radius(10))
+    .force("charge", d3.forceCollide().radius(8))
     //.force("link", d3.forceLink(data.edges).distance(110))
     .force(
       "link",
       d3
         .forceLink(data.edges)
-        .distance(1250)
-        .strength(0.00005)
+        .distance(1750)
+        .strength(0.0001)
     )
     .force("r", d3.forceRadial(getForceRadial))
     .nodes(nodes)
     .on("tick", ticked);
 
-    simulation.force("link").links(links);
+  simulation.force("link").links(links);
 
   // var simulation = d3.forceSimulation().force("link", d3.forceLink().distance(1250).strength(0.001));
   // simulation.nodes(nodes).on("tick", ticked);
