@@ -7,51 +7,103 @@
             opacity: 0.1;
         }
 
-        circle.prb {
-            fill: blue;
+        circle.transit {
+            fill: lightblue;
         }
 
-        circle.asn {
+        circle.eyeball {
             fill: yellowgreen;
+
         }
 
         circle {
             fill: brown;
+            stroke: white;
+            stroke-width: 1.5pt;
         }
 
-        circle:hover {
-            cursor: pointer;
+        circle.bg-circle.eyeball {
+            fill: yellowgreen;
+            opacity: 0.1;
+        }
+
+        circle.bg-circle.transit {
+            fill: lightblue;
+            opacity: 0.2;
+        }
+
+        circle.interior-circle {
+            fill: white;
+            opacity: 1.0;
         }
 
         .tooltip {
             position: absolute;
         }
 
-        path {
-            fill: none;
-            stroke:bisque;
-        }
-
         path:hover {
             stroke: black;
+            stroke-opacity: 1.0;
+            stroke-width: 5pt;
+        }
+
+        path {
+            fill: none;
+            stroke-width: 1pt;
+            stroke-opacity: 0.5;
+            stroke-linecap: round;
+            stroke: black;
+        }
+
+        path.eyeball_asn {
+            fill: none;
+            stroke: rgb(46, 82, 22);
+            stroke-width: 1pt;
+            stroke-opacity: 0.5;
+        }
+
+        path.ixp-ixp, path.transit-ixp, path.eyeball-ixp, path.ixp, path.ixp-eyeball {
+            stroke: coral;
+            /*stroke-width: 4pt;*/
+            stroke-opacity: 0.6;
+        }
+
+        path.ixp-transit, path.transit-transit, path.eyeball-transit, path.transit_asn, path.transit-eyeball {
+            stroke: lightblue;
+            /*stroke-width: 4pt;*/
+            stroke-opacity: 0.7;
+        }
+
+        path.i {
+            stroke-dasharray: 3, 3;
+        }
+
+        path.eyeball-ixp.i {
+            stroke-dasharray: 6, 6;
+            /*stroke-width: 1pt;*/
+        }
+
+        path.d:not(".eyeball_asn") {
             stroke-width: 2pt;
         }
-
-        path.ixp {
-            stroke: lightblue;
-        }
-
-        path.asn {
-            stroke-opacity: 0.4;
-        }
-        
     </style>
 
 
 </head>
 
 <body>
-    <svg width="100%" height="100%" viewBox="-480 -250 960 500" />
+    <svg width="1440" height="750" viewBox="-480 -250 960 500">
+        <defs>
+            <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#05a" />
+                <stop offset="100%" stop-color="#0a5" />
+            </linearGradient>
+        </defs>
+        <circle r="240" cx="0" cy="0" class="bg-circle eyeball" />
+        <circle r="190" cx="0" cy="0" class="interior-circle" />
+        <circle r="170" cx="0" cy="0" class="bg-circle transit" />
+        <circle r="120" cx="0" cy="0" class="interior-circle" />
+    </svg>
     <script type="text/javascript" src="bundle.js" charset="utf-8"></script>
     </head>
 </body>
