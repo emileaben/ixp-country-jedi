@@ -18,7 +18,7 @@ const nodeClass = d =>
   (d.type === "transit_asn" && "transit") ||
   "";
 
-d3.json(DATA_URL, function(error, data) {
+d3.json(DATA_URL, function (error, data) {
   console.log((error && error) || "loaded without errors");
   console.log(data);
   //   const ticked = () => {
@@ -42,7 +42,9 @@ d3.json(DATA_URL, function(error, data) {
   }
 
   const positionLink = d => {
+    if (d[0].type === "eyeball_asn" && d[2].type === "eyeball_asn" && d[3] === "d") { console.log(d) };
     return (
+      (d[0].type === "eyeball_asn" && d[2].type === "eyeball_asn") && `M ${d[0].x},${d[0].y} A ${d[3] === "i" && 194 || 0},${d[3] === "i" && 194 || 0} 0 0 0 ${d[2].x} ${d[2].y}` ||
       (d[3] === "i" &&
         `M ${d[0].x},${d[0].y} S ${d[1].x},${d[1].y} ${d[2].x},${d[2].y}`) ||
       `M ${d[0].x},${d[0].y} A 0,0 0 0 1 ${d[2].x} ${d[2].y}`
@@ -58,19 +60,19 @@ d3.json(DATA_URL, function(error, data) {
     .attr("class", "tooltip");
 
   var nodes = data.nodes,
-    nodeById = d3.map(nodes, function(d) {
+    nodeById = d3.map(nodes, function (d) {
       return d.id;
     }),
     links = data.edges,
     bilinks = [];
 
-  links.forEach(function(link) {
-    console.log(link.type);
+  links.forEach(function (link) {
+    //console.log(link.type);
     var s = (link.source = nodeById.get(link.source)),
       t = (link.target = nodeById.get(link.target)),
       //i = { index: 100, vx: 0, vy: 0, x: 0, y: 0 }; // intermediate node
       i = {};
-    console.log(i);
+    //console.log(i);
     nodes.push(i);
     links.push({ source: s, target: i }, { source: i, target: t });
     //link.source.type === "eyeball_asn" &&
@@ -85,7 +87,7 @@ d3.json(DATA_URL, function(error, data) {
     .enter()
     .append("path")
     .attr("class", d => {
-      console.log(d);
+      //console.log(d);
       const linkClass =
         (d[0].type === "transit_asn" &&
           d[2].type === "transit_asn" &&
@@ -114,17 +116,17 @@ d3.json(DATA_URL, function(error, data) {
       return Math.max(Math.log(scalar * SCALEFACTOR) * 3.5, 2);
     })
     .attr("class", nodeClass)
-    .on("mouseover", function(d) {
+    .on("mouseover", function (d) {
       const g = d3.select(this);
       div.style("opacity", 0.9);
       div
         .html(
-          `<div class="tooltip"><h4>${d.name}</h5><p>${d.eyeball_pct}</p><div>`
+        `<div class="tooltip"><h4>${d.name}</h5><p>${d.eyeball_pct}</p><div>`
         )
         .attr("left", `${d.x}px`)
         .attr("top", `${d.y}px`);
     })
-    .on("mouseout", function(d) {
+    .on("mouseout", function (d) {
       div.style("opacity", 0);
     });
   //node.append("text").text(d => `${d.name} ${d.eyeball_pct}`);
@@ -136,11 +138,11 @@ d3.json(DATA_URL, function(error, data) {
     .force("charge", d3.forceCollide().radius(10))
     //.force("link", d3.forceLink(data.edges).distance(110))
     .force(
-      "link",
-      d3
-        .forceLink(data.edges)
-        //.distance(120)
-        .strength(0.0)
+    "link",
+    d3
+      .forceLink(data.edges)
+      //.distance(120)
+      .strength(0.0)
     )
     .force("r", d3.forceRadial(getForceRadial))
     .nodes(nodes)
