@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 
-let [countryCode, year, month, day] = window.location.pathname.match(/^\/([a-zA-Z]{2})\/([0-9]{4})\/([0-9]{2})\/([0-9]{2})/).slice(1,6);
+let [countryCode, year, month, day] = window.location.pathname.match(/([a-zA-Z]{2})\/([0-9]{4})\/([0-9]{2})\/([0-9]{2})/).slice(1,6);
 console.log(`country : ${countryCode}, date: ${year}-${month}-${day}`);
 
 const SCALEFACTOR = 2;
