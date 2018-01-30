@@ -1,11 +1,13 @@
 import * as d3 from "d3";
+import "../styles/eyeballsgraph.less";
 
-let [countryCode, year, month, day] = window.location.pathname.match(/([a-zA-Z]{2})\/([0-9]{4})\/([0-9]{2})\/([0-9]{2})/).slice(1,6);
+let [countryCode, year, month, day] = window.location.pathname
+  .match(/([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/)
+  .slice(1, 6);
 console.log(`country : ${countryCode}, date: ${year}-${month}-${day}`);
 
 const SCALEFACTOR = 2;
-const DATA_URL =
-  `http://sg-pub.ripe.net/emile/ixp-country-jedi/history/${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
+const DATA_URL = `http://sg-pub.ripe.net/emile/ixp-country-jedi/history/${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
 const schema = {
   eyeball: "eyeball_asn",
   ixp: "ixp_asn",
@@ -24,6 +26,7 @@ const TAU = 2 * Math.PI;
 
 const nodeClass = d =>
   (d.type === "eyeball_asn" && d.transits && "eyeball-with-transit") ||
+  (d.type === "eyeball_asn_noprobe" && "eyeball-no-probe") ||
   (d.type === "eyeball_asn" && "eyeball") ||
   (d.type === "transit_asn" && "transit") ||
   (d.type === "ixp" && "ixp") ||
@@ -85,11 +88,17 @@ d3.json(DATA_URL, function(error, data) {
     .endAngle(
       TAU *
         (nodes
-          .filter(d => d.type === "eyeball_asn")
+          .filter(
+            d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+          )
           .reduce((acc, cur) => acc + cur.eyeball_pct, 0) /
           100)
     )
-    .value(d => d.eyeball_pct)(nodes.filter(d => d.type === "eyeball_asn"));
+    .value(d => d.eyeball_pct)(
+    nodes.filter(
+      d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+    )
+  );
   console.log(connectedRing);
   var connectedArcSegment = d3.arc().innerRadius(220);
   //.outerRadius(230);
@@ -106,7 +115,13 @@ d3.json(DATA_URL, function(error, data) {
     .outerRadius(220);
 
   connectedRing.forEach(d => {
-    let group = svg.append("g");
+    let group = svg
+      .append("g")
+      .attr(
+        "class",
+        (d.data.type === "eyeball_asn_noprobe" && "eyeball-no-probe") || ""
+      );
+
     group
       .append("path")
       .attr(
@@ -179,7 +194,15 @@ d3.json(DATA_URL, function(error, data) {
       div.style("opacity", 0);
     });
 
-  node.append("text").text(d => (d.type !== "eyeball_asn" && d.name) || "");
+  node
+    .append("text")
+    .text(
+      d =>
+        (d.type !== "eyeball_asn" &&
+          d.type !== "eyeball_asn_noprobe" &&
+          d.name) ||
+        ""
+    );
 
   var simulation = d3
     .forceSimulation()
