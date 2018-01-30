@@ -1,0 +1,181 @@
+/* standard colours */
+
+@l-color: #00abab;
+@l-v-color: #2a6496;
+@l-h-color: #2a6496;
+@f-color: #58595b;
+@ripe-grey: #eee;
+@ripe-orange: #ff9600;
+@ripe-blue: #080037;
+@ripe-white: #fcfcfc;
+@tag-link: #5c5d60;
+
+// from www
+@ripe-magenta: #00abab; // supportcolor text on www
+@ripe-orange: #ff9600;
+@f-color: #58595b;
+
+@oim-antracite: #2a2a2a;
+@oim-silver: #bdc3c7;
+@oim-clouds: #ecf0f1;
+@oim-universe: #f0f0f0;
+@oim-carrot: #e67e22;
+@oim-emerald: #2ecc71;
+@oim-marker-yellow: #ffff99;
+
+@oim-land: #eff1d7;
+
+@atlas-green: #85a056;
+@atlas-red: #f84417;
+@atlas-darkblue: #080037;
+
+@jedi-transit: #f550c4;
+@jedi-ixp: #15DB3C;
+@jedi-eyeballs: #32d4d1;
+@jedi-eyeballs-no-probes: #F5F4E6;
+
+line {
+  stroke: grey;
+  opacity: 0.1;
+}
+
+g.transit {
+  circle {
+    stroke: @jedi-transit;
+    fill: white;
+    stroke-width: 4pt;
+  }
+  text {
+    fill: @atlas-darkblue;
+    stroke-width: 0.4pt;
+    stroke-opacity: 1;
+  }
+}
+
+g.eyeball {
+  circle {
+    fill: @jedi-eyeballs;
+    stroke: white;
+    stroke-width: 1.5pt;
+  }
+  text {
+    fill: @atlas-darkblue;
+  }
+}
+
+g.ixp {
+  circle {
+    fill: white;
+    stroke: @jedi-ixp;
+    stroke-width: 4pt;
+  }
+
+  circle {
+    fill: white;
+    stroke: @jedi-ixp;
+    stroke-width: 4pt;
+  }
+}
+
+g.eyeball-with-transit circle {
+  stroke-width: 1.5pt;
+  stroke: white;
+  fill: @jedi-transit;
+}
+
+g.eyeball-no-probe {
+  circle {
+    stroke: white;
+    stroke-width: 1.5pt;
+    fill: @jedi-eyeballs-no-probes;
+  }
+
+  path {
+    stroke: none;
+    fill: @jedi-eyeballs-no-probes;
+  }
+  
+  text {
+      fill: darken(@jedi-eyeballs-no-probes, 15%);
+  }
+}
+
+circle.bg-circle.eyeball {
+  fill: @jedi-eyeballs;
+  opacity: 0.1;
+}
+
+circle.interior-circle {
+  fill: white;
+  opacity: 1;
+}
+
+path.c-ring {
+  stroke: none;
+  fill: tint(@jedi-eyeballs, 20%);
+  //opacity: 0.6;
+}
+
+.tooltip {
+  position: absolute;
+}
+
+path:hover {
+  stroke: @oim-antracite;
+  stroke-opacity: 1;
+  //stroke-width: 1pt;
+}
+
+path {
+  fill: none;
+  stroke-width: 1pt;
+  stroke-opacity: 0.5;
+  stroke-linecap: round;
+  stroke: @oim-antracite;
+}
+
+path.eyeball_asn {
+  fill: none;
+  stroke: tint(@jedi-eyeballs, 50%);
+  stroke-width: 1pt;
+  //stroke-opacity: 0.5;
+}
+
+path.ixp-ixp,
+path.transit-ixp,
+path.eyeball-ixp,
+path.ixp,
+path.ixp-eyeball {
+  stroke: tint(@jedi-ixp, 50%);
+  /*stroke-width: 4pt;*/
+  //stroke-opacity: 0.6;
+}
+
+path.ixp-transit,
+path.transit-transit,
+path.eyeball-transit,
+path.transit_asn,
+path.transit-eyeball {
+  stroke: tint(@jedi-transit, 50%);
+  /*stroke-width: 4pt;*/
+  //stroke-opacity: 0.7;
+}
+
+path.i {
+  stroke-dasharray: 3, 3;
+}
+
+/* path.eyeball-ixp.i {
+    stroke-dasharray: 6, 6;
+    
+} */
+
+path.d:not(".eyeball_asn") {
+  stroke-width: 2pt;
+}
+
+svg text {
+  font-family: "open sans", sans;
+  font-size: 0.6em;
+  transform: translate(3 0 0);
+}
