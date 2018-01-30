@@ -7,13 +7,30 @@
             opacity: 0.1;
         }
 
-        circle.transit {
-            fill: lightblue;
+        g.transit circle {
+            stroke: lightblue;
+            fill: white;
+            stroke-width: 4pt;
         }
 
-        circle.eyeball {
-            fill: yellowgreen;
+        g.transit text {
+            fill: darkblue;
+            stroke-width: 0.4pt;
+            stroke-opacity: 1;
+        }
 
+        g.eyeball circle {
+            fill: yellowgreen;
+        }
+
+        g.eyeball text {
+            fill: yellowgreen;
+        }
+
+        g.ixp circle {
+            fill: white;
+            stroke: brown;
+            stroke-width: 4pt;
         }
 
         circle {
@@ -22,19 +39,25 @@
             stroke-width: 1.5pt;
         }
 
+        g.eyeball-with-transit circle {
+            /*stroke-width: 4pt;*/
+            fill: lightblue;
+        }
+
         circle.bg-circle.eyeball {
             fill: yellowgreen;
             opacity: 0.1;
         }
 
-        circle.bg-circle.transit {
-            fill: lightblue;
-            opacity: 0.2;
-        }
-
         circle.interior-circle {
             fill: white;
             opacity: 1.0;
+        }
+
+        path.c-ring {
+            stroke: none;
+            fill: yellowgreen;
+            opacity: 0.6;
         }
 
         .tooltip {
@@ -62,13 +85,21 @@
             stroke-opacity: 0.5;
         }
 
-        path.ixp-ixp, path.transit-ixp, path.eyeball-ixp, path.ixp, path.ixp-eyeball {
+        path.ixp-ixp,
+        path.transit-ixp,
+        path.eyeball-ixp,
+        path.ixp,
+        path.ixp-eyeball {
             stroke: coral;
             /*stroke-width: 4pt;*/
             stroke-opacity: 0.6;
         }
 
-        path.ixp-transit, path.transit-transit, path.eyeball-transit, path.transit_asn, path.transit-eyeball {
+        path.ixp-transit,
+        path.transit-transit,
+        path.eyeball-transit,
+        path.transit_asn,
+        path.transit-eyeball {
             stroke: lightblue;
             /*stroke-width: 4pt;*/
             stroke-opacity: 0.7;
@@ -87,9 +118,10 @@
             stroke-width: 2pt;
         }
 
-        path.c-ring {
-            stroke: none;
-            fill: white;
+        svg text {
+            font-family: "open sans", sans;
+            font-size: 0.6em;
+            transform: translate(3.0 0 0);
         }
     </style>
 
@@ -97,15 +129,17 @@
 </head>
 
 <body>
-    <svg width="1440" height="750" viewBox="-480 -250 960 500">
+    <svg width="1440" height="800" viewBox="-480 -250 960 500">
         <defs>
             <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#05a" />
                 <stop offset="100%" stop-color="#0a5" />
             </linearGradient>
         </defs>
-        <circle r="240" cx="0" cy="0" class="bg-circle eyeball" />
-        <circle r="190" cx="0" cy="0" class="interior-circle" />
+        <circle r="270" cx="0" cy="0" class="bg-circle eyeball" />
+        <circle r="220" cx="0" cy="0" class="interior-circle" />
+        <!-- <circle r="215" cx="0" cy="0" class="baseline-c" /> -->
+
     </svg>
     <script type="text/javascript" src="bundle.js" charset="utf-8"></script>
     </head>

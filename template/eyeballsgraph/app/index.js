@@ -1,7 +1,8 @@
 import * as d3 from "d3";
 
 const SCALEFACTOR = 2;
-const DATA_URL = "asgraph-2.json";
+const DATA_URL =
+  "http://sg-pub.ripe.net/emile/ixp-country-jedi/history/2018-01-01/CH/eyeballasgraph/asgraph.json";
 const schema = {
   eyeball: "eyeball_asn",
   ixp: "ixp_asn",
@@ -19,28 +20,14 @@ const getForceX = d => d.type === "eyeball_asn";
 const TAU = 2 * Math.PI;
 
 const nodeClass = d =>
+  (d.type === "eyeball_asn" && d.transits && "eyeball-with-transit") ||
   (d.type === "eyeball_asn" && "eyeball") ||
   (d.type === "transit_asn" && "transit") ||
+  (d.type === "ixp" && "ixp") ||
   "";
 
 d3.json(DATA_URL, function(error, data) {
   console.log((error && error) || "loaded without errors");
-  //console.log(data);
-  //   const ticked = () => {
-  //     link
-  //       .attr("x1", d => d.source.x)
-  //       .attr("y1", d => d.source.y)
-  //       .attr("x2", d => d.target.x)
-  //       .attr("y2", d => d.target.y);
-  //     node
-  //       .attr("cx", function(d) {
-  //         return d.x;
-  //       })
-  //       .attr("cy", function(d) {
-  //         return d.y;
-  //       });
-  //   };
-
   function ticked() {
     link.attr("d", positionLink);
     node.attr("transform", positionNode);
@@ -48,13 +35,16 @@ d3.json(DATA_URL, function(error, data) {
 
   const positionLink = d => {
     return (
-      (d[3] === "i" &&
-        `M ${d[0].x},${d[0].y} S ${d[1].x},${d[1].y} ${d[2].x},${d[2].y}`) ||
-      (d[0].type === "eyeball_asn" &&
-        d[2].type === "eyeball_asn" &&
-        `M ${d[0].x},${d[0].y} A 1,1 0 0 1 ${d[2].x} ${d[2].y}`) ||
-      `M ${d[0].x},${d[0].y} A 0,0 0 0 0 ${d[2].x} ${d[2].y}`
-    );
+      //(d[3] === "i" &&
+      //`M ${d[0].x},${d[0].y} S ${d[1].x},${d[1].y} ${d[2].x},${d[2].y}`) ||
+      `M ${d[0].x},${d[0].y} A 800,800 0 0 1 ${d[2].x} ${d[2].y}`
+    ); //||
+    // `M ${d[0].x},${d[0].y} S 0,0 ${d[2].x} ${d[2].y}`) ||
+    //   (d[0].type === "eyeball_asn" &&
+    //     d[2].type === "eyeball_asn" &&
+    //`M ${d[0].x},${d[0].y} A 350,350 0 0 1 ${d[2].x} ${d[2].y}`) ||
+    //`M ${d[0].x},${d[0].y} A 0,0 0 0 0 ${d[2].x} ${d[2].y}`
+    // );
   };
   const positionNode = d => `translate(${d.x},${d.y})`;
 
@@ -98,23 +88,37 @@ d3.json(DATA_URL, function(error, data) {
     )
     .value(d => d.eyeball_pct)(nodes.filter(d => d.type === "eyeball_asn"));
   console.log(connectedRing);
-  var connectedArcSegment = d3
-    .arc()
-    .innerRadius(200)
-    .outerRadius(230);
+  var connectedArcSegment = d3.arc().innerRadius(220);
+  //.outerRadius(230);
   //.endAngle(Math.PI / 2);
+
+  var textOutLineSegment = d3
+    .arc()
+    .innerRadius(260)
+    .outerRadius(260);
 
   var eyeBallsRing = d3
     .arc()
-    .innerRadius(170)
-    .outerRadius(200);
+    .innerRadius(220)
+    .outerRadius(220);
 
-  connectedRing.forEach(d =>
-    svg
+  connectedRing.forEach(d => {
+    let group = svg.append("g");
+    group
       .append("path")
-      .attr("d", connectedArcSegment(d))
-      .attr("class", "c-ring")
-  );
+      .attr(
+        "d",
+        connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+      )
+      .attr("class", "c-ring");
+
+    group
+      .append("text")
+      .text(d.data.name)
+      .attr("x", textOutLineSegment.centroid(d)[0])
+      .attr("y", textOutLineSegment.centroid(d)[1])
+      .attr("text-anchor", "middle");
+  });
 
   var link = svg
     //.append("g")
@@ -143,10 +147,13 @@ d3.json(DATA_URL, function(error, data) {
     });
 
   var node = svg
-    //.append("g")
     .selectAll(".circle")
-    .data(nodes.filter(d => d.id))
+    .data(nodes.filter(d => d.id || d.id === 0))
     .enter()
+    .append("g")
+    .attr("class", nodeClass);
+
+  node
     .append("circle")
     .attr("r", d => {
       const scalar =
@@ -155,7 +162,6 @@ d3.json(DATA_URL, function(error, data) {
         Math.max(d.conn_btwn_pct, BALL_MIN_SIZE) || BALL_MIN_SIZE;
       return Math.max(Math.log(scalar * SCALEFACTOR) * 3.5, 2);
     })
-    .attr("class", nodeClass)
     .on("mouseover", function(d) {
       const g = d3.select(this);
       div.style("opacity", 0.9);
@@ -169,9 +175,8 @@ d3.json(DATA_URL, function(error, data) {
     .on("mouseout", function(d) {
       div.style("opacity", 0);
     });
-  //node.append("text").text(d => `${d.name} ${d.eyeball_pct}`);
-  // .append("text")
-  // .attr("")
+
+  node.append("text").text(d => (d.type !== "eyeball_asn" && d.name) || "");
 
   var simulation = d3
     .forceSimulation()
@@ -179,19 +184,6 @@ d3.json(DATA_URL, function(error, data) {
       "charge",
       d3.forceCollide().radius(d => (d.type !== "eyeball_asn" && 15) || 0)
     )
-    //.force("link", d3.forceLink(data.edges).distance(110))
-    // .force(
-    //   "link",
-    //   d3
-    //     .forceLink(data.edges)
-    //     //.distance(120)
-    //     .strength(d => {
-    //       let seg = connectedRing.find(c => c.data.index === d.index);
-    //       return seg & 100.0 || 0.0;
-    //     })
-    // )
-    //.force("attractForce", d3.forceManyBody())
-    //.force("r", d3.forceRadial(getForceRadial))
     .force(
       "x",
       d3.forceX(d => {
@@ -211,13 +203,4 @@ d3.json(DATA_URL, function(error, data) {
     )
     .nodes(nodes)
     .on("tick", ticked);
-
-  //simulation.force("link").links(links);
-
-  //svg.append("path").attr("d", connectedArc);
-  //connectedArc();
-
-  // var simulation = d3.forceSimulation().force("link", d3.forceLink().distance(1250).strength(0.001));
-  // simulation.nodes(nodes).on("tick", ticked);
-  // simulation.force("link").links(links);
 });
