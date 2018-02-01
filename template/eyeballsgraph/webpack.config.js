@@ -43,6 +43,7 @@ module.exports = {
     filename: "bundle.js"
   },
   context: dir_app,
+  devtool: "cheap-module-source-map",
   devServer: {
     contentBase: dir_build,
     historyApiFallback: {
