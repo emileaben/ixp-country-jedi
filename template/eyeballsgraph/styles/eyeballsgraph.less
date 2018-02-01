@@ -30,14 +30,38 @@
 @atlas-darkblue: #080037;
 
 // modern love
-@jedi-transit: #f550c4;
-@jedi-ixp: #16DB3D;
-@jedi-eyeballs: #32d4d1;
-@jedi-eyeballs-no-probes: #FEFF22;
+// @jedi-transit: #f550c4;
+// @jedi-ixp: #16db3d;
+// @jedi-eyeballs: #32d4d1;
+// @jedi-eyeballs-no-probes: #feff22;
 
+// done by the forces of nature
+// @jedi-eyeballs: #72a168;
+// @jedi-ixp: #d9d686;
+// @jedi-transit: #a2cade;
+// @jedi-eyeballs-no-probes: #e5dbc3;
+
+// bright life
+// @jedi-transit: lighten(#5000ff, 25%);
+// @jedi-ixp: #ff8e19;
+// @jedi-eyeballs-no-probes: lighten(#14cc2d, 50%);
+// @jedi-eyeballs: #09b220;
+
+// mad professor
+// @jedi-transit: #f550c4;
+// @jedi-ixp: #32d4d1;
+// @jedi-eyeballs-no-probes: lighten(#14cc2d, 50%);
+// @jedi-eyeballs: #72a168;
+
+// radical researcher
+@jedi-ixp: #ff8e19;
+@jedi-transit: #a2cade;
+@jedi-eyeballs: #64D46A;
+@jedi-eyeballs-no-probes: #DCEDE6;
+@jedi-anthracite: #363738;
 
 line {
-  stroke: grey;
+  stroke: @jedi-anthracite;
   opacity: 0.1;
 }
 
@@ -48,7 +72,7 @@ g.transit {
     stroke-width: 4pt;
   }
   text {
-    fill: @atlas-darkblue;
+    fill: @jedi-anthracite;
     stroke-width: 0.4pt;
     stroke-opacity: 1;
   }
@@ -61,7 +85,7 @@ g.eyeball {
     stroke-width: 1.5pt;
   }
   text {
-    fill: @atlas-darkblue;
+    fill: @jedi-anthracite;
   }
 }
 
@@ -96,9 +120,9 @@ g.eyeball-no-probe {
     stroke: none;
     fill: @jedi-eyeballs-no-probes;
   }
-  
+
   text {
-      fill: darken(@jedi-eyeballs-no-probes, 15%);
+    fill: darken(@jedi-eyeballs-no-probes, 15%);
   }
 }
 
