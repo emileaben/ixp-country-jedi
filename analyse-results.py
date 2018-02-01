@@ -529,6 +529,7 @@ def do_eyeballasgraph_printresult( d ):
    # loop over all in eyeball_asns
    cummulative=0
    asn_between = Counter()
+   does_transit = set()
    for eye_asn,eye_data in d['eyeball_asns'].iteritems():
        fract = eye_data['percent']/100 # percent->fraction
        cummulative += fract
@@ -548,6 +549,7 @@ def do_eyeballasgraph_printresult( d ):
       for between in btw_set:
           #asn_between.setdefault( between, 0)
           asn_between[ between ] += weight
+          does_transit.add( between )
 
    ## now print all the things in ASN_between
    ## now all nodes should have a betweenness
@@ -556,8 +558,8 @@ def do_eyeballasgraph_printresult( d ):
        if asn in d['eyeball_asns']:
           eyeball_fract = d['eyeball_asns'][ asn ]['percent']/100
        print "%s %s %s" % ( asn,weight,eyeball_fract )
-   print json.dumps( d['nodes'] )
-   print json.dumps( d['links'] )
+   #print json.dumps( d['nodes'] )
+   #print json.dumps( d['links'] )
    result = {'nodes': [], 'edges': []}
    VIZPATH='./analysis/eyeballasgraph/'
    if not os.path.exists( VIZPATH ):
@@ -565,17 +567,45 @@ def do_eyeballasgraph_printresult( d ):
    name2idx={}
    idx=0
    for n in d['nodes']:
-      count = d['nodes'][n]
       name2idx[ n ] = idx
-      typ = 'asn'
-      if n.startswith('_'):
+      typ = 'transit_asn'
+      eyeball_pct = 0
+      conn_btwn_pct = asn_between[ n ]*100;
+      # figure out if a network 'transits' (an eyeball network can also transit!)
+      transits = False
+      if n in does_transit:
+        transits = True
+      #
+      if n in d['eyeball_asns']:
+         typ = 'eyeball_asn'
+         eyeball_pct = d['eyeball_asns'][ n ]['percent']
+      elif n.startswith('_'):
          typ = 'ixp'
          n = n.lstrip('_');
-      elif n.startswith('#'):
-         typ = 'prb'
-         n = n.lstrip('#');
-      result['nodes'].append({'id': idx, 'name': n, 'type': typ, 'count': asn_between[ n ] })
+      ## todo treat 'others' well
+      result['nodes'].append({
+        'id': idx,
+        'name': n,
+        'type': typ,
+        'conn_btwn_pct': conn_btwn_pct,
+        'transits': transits,
+        'eyeball_pct': eyeball_pct
+      })
       idx += 1
+   # add nodes that don't have probes too
+   for asn in d['eyeball_asns']:
+      if not asn in d['nodes']:
+         eyeball_pct = d['eyeball_asns'][ asn ]['percent']
+         conn_btwn_pct = 1-(1-(eyeball_pct/100))**2
+         result['nodes'].append({
+            'id': idx,
+            'name': asn,
+            'type': 'eyeball_asn_noprobe',
+            'conn_btwn_pct': conn_btwn_pct,
+            'transits': False,
+            'eyeball_pct': eyeball_pct
+         })
+         idx += 1
    for l in d['links']:
       src,dst,typ = l.split('>',2)
       if src in name2idx and dst in name2idx:
@@ -584,7 +614,7 @@ def do_eyeballasgraph_printresult( d ):
         print >>sys.stderr, "problem with this src/dst: %s/%s" % ( src, dst )
    with open('%s/asgraph.json' % ( VIZPATH), 'w') as outfile:
       #print >> outfile, "var data=%s ;" % json.dumps( result );
-      print >> outfile, json.dumps( result );
+      print >> outfile, json.dumps( result, indent=2 );
    print "EYEBALLGRAPH viz results in '%s'" % ( VIZPATH )
 
 
@@ -881,7 +911,8 @@ def main():
       'ixplans': True,
       'probetags': True,
       'viaanchor': False, ## buggy
-      'perasn': True
+      'perasn': True,
+      'eyeballasgraph': True
    }
    #defs={'eyeballasgraph': True}
 
