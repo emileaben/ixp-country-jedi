@@ -8,6 +8,8 @@ console.log(`country : ${countryCode}, date: ${year}-${month}-${day}`);
 
 const SCALEFACTOR = 2;
 const DATA_URL = `http://sg-pub.ripe.net/emile/ixp-country-jedi/history/${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
+const AS_RESOLVER_URL =
+  "https://stat.ripe.net/data/as-overview/data.json?resource=";
 const schema = {
   eyeball: "eyeball_asn",
   ixp: "ixp_asn",
@@ -32,8 +34,39 @@ const nodeClass = d =>
   (d.type === "ixp" && "ixp") ||
   "";
 
+const resolveAsToName = async asn => {
+  const fetchUrl = `${AS_RESOLVER_URL}${asn}`;
+  let response = await fetch(fetchUrl);
+  let data = await response.json();
+  //console.log(`${asn} => ${data.data.holder}`);
+  return data.data.holder;
+};
+
+const getAllOrgNames = async nodes => {
+  for (let node of nodes.filter(
+    n =>
+      n.name.slice(0, 2) === "AS" //&&
+      //n.type !== "eyeball_asn" &&
+      //n.type !== "eyeball_asn_noprobe"
+  )) {
+    let orgName = await resolveAsToName(node.name);
+    console.log(`inject ${orgName}`);
+    console.log(
+      document.querySelector(`text[data-asn='${node.name}']`).textContent
+    );
+    document.querySelector(
+      `text[data-asn="${node.name}"]`
+    ).textContent = orgName.split(/_|\.| |\,/)[0];
+  }
+};
+
 d3.json(DATA_URL, function(error, data) {
   console.log((error && error) || "loaded without errors");
+
+  getAllOrgNames(data.nodes).then(orgNames => {
+    console.log(orgNames);
+  });
+
   function ticked() {
     link.attr("d", positionLink);
     node.attr("transform", positionNode);
@@ -133,6 +166,7 @@ d3.json(DATA_URL, function(error, data) {
     group
       .append("text")
       .text(d.data.name)
+      .attr("data-asn", d.data.name)
       .attr("x", textOutLineSegment.centroid(d)[0])
       .attr("y", textOutLineSegment.centroid(d)[1])
       .attr("text-anchor", "middle");
@@ -202,7 +236,8 @@ d3.json(DATA_URL, function(error, data) {
           d.type !== "eyeball_asn_noprobe" &&
           d.name) ||
         ""
-    );
+    )
+    .attr("data-asn", d => d.name);
 
   var simulation = d3
     .forceSimulation()
