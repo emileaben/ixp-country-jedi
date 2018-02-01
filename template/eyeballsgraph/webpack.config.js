@@ -50,6 +50,7 @@ module.exports = {
       rewrites: [
         { from: /bundle\.js/, to: "/bundle.js" },
         { from: /index\.html/, to: "/index.html" },
+        { from: /as2org\.json/, to: "/as2org.json"},
         { from: /[a-zA-Z]{2}\/[0-9]{4}\/[0-9]{2}\/[0-9]{2}/, to: "/" },
         { from: /[a-zA-Z]{2}/, to: "/" }
       ]

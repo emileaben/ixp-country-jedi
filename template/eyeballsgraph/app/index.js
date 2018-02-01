@@ -42,12 +42,49 @@ const resolveAsToName = async asn => {
   return data.data.holder;
 };
 
+const replaceAs2OrgNames = async nodes => {
+  const fetchUrl = "./as2org.json";
+  let response = await fetch(fetchUrl);
+  let orgNames = await response.json();
+  for (let node of nodes.filter(
+    n => n.name && n.name.slice(0, 2) === "AS" //&&
+    //n.type !== "eyeball_asn" &&
+    //n.type !== "eyeball_asn_noprobe"
+  )) {
+    let orgName = orgNames.find(o => o.asn === node.name.replace("AS", ""));
+    console.log(`inject ${orgName.name}`);
+    console.log(
+      document.querySelector(`text[data-asn='${node.name}']`).textContent
+    );
+    document.querySelector(
+      `text[data-asn="${node.name}"]`
+    ).textContent = orgName.name.split(/_|\.| |\,/)[0];
+  }
+};
+
+// const getAllOrgNamesFromRipeStat = async nodes => {
+//   for (let node of nodes.filter(
+//     n =>
+//       n.name.slice(0, 2) === "AS" //&&
+//       //n.type !== "eyeball_asn" &&
+//       //n.type !== "eyeball_asn_noprobe"
+//   )) {
+//     let orgName = await resolveAsToName(node.name);
+//     console.log(`inject ${orgName}`);
+//     console.log(
+//       document.querySelector(`text[data-asn='${node.name}']`).textContent
+//     );
+//     document.querySelector(
+//       `text[data-asn="${node.name}"]`
+//     ).textContent = orgName.split(/_|\.| |\,/)[0];
+//   }
+// };
+
 const getAllOrgNames = async nodes => {
   for (let node of nodes.filter(
-    n =>
-      n.name.slice(0, 2) === "AS" //&&
-      //n.type !== "eyeball_asn" &&
-      //n.type !== "eyeball_asn_noprobe"
+    n => n.name.slice(0, 2) === "AS" //&&
+    //n.type !== "eyeball_asn" &&
+    //n.type !== "eyeball_asn_noprobe"
   )) {
     let orgName = await resolveAsToName(node.name);
     console.log(`inject ${orgName}`);
@@ -63,9 +100,11 @@ const getAllOrgNames = async nodes => {
 d3.json(DATA_URL, function(error, data) {
   console.log((error && error) || "loaded without errors");
 
-  getAllOrgNames(data.nodes).then(orgNames => {
-    console.log(orgNames);
-  });
+  //   getAllOrgNamesFromRipeStat(data.nodes).then(orgNames => {
+  //     console.log(orgNames);
+  //   });
+
+  replaceAs2OrgNames(data.nodes);
 
   function ticked() {
     link.attr("d", positionLink);
