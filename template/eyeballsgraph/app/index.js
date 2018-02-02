@@ -8,8 +8,8 @@ console.log(`country : ${countryCode}, date: ${year}-${month}-${day}`);
 
 const SCALEFACTOR = 2;
 const DATA_URL = `http://sg-pub.ripe.net/emile/ixp-country-jedi/history/${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
-// const AS_RESOLVER_URL =
-//   "https://stat.ripe.net/data/as-overview/data.json?resource=";
+const AS_RESOLVER_URL =
+  "https://stat.ripe.net/data/as-overview/data.json?resource=";
 const schema = {
   eyeball: "eyeball_asn",
   ixp: "ixp_asn",
@@ -46,37 +46,45 @@ const replaceAs2OrgNames = async nodes => {
   const fetchUrl = "./as2org.json";
   let response = await fetch(fetchUrl);
   let orgNames = await response.json();
-  for (let node of nodes.filter(
-    n => n.name && n.name.slice(0, 2) === "AS"
-  )) {
-    let orgName = orgNames.find(o => o.asn === node.name.replace("AS", ""));
-    console.log(`inject ${orgName.name}`);
-    console.log(
-      document.querySelector(`text[data-asn='${node.name}']`).textContent
+  let unknownAses = [];
+  for (let node of nodes.filter(n => n.name && n.name.slice(0, 2) === "AS")) {
+    let orgName = orgNames.find(
+      o => o.asn === node.name.replace("AS", "") && o.name !== ""
     );
-    document.querySelector(
-      `text[data-asn="${node.name}"]`
-    ).textContent = orgName.name.split(/_|\.| |\,/)[0];
+    if (orgName) {
+      console.log(`inject ${orgName.name}`);
+      console.log(
+        document.querySelector(`text[data-asn='${node.name}']`).textContent
+      );
+      document.querySelector(
+        `text[data-asn="${node.name}"]`
+      ).textContent = orgName.name.split(/_|\.| |\,/)[0];
+    } else {
+      console.log(`skipping ${node.name}`);
+      unknownAses.push(node.name);
+    }
   }
+  return unknownAses;
 };
 
-// const getAllOrgNamesFromRipeStat = async nodes => {
-//   for (let node of nodes.filter(
-//     n =>
-//       n.name.slice(0, 2) === "AS" //&&
-//       //n.type !== "eyeball_asn" &&
-//       //n.type !== "eyeball_asn_noprobe"
-//   )) {
-//     let orgName = await resolveAsToName(node.name);
-//     console.log(`inject ${orgName}`);
-//     console.log(
-//       document.querySelector(`text[data-asn='${node.name}']`).textContent
-//     );
-//     document.querySelector(
-//       `text[data-asn="${node.name}"]`
-//     ).textContent = orgName.split(/_|\.| |\,/)[0];
-//   }
-// };
+const getOrgNamesFromRipeStat = async asns => {
+  for (let asn of asns.filter(
+    n => n.slice(0, 2) === "AS" //&&
+    //n.type !== "eyeball_asn" &&
+    //n.type !== "eyeball_asn_noprobe"
+  )) {
+    let orgName = await resolveAsToName(asn);
+    if (orgName !== "") {
+      console.log(`inject ${orgName}`);
+      console.log(
+        document.querySelector(`text[data-asn='${asn}']`).textContent
+      );
+      document.querySelector(
+        `text[data-asn="${asn}"]`
+      ).textContent = orgName.split(/_|\.| |\,/)[0];
+    }
+  }
+};
 
 const getAllOrgNames = async nodes => {
   for (let node of nodes.filter(
@@ -102,7 +110,9 @@ d3.json(DATA_URL, function(error, data) {
   //     console.log(orgNames);
   //   });
 
-  replaceAs2OrgNames(data.nodes);
+  const unknownAses = replaceAs2OrgNames(data.nodes).then(
+    unknownAses => unknownAses.length > 0 && getOrgNamesFromRipeStat(unknownAses)
+  );
 
   function ticked() {
     link.attr("d", positionLink);
@@ -209,7 +219,13 @@ d3.json(DATA_URL, function(error, data) {
       .attr("data-asn", d.data.name)
       .attr("x", textCoords[0])
       .attr("y", textCoords[1])
-      .attr("text-anchor", d => textCoords[0] < 0 && "end" || textCoords[0] > 0 && "start" || "middle");
+      .attr(
+        "text-anchor",
+        d =>
+          (textCoords[0] < 0 && "end") ||
+          (textCoords[0] > 0 && "start") ||
+          "middle"
+      );
   });
 
   var link = svg
