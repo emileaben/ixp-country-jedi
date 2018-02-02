@@ -47,9 +47,7 @@ const replaceAs2OrgNames = async nodes => {
   let response = await fetch(fetchUrl);
   let orgNames = await response.json();
   for (let node of nodes.filter(
-    n => n.name && n.name.slice(0, 2) === "AS" //&&
-    //n.type !== "eyeball_asn" &&
-    //n.type !== "eyeball_asn_noprobe"
+    n => n.name && n.name.slice(0, 2) === "AS"
   )) {
     let orgName = orgNames.find(o => o.asn === node.name.replace("AS", ""));
     console.log(`inject ${orgName.name}`);
