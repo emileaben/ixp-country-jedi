@@ -250,7 +250,10 @@ d3.json(DATA_URL, function(error, data) {
           d[2].type === "eyeball_asn" &&
           "transit-eyeball") ||
         (d[0].type === "ixp" && d[2].type === "ixp" && "ixp-ixp") ||
-        d[0].type;
+        d[2].type === "eyeball_asn" && "eyeball" ||
+        d[2].type === "transit_asn" && "transit" ||
+        d[2].type === "ixp" && "ixp"
+        //d[0].type;
       return `link ${linkClass} ${d[3]}`;
     });
 
