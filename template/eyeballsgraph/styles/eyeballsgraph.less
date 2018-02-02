@@ -147,7 +147,7 @@ path.c-ring {
 }
 
 path:hover {
-  stroke: @oim-antracite;
+  //stroke: @oim-antracite;
   stroke-opacity: 1;
   //stroke-width: 1pt;
 }
@@ -155,36 +155,47 @@ path:hover {
 path {
   fill: none;
   stroke-width: 1pt;
-  stroke-opacity: 0.5;
+  stroke-opacity: 0.6;
   stroke-linecap: round;
-  stroke: @oim-antracite;
+  stroke: red;
 }
 
-path.eyeball_asn {
+path.eyeball {
   fill: none;
   stroke: tint(@jedi-eyeballs, 50%);
   stroke-width: 1pt;
   //stroke-opacity: 0.5;
 }
 
-path.ixp-ixp,
 path.transit-ixp,
 path.eyeball-ixp,
 path.ixp,
 path.ixp-eyeball {
   stroke: tint(@jedi-ixp, 50%);
+  fill: none;
+  stroke-width: 1pt;
   /*stroke-width: 4pt;*/
   //stroke-opacity: 0.6;
+}
+
+path.ixp-ixp {
+    stroke: red;
 }
 
 path.ixp-transit,
 path.transit-transit,
 path.eyeball-transit,
-path.transit_asn,
+//path.transit_asn,
 path.transit-eyeball {
   stroke: tint(@jedi-transit, 50%);
+  fill: none;
+  stroke-width: 1pt;
   /*stroke-width: 4pt;*/
   //stroke-opacity: 0.7;
+}
+
+path.transit {
+    stroke: tint(@jedi-transit, 50%);
 }
 
 path.i {
@@ -196,7 +207,7 @@ path.i {
     
 } */
 
-path.d:not(".eyeball_asn") {
+path.d:not(".eyeball") {
   stroke-width: 2pt;
 }
 
