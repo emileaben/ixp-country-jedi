@@ -8,8 +8,8 @@ console.log(`country : ${countryCode}, date: ${year}-${month}-${day}`);
 
 const SCALEFACTOR = 2;
 const DATA_URL = `http://sg-pub.ripe.net/emile/ixp-country-jedi/history/${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
-const AS_RESOLVER_URL =
-  "https://stat.ripe.net/data/as-overview/data.json?resource=";
+// const AS_RESOLVER_URL =
+//   "https://stat.ripe.net/data/as-overview/data.json?resource=";
 const schema = {
   eyeball: "eyeball_asn",
   ixp: "ixp_asn",
@@ -163,6 +163,8 @@ d3.json(DATA_URL, function(error, data) {
           .filter(
             d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
           )
+          // calculate which percentage we're actually representing,
+          // so that we can have an open ring.
           .reduce((acc, cur) => acc + cur.eyeball_pct, 0) /
           100)
     )
@@ -178,8 +180,8 @@ d3.json(DATA_URL, function(error, data) {
 
   var textOutLineSegment = d3
     .arc()
-    .innerRadius(260)
-    .outerRadius(260);
+    .innerRadius(245)
+    .outerRadius(245);
 
   var eyeBallsRing = d3
     .arc()
@@ -187,6 +189,7 @@ d3.json(DATA_URL, function(error, data) {
     .outerRadius(220);
 
   connectedRing.forEach(d => {
+    const textCoords = textOutLineSegment.centroid(d);
     let group = svg
       .append("g")
       .attr(
@@ -206,9 +209,9 @@ d3.json(DATA_URL, function(error, data) {
       .append("text")
       .text(d.data.name)
       .attr("data-asn", d.data.name)
-      .attr("x", textOutLineSegment.centroid(d)[0])
-      .attr("y", textOutLineSegment.centroid(d)[1])
-      .attr("text-anchor", "middle");
+      .attr("x", textCoords[0])
+      .attr("y", textCoords[1])
+      .attr("text-anchor", d => textCoords[0] < 0 && "end" || textCoords[0] > 0 && "start" || "middle");
   });
 
   var link = svg
@@ -250,7 +253,7 @@ d3.json(DATA_URL, function(error, data) {
       const scalar =
         // (d.type === "eyeball_asn" && Math.max(d.eyeball_pct, BALL_MIN_SIZE)) ||
         // ((d.type === "transit_asn" || d.type === "ixp") &&
-        Math.max(d.conn_btwn_pct, BALL_MIN_SIZE) || BALL_MIN_SIZE;
+        d.conn_btwn_pct || BALL_MIN_SIZE;
       return Math.max(Math.log(scalar * SCALEFACTOR) * 3.5, 2);
     })
     .on("mouseover", function(d) {
@@ -282,7 +285,7 @@ d3.json(DATA_URL, function(error, data) {
     .forceSimulation()
     .force(
       "charge",
-      d3.forceCollide().radius(d => (d.type !== "eyeball_asn" && 15) || 0)
+      d3.forceCollide().radius(d => (d.type !== "eyeball_asn" && 12) || 0)
     )
     .force(
       "x",
