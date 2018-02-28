@@ -107,6 +107,10 @@ _~/.geonames/auth_.
 
 for more information on GeoNames see http://www.geonames.org/export/web-services.html
 
+This script also relies on Google Maps Geocoding API to geocode a location from list of probes. The limit is
+[2500 free requests](https://developers.google.com/maps/documentation/geocoding/usage-limits). You can pass your own
+API key by using environment variable `GOOGLEMAPS_API_KEY`.
+
 ## measure.py
 
 This script runs one-off measurements for the probes specified in
