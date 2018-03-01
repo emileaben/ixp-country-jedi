@@ -407,13 +407,23 @@ def capital_city_for_country( country_code ):
 def locstr2latlng( locstring ):
    try:
       locstr = urllib2.quote( locstring )
-      geocode_url = "http://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false" % locstr
+      geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false" % locstr
+      apikey = os.getenv('GOOGLEMAPS_API_KEY')
+      if apikey:
+         geocode_url += "&key=%s" % apikey
+
       req = urllib2.urlopen(geocode_url)
+
       resp = json.loads(req.read())
+      if 'error_message' in resp:
+         raise SystemExit("Maps geocode error: %s" % resp['error_message'])
+
+
       ll = resp['results'][0]['geometry']['location']
-      return ( ll['lat'], ll['lng'] )
-   except:
+      return (ll['lat'], ll['lng'])
+   except (ValueError, IndexError):
       print "could not determine lat/long for '%s'" % ( locstring )
+      pass
 
 
 def extract_websites_in_tld(country_code, max_results=100):
