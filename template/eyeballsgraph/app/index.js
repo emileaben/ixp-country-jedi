@@ -209,7 +209,8 @@ d3.json(DATA_URL, function(error, data) {
       .append("path")
       .attr(
         "d",
-        connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+        connectedArcSegment.outerRadius(d => 240)(d)
+        //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
       )
       .attr("class", "c-ring");
 
