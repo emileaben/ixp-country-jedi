@@ -8,11 +8,22 @@ var dir_html = path.resolve(__dirname, "html");
 var dir_data = path.resolve(__dirname, "data");
 
 module.exports = {
-  entry: ["babel-polyfill", path.resolve(dir_app, "index.js")],
+  entry: [
+    "babel-polyfill",
+    "react-hot-loader/patch",
+    "webpack-dev-server/client?http://4042.ripe.net",
+    "webpack/hot/only-dev-server",
+    path.resolve(dir_app, "index.js")
+  ],
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.md?$/,
+        use: ["babel-loader", "markdown-jsx-loader"],
+        include: [/texts/]
+      },
+      {
+        test: /\.js[x]?$/,
         exclude: [/node_modules/],
         include: [/app/],
         use: ["babel-loader"]
@@ -45,12 +56,21 @@ module.exports = {
   context: dir_app,
   devtool: "cheap-module-source-map",
   devServer: {
+    host: "4042.ripe.net",
+    port: 4042,
+    hot: true,
+    public: "4042.ripe.net",
+    disableHostCheck: true,
+    headers: {
+      "Access-Control-Allow-Origin": "*"
+    },
     contentBase: dir_build,
     historyApiFallback: {
       rewrites: [
         { from: /bundle\.js/, to: "/bundle.js" },
         { from: /index\.html/, to: "/index.html" },
-        { from: /as2org\.json/, to: "/as2org.json"},
+        { from: /world-geo150_ne50m.topo.json/, to: "/world-geo150_ne50m.topo.json" },
+        { from: /as2org\.json/, to: "/as2org.json" },
         { from: /[a-zA-Z]{2}\/[0-9]{4}\/[0-9]{2}\/[0-9]{2}/, to: "/" },
         { from: /[a-zA-Z]{2}/, to: "/" }
       ]
