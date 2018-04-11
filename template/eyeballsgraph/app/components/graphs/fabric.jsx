@@ -56,7 +56,7 @@ export class PeerToPeerFabricGraph extends React.Component {
     return data.data.holder;
   };
 
-  replaceAs2OrgNames = async (nodes, orgNames = []) => {
+  replaceAs2OrgNames = (nodes, orgNames = []) => {
     let unknownAses = [];
     for (let node of nodes.filter(n => n.name && n.name.slice(0, 2) === "AS")) {
       let orgName = orgNames.find(
@@ -246,7 +246,7 @@ export class PeerToPeerFabricGraph extends React.Component {
           !props.hideText &&
           p
             .append("text")
-            .text(d => d.data.name)
+            .text(d => d.data.orgName || d.data.name)
             .attr("data-asn", d => d.data.name)
             .attr("x", d => textOutLineSegment.centroid(d)[0])
             .attr("y", d => textOutLineSegment.centroid(d)[1])
@@ -369,7 +369,7 @@ export class PeerToPeerFabricGraph extends React.Component {
               d =>
                 (d.type !== "eyeball_asn" &&
                   d.type !== "eyeball_asn_noprobe" &&
-                  d.name) ||
+                  (d.orgName || d.name)) ||
                 ""
             )
             .attr("data-asn", d => d.name)
@@ -452,15 +452,15 @@ export class PeerToPeerFabricGraph extends React.Component {
       // in two steps:
       // 1. lookup in a json file (from CAIDA) that we'll load async
       // 2. lookup with a call to RIPEstat
+      // doing this sync should be fast, because the as2org file
+      // is loaded async by the parent and then
+      // propagates as a prop to this component when it has arrived
+      // in parent.
       const unknownAses =
         !this.props.hideText &&
-        this.replaceAs2OrgNames(
-          this.state.asGraph.nodes,
-          nextProps.orgNames
-        ).then(unknownAses => {
-          console.log(`not found in as2org :\t${unknownAses.length}`);
-          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
-        });
+        this.replaceAs2OrgNames(this.state.asGraph.nodes, nextProps.orgNames);
+      console.log(`not found in as2org :\t${unknownAses.length}`);
+      unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
     }
 
     if (
@@ -472,12 +472,12 @@ export class PeerToPeerFabricGraph extends React.Component {
 
       this.loadAsGraphData(nextProps).then(
         data => {
+          console.log(this.state.asGraph.nodes);
+
           const d3GraphNodesLinks = this.renderD3Ring({
             ...this.props,
             data: {
-              nodes: [...data.nodes].sort((a, b) => {
-                a.id < b.id;
-              }),
+              nodes: this.state.asGraph.nodes,
               edges: [...data.edges]
             }
           });
@@ -513,7 +513,26 @@ export class PeerToPeerFabricGraph extends React.Component {
         asGraph: data
       });
 
-      //});
+      if (this.props.orgNames) {
+        console.log("as2org loaded fast, looking up...");
+        // now lookup all the organisation names for ASes
+        // in two steps:
+        // 1. lookup in a json file (from CAIDA) that we'll load async
+        // 2. lookup with a call to RIPEstat
+        // doing this sync should be fast, because the as2org file
+        // is loaded async by the parent and then
+        // propagates as a prop to this component when it has arrived
+        // in parent.
+        const unknownAses =
+          this.props.orgNames &&
+          !this.props.hideText &&
+          this.replaceAs2OrgNames(
+            this.state.asGraph.nodes,
+            this.props.orgNames
+          );
+        console.log(`not found in as2org :\t${unknownAses.length}`);
+        unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+      }
     });
   }
 
