@@ -149,11 +149,11 @@ export class PeerToPeerFabricGraph extends React.Component {
     //     .attr("class", "tooltip");
 
     var nodes = data.nodes,
-      nodeById = d3.map(nodes, function(d) {
-        return d.id;
-      }),
+      nodeById = d3.map(nodes, d => d.id),
       bilinks = [];
 
+    // rework link data to include the
+    // link type
     data.edges.forEach(function(link) {
       //console.log(link.type);
       var s = (link.source = nodeById.get(link.source)),
@@ -187,7 +187,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
       )
     );
-    //console.log(connectedRing);
+
     var connectedArcSegment = d3.arc().innerRadius(220);
     //.outerRadius(230);
     //.endAngle(Math.PI / 2);
@@ -202,47 +202,85 @@ export class PeerToPeerFabricGraph extends React.Component {
       .innerRadius(220)
       .outerRadius(220);
 
-    // TODD: refactor using data.(...).enter()
-    // otherwise updates will duplicate these segments
-    // and the directed force graph will explode, because it can't find the actual segments
-    // it needs to bind some nodes to.
-    connectedRing.forEach(d => {
-      const textCoords = textOutLineSegment.centroid(d);
+    var ringPath0 = svg.selectAll("g.connected-ring").data(connectedRing);
 
-      let group = svg
-        .append("g")
-        .attr(
-          "class",
-          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-            "eyeball-no-probe") ||
-            "eyeball-probe"}`
-        );
-
-      group
-        .append("path")
-        .attr(
-          "d",
-          connectedArcSegment.outerRadius(d => 240)(d)
-          //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
-        )
-        .attr("class", "c-ring");
-
-      if (!props.hideText) {
-        group
-          .append("text")
-          .text(d.data.name)
-          .attr("data-asn", d.data.name)
-          .attr("x", textCoords[0])
-          .attr("y", textCoords[1])
+    var ringPath = ringPath0
+      .enter()
+      .append("g")
+      .attr(
+        "class",d => 
+        `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+          "eyeball-no-probe") ||
+          "eyeball-probe"}`
+      )
+      .call(p =>
+        p
+          .append("path")
           .attr(
-            "text-anchor",
-            d =>
-              (textCoords[0] < 0 && "end") ||
-              (textCoords[0] > 0 && "start") ||
-              "middle"
-          );
-      }
-    });
+            "d",
+            d => connectedArcSegment.outerRadius(d => 240)(d)
+            //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+          )
+          .attr("class", "c-ring")
+      )
+      .call(
+        p =>
+          !props.hideText &&
+          p
+            .append("text")
+            .text(d => d.data.name)
+            .attr("data-asn", d => d.data.name)
+            .attr("x", d => textOutLineSegment.centroid(d)[0])
+            .attr("y", d => textOutLineSegment.centroid(d)[1])
+            .attr(
+              "text-anchor",
+              d =>
+                (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
+                (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
+                "middle"
+            )
+      )
+      .merge(ringPath0);
+
+    ringPath.exit().remove();
+
+    // connectedRing.forEach(d => {
+    //   const textCoords = textOutLineSegment.centroid(d);
+
+    //   let group = svg
+    //     .append("g")
+    //     .attr(
+    //       "class",
+    //       `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+    //         "eyeball-no-probe") ||
+    //         "eyeball-probe"}`
+    //     );
+
+    //   group
+    //     .append("path")
+    //     .attr(
+    //       "d",
+    //       connectedArcSegment.outerRadius(d => 240)(d)
+    //       //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+    //     )
+    //     .attr("class", "c-ring");
+
+    //   if (!props.hideText) {
+    //     group
+    //       .append("text")
+    //       .text(d.data.name)
+    //       .attr("data-asn", d.data.name)
+    //       .attr("x", textCoords[0])
+    //       .attr("y", textCoords[1])
+    //       .attr(
+    //         "text-anchor",
+    //         d =>
+    //           (textCoords[0] < 0 && "end") ||
+    //           (textCoords[0] > 0 && "start") ||
+    //           "middle"
+    //       );
+    //   }
+    // });
 
     var link0 = svg
       //.append("g")
