@@ -1,14 +1,59 @@
 import React from "react";
 
+const MIN_SNAPSHOT_DATE = new Date("2018/01/01");
+
+class SnapshotDot extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentSnapshotDate: props.currentSnapshotDate
+    };
+  }
+
+  render() {
+    return [
+      <text
+        transform={`matrix(1 0 0 1 ${this.props.i * 100 + 40} 55.998)`}
+        key={`t-${this.props.i}`}
+      >
+        {this.props.monthName}
+      </text>,
+      this.props.isCurrentDate && (
+        <circle
+          className="st2"
+          cx={this.props.i * 100 + 40}
+          cy="79.2"
+          r="12"
+          key={"cc-${this.props.i}"}
+        />
+      ),
+      <circle
+        className={(this.props.isCurrentDate && "st3") || "st2"}
+        cx={this.props.i * 100 + 40}
+        cy="79.2"
+        r="9"
+        onClick={() => this.props.handleChangeSnapshot(this.props.snapshotDate)}
+        key={`c-${this.props.i}`}
+      />
+    ];
+  }
+}
+
 export class SnapShotTimeLine extends React.Component {
   render() {
+    const currentSnapshots = this.props.snapshots.filter(
+      s => new Date(`${s.year}-${s.month}-${s.day}`) >= MIN_SNAPSHOT_DATE
+    );
+    const firstDate = (currentSnapshots && currentSnapshots[0]) || null;
     return (
       <svg
         className="snapshot-timeline"
-        x="0px" y="0px"
-        width="377.4px" height="91.7px"
+        x="0px"
+        y="0px"
+        width="377.4px"
+        height="91.7px"
         viewBox="0 0 377.4 91.7"
-        style={{"enableBackground": "new 0 0 377.4 91.7"}}
+        style={{ enableBackground: "new 0 0 377.4 91.7" }}
       >
         <g>
           <line className="st0" x1="48.7" y1="79.2" x2="329.3" y2="79.2" />
@@ -23,9 +68,9 @@ export class SnapShotTimeLine extends React.Component {
               </g>
             </g>
           </g>
-          <circle className="st2" cx="39.3" cy="79.2" r="9" />
+          {/* <circle className="st2" cx="39.3" cy="79.2" r="9" />
           <circle className="st2" cx="338.3" cy="79.2" r="9" />
-          <circle className="st2" cx="137.1" cy="79.2" r="9" />
+    <circle className="st2" cx="137.1" cy="79.2" r="9" /> */}
           <polyline
             className="st0"
             points="338.4,31.2 338.4,22.2 338.4,21.5 38.6,21.5 38.6,30.5 	"
@@ -41,33 +86,41 @@ export class SnapShotTimeLine extends React.Component {
               </g>
             </g>
           </g>
-          <text
-            transform="matrix(1 0 0 1 14.6255 55.998)"
-          >
-            August
+          {/* by default show the four most recent snapshots in the timeline */}
+          {currentSnapshots.slice(-4).map((s, i) => {
+            const date = new Date(`${s.year}-${s.month}-${s.day} 00:00`);
+            // JS is funny like that: a Date is never equal to a Date.
+            const isCurrentDate =
+              (this.props.currentSnapshotDate.year === s.year &&
+                this.props.currentSnapshotDate.month === s.month &&
+                this.props.currentSnapshotDate.day === s.day) ||
+              false;
+            const monthName = date.toLocaleDateString("en-us", {
+              month: "long"
+            });
+            return (
+              <SnapshotDot
+                monthName={monthName}
+                isCurrentDate={isCurrentDate}
+                snapshotDate={s}
+                i={i}
+                handleChangeSnapshot={s => this.props.handleChangeSnapshot(s)}
+                key={`ssdot-${i}`}
+              />
+            );
+          })}
+          {/*<text transform="matrix(1 0 0 1 14.6255 55.998)">August</text>
+          <text transform="matrix(1 0 0 1 101.7588 55.998)">September</text>
+          <text transform="matrix(1 0 0 1 203.9561 55.998)">1 October</text>
+        <text transform="matrix(1 0 0 1 302.0596 55.998)">December</text>*/}
+          <text transform="matrix(1 0 0 1 165.8276 13.7109)">
+            {firstDate &&
+              new Date(
+                `${firstDate.year}/${firstDate.month}/${firstDate.day}`
+              ).getYear() + 1900}
           </text>
-          <text
-            transform="matrix(1 0 0 1 101.7588 55.998)"
-          >
-            September
-          </text>
-          <text
-            transform="matrix(1 0 0 1 203.9561 55.998)"
-          >
-            1 October
-          </text>
-          <text
-            transform="matrix(1 0 0 1 302.0596 55.998)"
-          >
-            December
-          </text>
-          <text
-            transform="matrix(1 0 0 1 165.8276 13.7109)"
-          >
-            2018
-          </text>
-          <circle className="st2" cx="237.3" cy="79.2" r="12" />
-          <circle className="st3" cx="237.3" cy="79.2" r="9" />
+          {/* <circle className="st2" cx="237.3" cy="79.2" r="12" /> */}
+          {/* <circle className="st3" cx="237.3" cy="79.2" r="9" /> */}
         </g>
       </svg>
     );

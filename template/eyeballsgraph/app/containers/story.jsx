@@ -23,27 +23,24 @@ const primaryFromUrl = window.location.pathname.match(
   /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
 );
 
-const destructureCountryInfoFromUrl = () => {
-  const paths = primaryFromUrl || null;
-  let [countryCode, year, month, day] = (paths && paths.slice(1, 6)) || [
-    null,
-    null,
-    null,
-    null
-  ];
-
-  // let [propsYear, propsMonth, propsDay] = props.date
-  //   .match(/([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/)
-  //   .slice(1, 6) || [null, null, null];
-  return {
-    countryCode,
-    year,
-    month,
-    day
-  };
-};
-
 export class PeerToPeerContainer extends React.Component {
+  destructureCountryInfoFromUrl = () => {
+    const paths = primaryFromUrl || null;
+    return (paths && paths.slice(1, 6)) || [null, null, null, null];
+    // console.log({
+    //     countryCode,
+    //     year,
+    //     month,
+    //     day
+    //   })
+    // return {
+    //   countryCode,
+    //   year,
+    //   month,
+    //   day
+    // };
+  };
+
   loadCountryGeoInfo = async countryGeoInfoUrl => {
     let response = await fetch(countryGeoInfoUrl);
     let data = await response.json();
@@ -58,7 +55,7 @@ export class PeerToPeerContainer extends React.Component {
   };
 
   whatsMyGeoLocation = async () => {
-    const fetchMyIpUrl = `https://stat.ripe.net/data/whats-my-ip/data.json`;
+    const fetchMyIpUrl = "https://stat.ripe.net/data/whats-my-ip/data.json";
     const fetchGeoUrl = "https://stat.ripe.net/data/geoloc/data.json";
     let ipResponse = await fetch(fetchMyIpUrl);
     let ipAddress = await ipResponse.json();
@@ -69,6 +66,14 @@ export class PeerToPeerContainer extends React.Component {
     return (
       (geoLocation.data.locations && geoLocation.data.locations[0]) || null
     );
+  };
+
+  loadAs2GeojsonIndex = async () => {
+    const fetchUrl =
+      "https://sg-pub.ripe.net/emile/ixp-country-jedi/history/country-timelines.json";
+    let response = await fetch(fetchUrl);
+    let countrySnapshots = await response.json();
+    return countrySnapshots;
   };
 
   componentDidMount() {
@@ -90,52 +95,124 @@ export class PeerToPeerContainer extends React.Component {
 
     // try to get the country of the user
     this.whatsMyGeoLocation().then(l => {
-      const countryCode = (l.country && l.country.toLowerCase()) || null;
-      console.log(`user country:\t${countryCode}`);
-      if (countryCode) {
+      //let countryCode = (l.country && l.country.toLowerCase()) || null;
+      //console.log(`user country:\t${countryCode}`);
+
+      //   if (countryCode) {
+      //     this.setState({
+      //       countryCode: countryCode
+      //     });
+      //   }
+
+      this.loadAs2GeojsonIndex().then(cA => {
+        console.log(this.destructureCountryInfoFromUrl());
+        let [
+          urlCountryCode,
+          urlYear,
+          urlMonth,
+          urlDay
+        ] = this.destructureCountryInfoFromUrl();
+        const countryCode =
+          (urlCountryCode && urlCountryCode.toUpperCase()) ||
+          l.country.toUpperCase();
+        console.log(countryCode);
+        const snaps = cA
+          .find(snap => snap.country === countryCode)
+          .dates.map(d => {
+            const [year, month, day] = d
+              .match(/([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/)
+              .slice(1, 4);
+            return {
+              year,
+              month,
+              day
+            };
+          });
+
+        console.log(snaps);
+        let [year, month, day] = [
+          urlYear || snaps.slice(-1)[0].year,
+          urlMonth || snaps.slice(-1)[0].month,
+          urlDay || snaps.slice(-1)[0].day
+        ];
         this.setState({
-          countryCode: countryCode
+          snapshots: snaps,
+          countryCode: countryCode,
+          currentSnapshotDate: { year, month, day }
         });
-      }
+        console.log(new Date(`${year}/${month}/${day} 00:00`));
+      });
     });
+
+    // See if the URL has parameters for the primary graph.
+
+    //const [urlYear, urlMonth, urlDay] = this.destructureCountryInfoFromUrl();
+
+    // ready collecting info, try to assemble the parameters for the primary graph:
+    // 1. See if the URL has parameters, if so, 'move' to the nearest available snapshot, if not:
+    // 2. Use the geolocated IP address to use as the country for the primary graph
+    // 3. If we still don't have a date, use the most recent snapshot.
   }
+
+  changeSnapshotDate = newSnapshotDate => {
+    this.setState({
+      currentSnapshotDate: newSnapshotDate
+    });
+  };
 
   render() {
     return (
       <div id="ptp-fabric-panel">
-        {/* id="ptp-fabric-panel"
-      countryGeoInfoUrl={countryGeoInfoUrl}
-    > */}
         <PeerToPeerStoryText />
-        <SnapShotTimeLine />
-        {(primaryFromUrl &&
+        {this.state && this.state.currentSnapshotDate && <SnapShotTimeLine
+          snapshots={(this.state && this.state.snapshots) || []}
+          currentSnapshotDate={this.state.currentSnapshotDate}
+          handleChangeSnapshot={this.changeSnapshotDate}
+        />}
+
+        {/* {(primaryFromUrl &&
           this.state &&
           this.state.countries && (
             <PeerToPeerFabricGraph
               primary={true}
               {...destructureCountryInfoFromUrl()}
             />
-          )) ||
-          (this.state &&
-            this.state.countryCode &&
-            this.state.countries && (
-              <PeerToPeerFabricGraph
-                primary={true}
-                countryInfo={
-                  this.state &&
-                  this.state.countries &&
-                  this.state.countries.geometries.find(
-                    c =>
-                      c.properties.countryCode ===
-                      this.state.countryCode.toUpperCase()
-                  )
-                }
-                countryCode={this.state && this.state.countryCode}
-                year="2018"
-                month="03"
-                day="01"
-              />
-            )) || <div>waiting...</div>}
+          )) || */}
+
+        {(this.state &&
+          this.state.countryCode &&
+          this.state.countries &&
+          this.state.currentSnapshotDate && (
+            <PeerToPeerFabricGraph
+              primary={true}
+              countryInfo={
+                this.state &&
+                this.state.countryCode &&
+                this.state.countries &&
+                this.state.countries.geometries.find(
+                  c =>
+                    c.properties.countryCode ===
+                    this.state.countryCode.toUpperCase()
+                )
+              }
+              countryCode={this.state && this.state.countryCode}
+              year={
+                this.state &&
+                this.state.currentSnapshotDate &&
+                this.state.currentSnapshotDate.year
+              }
+              month={
+                this.state &&
+                this.state.currentSnapshotDate &&
+                this.state.currentSnapshotDate.month
+              }
+              day={
+                this.state &&
+                this.state.currentSnapshotDate &&
+                this.state.currentSnapshotDate.day
+              }
+            />
+          )) || <div>waiting...</div>}
 
         <Legend />
         <div className="small-graphs">
@@ -162,7 +239,6 @@ export class PeerToPeerContainer extends React.Component {
                   c => c.properties.countryCode === "ES"
                 )}
                 countryCode="ES"
-                //countries={this.state.countries}
                 year="2018"
                 month="03"
                 day="01"
@@ -173,7 +249,6 @@ export class PeerToPeerContainer extends React.Component {
                   c => c.properties.countryCode === "IE"
                 )}
                 countryCode="IE"
-                //countries={this.state.countries}
                 year="2018"
                 month="03"
                 day="01"
@@ -183,7 +258,6 @@ export class PeerToPeerContainer extends React.Component {
                 countryInfo={this.state.countries.geometries.find(
                   c => c.properties.countryCode === "CZ"
                 )}
-                //countries={this.state.countries}
                 countryCode="CZ"
                 year="2018"
                 month="02"
@@ -194,51 +268,5 @@ export class PeerToPeerContainer extends React.Component {
           )}
       </div>
     );
-
-    //////////////////
-    // return (
-    //   <div id={this.props.id}>
-    //     {/* propagate all loaded general info to all the children */}
-    //     {React.Children.map(this.props.children, child => {
-    //       return React.cloneElement(child, {
-    //         // select the country for this particular child component
-    //         // based on the presence of the `countryCode` property of the child.
-    //         countryinfo:
-    //           (this.state &&
-    //             this.state.countries &&
-    //             (child.props.countryCode &&
-    //               this.state.countries.geometries.find(
-    //                 c =>
-    //                   c.properties.countryCode ===
-    //                   child.props.countryCode.toUpperCase()
-    //               ))) ||
-    //           (this.state &&
-    //             this.state.countryCode &&
-    //             this.state.countries &&
-    //             this.state.countries.geometries.find(
-    //               c =>
-    //                 c.properties.countryCode ===
-    //                 this.state.countryCode.toUpperCase()
-    //             )) ||
-    //           null,
-    //         // pass on the countryCode that was acquired from the geolocation of the user's ip,
-    //         // if this is the primary graph.
-    //         countryCode:
-    //           (this.state && child.props.primary && this.state.countryCode) ||
-    //           child.props.countryCode,
-    //         // pass on all countries if the child indicates that it has children
-    //         // itself that need specific country info.
-    //         countries:
-    //           child.props.hasGraphs && this.state && this.state.countries,
-    //         orgnames:
-    //           ((this.state || child.props.hasGraphs) &&
-    //             this.state &&
-    //             child.props.countryCode &&
-    //             this.state.orgnames) ||
-    //           null
-    //       });
-    //     })}
-    //   </div>
-    //);
   }
 }
