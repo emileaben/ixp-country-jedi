@@ -211,6 +211,7 @@ export class PeerToPeerContainer extends React.Component {
                 this.state.currentSnapshotDate &&
                 this.state.currentSnapshotDate.day
               }
+              orgNames={this.state.orgnames}
             />
           )) || <div>waiting...</div>}
 

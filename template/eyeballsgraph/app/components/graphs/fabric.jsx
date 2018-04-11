@@ -56,26 +56,39 @@ export class PeerToPeerFabricGraph extends React.Component {
     return data.data.holder;
   };
 
-  replaceAs2OrgNames = async nodes => {
+  replaceAs2OrgNames = async (nodes, orgNames = []) => {
     let unknownAses = [];
     for (let node of nodes.filter(n => n.name && n.name.slice(0, 2) === "AS")) {
-      let orgName =
-        this.props.orgnames &&
-        this.props.orgnames.find(
-          o => o.asn === node.name.replace("AS", "") && o.name !== ""
-        );
+      let orgName = orgNames.find(
+        o => o.asn === node.name.replace("AS", "") && o.name !== ""
+      );
       if (orgName) {
-        console.log(`inject ${orgName.name}`);
+        console.log(`inject from as2org\t: ${orgName.name}`);
         const textNode = document.querySelector(
           `text[data-asn="${node.name}"]`
         );
+
+        // add the orgName to the node, so it can be stored in the components
+        // state later on.
+        node.orgName = orgName.name.split(/_|\.| |\,/)[0];
+
         if (textNode) {
+          // Manipulate DOM directly
           textNode.textContent = orgName.name.split(/_|\.| |\,/)[0];
         }
       } else {
         unknownAses.push(node.name);
       }
     }
+
+    // batch update all the nodes in the current state
+    this.state &&
+      this.setState({
+        asGraph: {
+          ...this.state.asGraph,
+          nodes: [...nodes]
+        }
+      });
     return unknownAses;
   };
 
@@ -87,14 +100,25 @@ export class PeerToPeerFabricGraph extends React.Component {
     )) {
       let orgName = await this.resolveAsToName(asn);
       if (orgName !== "") {
-        console.log(`inject ${orgName}`);
+        console.log(`inject from RIPEstat\t: ${orgName}`);
         // console.log(
         //   document.querySelector(`text[data-asn='${asn}']`).textContent
         // );
+        // manipulate the DOM directly
         const textNode = document.querySelector(`text[data-asn="${asn}"]`);
         if (textNode) {
           textNode.textContent = orgName.split(/_|\.| |\,/)[0];
         }
+        const newAsNode = this.state.asGraph.nodes.find(n => n.name === asn);
+        this.setState({
+          asGraph: {
+            ...this.state.asGraph,
+            nodes: [
+              ...this.state.asGraph.nodes.filter(n => n.id !== newAsNode.id),
+              { ...newAsNode, orgName: orgName.split(/_|\.| |\,/)[0] }
+            ]
+          }
+        });
       }
     }
   };
@@ -114,13 +138,6 @@ export class PeerToPeerFabricGraph extends React.Component {
   };
 
   renderD3Ring = ({ data, ...props }) => {
-    const unknownAses =
-      !props.hideText &&
-      this.replaceAs2OrgNames(data.nodes).then(
-        unknownAses =>
-          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses)
-      );
-
     function ticked() {
       link.attr("d", positionLink);
       node.attr("transform", positionNode);
@@ -208,10 +225,11 @@ export class PeerToPeerFabricGraph extends React.Component {
       .enter()
       .append("g")
       .attr(
-        "class",d => 
-        `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-          "eyeball-no-probe") ||
-          "eyeball-probe"}`
+        "class",
+        d =>
+          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+            "eyeball-no-probe") ||
+            "eyeball-probe"}`
       )
       .call(p =>
         p
@@ -428,6 +446,23 @@ export class PeerToPeerFabricGraph extends React.Component {
   };
 
   componentWillReceiveProps(nextProps) {
+    if (this.state && nextProps.orgNames) {
+      console.log("as2org loaded, looking up...");
+      // now lookup all the organisation names for ASes
+      // in two steps:
+      // 1. lookup in a json file (from CAIDA) that we'll load async
+      // 2. lookup with a call to RIPEstat
+      const unknownAses =
+        !this.props.hideText &&
+        this.replaceAs2OrgNames(
+          this.state.asGraph.nodes,
+          nextProps.orgNames
+        ).then(unknownAses => {
+          console.log(`not found in as2org :\t${unknownAses.length}`);
+          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+        });
+    }
+
     if (
       nextProps.month !== this.props.month ||
       nextProps.year !== this.props.year ||
@@ -477,6 +512,8 @@ export class PeerToPeerFabricGraph extends React.Component {
       this.setState({
         asGraph: data
       });
+
+      //});
     });
   }
 
