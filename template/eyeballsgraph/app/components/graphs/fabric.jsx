@@ -48,6 +48,29 @@ export class PeerToPeerFabricGraph extends React.Component {
     (d.type === "ixp" && "ixp") ||
     "";
 
+  simulation = d3
+    .forceSimulation()
+    .force(
+      "charge",
+      d3.forceCollide().radius(d => {
+        return (d.type !== "eyeball_asn" && 24) || 0;
+      })
+    )
+    .force(
+      "x",
+      d3.forceX(d => {
+        let segAngle = this.state.segAngles[d.id];
+        return (segAngle && segAngle[0]) || 0;
+      })
+    )
+    .force(
+      "y",
+      d3.forceY(d => {
+        let segAngle = this.state.segAngles[d.id];
+        return (segAngle && segAngle[1]) || 0;
+      })
+    );
+
   resolveAsToName = async asn => {
     const fetchUrl = `${this.props.asResolverUrl}${asn}`;
     let response = await fetch(fetchUrl);
@@ -63,7 +86,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         o => o.asn === node.name.replace("AS", "") && o.name !== ""
       );
       if (orgName) {
-        console.log(`inject from as2org\t: ${orgName.name}`);
+        console.log(`inject from as2org\t: ${orgName.name} (${node.name})`);
         const textNode = document.querySelector(
           `text[data-asn="${node.name}"]`
         );
@@ -82,13 +105,13 @@ export class PeerToPeerFabricGraph extends React.Component {
     }
 
     // batch update all the nodes in the current state
-    this.state &&
-      this.setState({
-        asGraph: {
-          ...this.state.asGraph,
-          nodes: [...nodes]
-        }
-      });
+    // this.state &&
+    //   this.setState({
+    //     asGraph: {
+    //       ...this.asGraph,
+    //       nodes: [...nodes]
+    //     }
+    //   });
     return unknownAses;
   };
 
@@ -101,34 +124,29 @@ export class PeerToPeerFabricGraph extends React.Component {
       let orgName = await this.resolveAsToName(asn);
       if (orgName !== "") {
         console.log(`inject from RIPEstat\t: ${orgName}`);
-        // console.log(
-        //   document.querySelector(`text[data-asn='${asn}']`).textContent
-        // );
         // manipulate the DOM directly
         const textNode = document.querySelector(`text[data-asn="${asn}"]`);
         if (textNode) {
           textNode.textContent = orgName.split(/_|\.| |\,/)[0];
         }
-        const newAsNode = this.state.asGraph.nodes.find(n => n.name === asn);
-        this.setState({
-          asGraph: {
-            ...this.state.asGraph,
-            nodes: [
-              ...this.state.asGraph.nodes.filter(n => n.id !== newAsNode.id),
-              { ...newAsNode, orgName: orgName.split(/_|\.| |\,/)[0] }
-            ]
-          }
-        });
+        const newAsNode = this.asGraph.nodes.find(n => n.name === asn);
+        // this.setState({
+        //   asGraph: {
+        //     ...this.asGraph,
+        //     nodes: [
+        //       ...this.asGraph.nodes.filter(n => n.id !== newAsNode.id),
+        //       { ...newAsNode, orgName: orgName.split(/_|\.| |\,/)[0] }
+        //     ]
+        //   }
+        // });
       }
     }
   };
 
-  loadAsGraphData = async ({ year, month, day }) => {
-    const countryDataForDateUrl = `${this.props.dataBaseUrl}${
-      this.props.year
-    }-${this.props.month}-${
-      this.props.day
-    }/${this.props.countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
+  loadAsGraphData = async ({ year, month, day, countryCode }) => {
+    const countryDataForDateUrl = `${
+      this.props.dataBaseUrl
+    }${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
 
     let response = await fetch(countryDataForDateUrl);
     let data = await response.json();
@@ -137,7 +155,336 @@ export class PeerToPeerFabricGraph extends React.Component {
     return data;
   };
 
-  renderD3Ring = ({ data, ...props }) => {
+  // One stop-shop for transforming
+  // the input data from the json files to the actual format
+  // we need to diff it efficiently with
+  // the the state.asGraph data-structure.
+  //
+  // data       : raw input from asgraph.json file
+  // returns data: { nodes, links }
+  asGraph = { nodes: [], edges: [] };
+
+  transformAsGraphData(nextAsGraph) {
+    const toInteger = name => {
+      var hash = 0,
+        i,
+        chr;
+      if (name.length === 0) return hash;
+      for (i = 0; i < name.length; i++) {
+        chr = name.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0; // Convert to 32bit integer
+      }
+      return hash;
+    };
+
+    const toLinkClass = (s, t, type) => {
+      return `link ${s.type.replace("_asn", "")}-${t.type.replace(
+        "_asn",
+        ""
+      )} ${type}`;
+    };
+
+    // const edges = nextData.edges.map(l => ({
+    //   id: toInteger(`${l.source}-${l.target}`),
+    //   type: l.type,
+    //   target: toInteger(nextData.nodes.find(n => n.id === l.target).name),
+    //   source: toInteger(nextData.nodes.find(n => n.id === l.source).name)
+    // }));
+
+    const isNewGraph = this.asGraph.nodes.length === 0;
+
+    let asGraph = (isNewGraph && this.asGraph) || nextAsGraph;
+
+    this.asGraph.nodes.forEach((cn, idx) => {
+      const matchNIdx = nextAsGraph.nodes
+        .map(nn => toInteger(nn.name))
+        .indexOf(cn.id);
+
+      // Nodes is not in the next set of nodes, so delete it.
+      if (matchNIdx < 0) {
+        console.log(`node ${cn.name} deleted...`);
+        this.asGraph.nodes.splice(idx, 1);
+      }
+    });
+
+    nextAsGraph.nodes.forEach(n => {
+      const matchNIdx = this.asGraph.nodes
+        .map(n => n.id)
+        .indexOf(toInteger(n.name));
+
+      // Add to the end of the array if the node is new.
+      if (isNewGraph || matchNIdx < 0) {
+        console.log(`new node ${n.name} pushed...`);
+        this.asGraph.nodes.push({ ...n, id: toInteger(n.name) });
+      }
+
+      // Replace the existing node if the attributes have changed.
+      if (matchNIdx >= 0 && this.asGraph.nodes[matchNIdx].type !== n.type) {
+        console.log(`change node ${n.name}...`);
+        this.asGraph.nodes[matchNIdx] = { ...n, id: toInteger(n.name) };
+      }
+    });
+
+    this.asGraph.edges.forEach((ce, idx) => {
+      const matchEIdx = nextAsGraph.edges
+        .map(ne =>
+          toInteger(
+            `${asGraph.nodes[ne.source].name}-${asGraph.nodes[ne.target].name}`
+          )
+        )
+        .indexOf(ce[4]);
+
+      if (matchEIdx < 0) {
+        console.log(`edge ${ce[0].name}-${ce[2].name} deleted...`);
+        this.asGraph.edges.splice(idx, 1);
+      }
+    });
+
+    nextAsGraph.edges.forEach(e => {
+      const s = nextAsGraph.nodes.findIndex(n => n.id === e.source),
+        t = nextAsGraph.nodes.findIndex(n => n.id === e.target);
+
+      //   this.asGraph.edges.indexOf(toInteger(`${e.source}-${e.target}`)) < 0 &&
+      //     this.asGraph.edges.push(
+      //       //     {
+      //       //   type: e.type,
+      //       //   className: toLinkClass(s, t, e.type),
+      //       //   source: toInteger(s.name),
+      //       //   target: toInteger(t.name),
+      //       //   id: toInteger(`${e.source}-${e.target}`)
+      //       // }
+
+      //       [s, {}, t, toLinkClass(s, t, e.type)]
+      //     );
+      const edgeId = toInteger(
+        `${asGraph.nodes[s].name}-${asGraph.nodes[t].name}`
+      );
+      if (isNewGraph || this.asGraph.edges.map(n => n[4]).indexOf(edgeId) < 0) {
+        console.log(
+          `new edge ${asGraph.nodes[s].name}-${asGraph.nodes[t].name} pushed...`
+        );
+        this.asGraph.edges.push([
+          this.asGraph.nodes[s],
+          {},
+          this.asGraph.nodes[t],
+          toLinkClass(asGraph.nodes[s], asGraph.nodes[t], e.type),
+          edgeId
+        ]);
+      }
+    });
+    //console.log(this.asGraph.edges);
+
+    // const nodes = [];
+    // if (this.state) {
+    //   nextData.nodes.forEach(n => {
+    //     // is present in the current state, but not in nextData
+    //     const nn =
+    //       (this.state &&
+    //         (this.asGraph.nodes.filter(
+    //           g => tData.nodes.map(n => n.id).indexOf(g.id) < 0
+    //         ).length > 0 &&
+    //           n)) ||
+    //       null;
+    //     if (nn) {
+    //       nn.id = n && toInteger(n.name);
+    //     }
+    //     nodes.push(nn);
+    //   });
+    // } else {
+    //   nodes = nextData.nodes;
+    // }
+
+    //nodes.filter(n => n).sort((a, b) => a.id < b.id);
+
+    // const tData = {
+    //     edges: nextData.edges.map(l => ({
+    //       id: toInteger(`${l.source}-${l.target}`),
+    //       type: l.type,
+    //       target: toInteger(nextData.nodes.find(n => n.id === l.target).name),
+    //       source: toInteger(nextData.nodes.find(n => n.id === l.source).name)
+    //     })),
+    //   nodes: nextData.nodes.map(n => ({ ...n, id: toInteger(n.name) }))
+    // };
+
+    // tData.stateDiff = () => ({
+    //   inState:
+    //     (this.state &&
+    //       this.asGraph.nodes.filter(
+    //         g => tData.nodes.map(n => n.id).indexOf(g.id) < 0
+    //       )) ||
+    //     null,
+    //   inNextState:
+    //     (this.state &&
+    //       tData.nodes.filter(
+    //         g => this.asGraph.nodes.map(n => n.id).indexOf(g.id) < 0
+    //       )) ||
+    //     null,
+    //   // keep as much as possible of the current state (it has the as2org orgNames lookups in place)
+    //   commonState:
+    //     (this.state &&
+    //       this.asGraph.nodes.filter(x => g =>
+    //         tData.nodes.map(n => n.id).indexOf(g.id) > 0
+    //       )) ||
+    //     null
+    // });
+
+    // console.log(this.state && tData.stateDiff().commonState);
+    // console.log(this.state && tData.stateDiff().inState);
+    // console.log(this.state && tData.stateDiff().inNextState);
+
+    // this.setState({
+    //   asGraph: {
+    //     nodes: nodes,
+    //     edges: edges
+    //   }
+    // });
+
+    // return (
+    //   (tData.stateDiff().commonState.length === data.nodes.length && data) ||
+    //   tData
+    // );
+
+    // 'archive' the state of the graph.
+    this.setState({
+      asGraph: { nodes: this.asGraph.nodes, edges: this.asGraph.edges }
+    });
+  }
+
+  renderConnectedRing = ({ svg, update }) => {
+    const arcTween = a => {
+      var i = d3.interpolate(this._current, a);
+      this._current = i(0);
+      return t => connectedArcSegment(i(t));
+    };
+
+    var segAngles = {};
+
+    var connectedRing = d3
+      .pie()
+      .padAngle(0.01)
+      .endAngle(
+        TAU *
+          (this.asGraph.nodes
+            .filter(
+              d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+            )
+            // calculate which percentage we're actually representing,
+            // so that we can have an open ring.
+            .reduce((acc, cur) => acc + cur.eyeball_pct, 0) /
+            100)
+      )
+      .value(d => d.eyeball_pct);
+    //.sort(null); //(
+    //   nodes.filter(
+    //     d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+    //   )
+    //);
+
+    const eyeBallsRing = d3
+      .arc()
+      .innerRadius(220)
+      .outerRadius(220);
+
+    const connectedArcSegment = d3
+      .arc()
+      .innerRadius(220)
+      .outerRadius(240);
+    //.endAngle(Math.PI / 2);
+
+    const textOutLineSegment = d3
+      .arc()
+      .innerRadius(245)
+      .outerRadius(245);
+
+    var ringPath0 = svg
+      .datum(
+        this.asGraph.nodes.filter(
+          d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+        ),
+        d => d.id
+      )
+      .selectAll("g.connected-ring", d => d.id)
+      .data(connectedRing, d => d.id);
+
+    if (!update) {
+      ringPath0
+        .enter()
+        .append("g")
+        .attr(
+          "class",
+          d =>
+            `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+              "eyeball-no-probe") ||
+              "eyeball-probe"}`
+        )
+        .call(p =>
+          p
+            .append("path")
+            .attr(
+              "d",
+              connectedArcSegment //.outerRadius(d => 240)(d)
+              //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+            )
+            .attr("class", "c-ring")
+        )
+        .call(
+          p =>
+            !this.props.hideText &&
+            p
+              .append("text")
+              .text(d => d.data.orgName || d.data.name)
+              .attr("data-asn", d => d.data.name)
+              .attr("x", d => textOutLineSegment.centroid(d)[0])
+              .attr("y", d => textOutLineSegment.centroid(d)[1])
+              .attr(
+                "text-anchor",
+                d =>
+                  (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
+                  (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
+                  "middle"
+              )
+        )
+        .each(d => {
+          segAngles[d.data.id] = eyeBallsRing.centroid(d);
+          this._current = d;
+        });
+      this.setState({ ringPath: ringPath0 });
+    }
+
+    const updateRing = () => {
+      //console.log(this._current);
+      ringPath0 = this.state.ringPath.data(connectedRing, d => d.id);
+      ringPath0.transition().duration(750);
+      //.attrTween("d", arcTween.bind(this));
+
+      ringPath0.enter().each(d => {
+        segAngles[d.data.id] = eyeBallsRing.centroid(d);
+        this._current = d;
+      });
+    };
+
+    //.merge(ringPath0);
+
+    ringPath0.exit().remove();
+
+    if (update) {
+      updateRing();
+    }
+
+    this.setState({ segAngles: segAngles });
+  };
+
+  renderD3Ring = ({ update }) => {
+    if (!this.state) {
+      console.log("skipping ring rendering (not good)...");
+      return;
+    }
+
+    const data = this.asGraph,
+      props = this.props;
+    console.log("render ring...");
+    console.log(data);
     function ticked() {
       link.attr("d", positionLink);
       node.attr("transform", positionNode);
@@ -156,195 +503,67 @@ export class PeerToPeerFabricGraph extends React.Component {
       //`M ${d[0].x},${d[0].y} A 0,0 0 0 0 ${d[2].x} ${d[2].y}`
       // );
     };
-    const positionNode = d => `translate(${d.x},${d.y})`;
+    const positionNode = d => {
+      if (!d.x || !d.y) {
+        console.log("undefined (not good)");
+        console.log(d);
+      }
+      return `translate(${d.x},${d.y})`;
+    };
 
-    const svg = d3.select(`svg#${this.getRingId()}`);
+    const svg = d3.select(`svg#${this.getRingId()}`, d => d.id);
 
     //   var div = d3
     //     .select("body")
     //     .append("div")
     //     .attr("class", "tooltip");
 
-    var nodes = data.nodes,
-      nodeById = d3.map(nodes, d => d.id),
-      bilinks = [];
+    // var nodes = data.nodes.filter(n => n.id || n.id === 0),
+    //   nodeById = d3.map(nodes, d => d.id),
+    //   bilinks = [];
 
-    // rework link data to include the
-    // link type
-    data.edges.forEach(function(link) {
-      //console.log(link.type);
-      var s = (link.source = nodeById.get(link.source)),
-        t = (link.target = nodeById.get(link.target)),
-        //i = { index: 100, vx: 0, vy: 0, x: 0, y: 0 }; // intermediate node
-        i = {};
-      //console.log(i);
-      nodes.push(i);
-      //links.push({ source: s, target: i }, { source: i, target: t });
-      //link.source.type === "eyeball_asn" &&
-      //  link.target.type === "transit_asn" &&
-      bilinks.push([s, i, t, link.type]);
+    this.renderConnectedRing({
+      svg,
+      update: update
     });
 
-    var connectedRing = d3
-      .pie()
-      .padAngle(0.01)
-      .endAngle(
-        TAU *
-          (nodes
-            .filter(
-              d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
-            )
-            // calculate which percentage we're actually representing,
-            // so that we can have an open ring.
-            .reduce((acc, cur) => acc + cur.eyeball_pct, 0) /
-            100)
-      )
-      .value(d => d.eyeball_pct)(
-      nodes.filter(
-        d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
-      )
-    );
-
-    var connectedArcSegment = d3.arc().innerRadius(220);
-    //.outerRadius(230);
-    //.endAngle(Math.PI / 2);
-
-    var textOutLineSegment = d3
-      .arc()
-      .innerRadius(245)
-      .outerRadius(245);
-
-    var eyeBallsRing = d3
-      .arc()
-      .innerRadius(220)
-      .outerRadius(220);
-
-    var ringPath0 = svg.selectAll("g.connected-ring").data(connectedRing);
-
-    var ringPath = ringPath0
-      .enter()
-      .append("g")
-      .attr(
-        "class",
-        d =>
-          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-            "eyeball-no-probe") ||
-            "eyeball-probe"}`
-      )
-      .call(p =>
-        p
-          .append("path")
-          .attr(
-            "d",
-            d => connectedArcSegment.outerRadius(d => 240)(d)
-            //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
-          )
-          .attr("class", "c-ring")
-      )
-      .call(
-        p =>
-          !props.hideText &&
-          p
-            .append("text")
-            .text(d => d.data.orgName || d.data.name)
-            .attr("data-asn", d => d.data.name)
-            .attr("x", d => textOutLineSegment.centroid(d)[0])
-            .attr("y", d => textOutLineSegment.centroid(d)[1])
-            .attr(
-              "text-anchor",
-              d =>
-                (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
-                (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
-                "middle"
-            )
-      )
-      .merge(ringPath0);
-
-    ringPath.exit().remove();
-
-    // connectedRing.forEach(d => {
-    //   const textCoords = textOutLineSegment.centroid(d);
-
-    //   let group = svg
-    //     .append("g")
-    //     .attr(
-    //       "class",
-    //       `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-    //         "eyeball-no-probe") ||
-    //         "eyeball-probe"}`
-    //     );
-
-    //   group
-    //     .append("path")
-    //     .attr(
-    //       "d",
-    //       connectedArcSegment.outerRadius(d => 240)(d)
-    //       //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
-    //     )
-    //     .attr("class", "c-ring");
-
-    //   if (!props.hideText) {
-    //     group
-    //       .append("text")
-    //       .text(d.data.name)
-    //       .attr("data-asn", d.data.name)
-    //       .attr("x", textCoords[0])
-    //       .attr("y", textCoords[1])
-    //       .attr(
-    //         "text-anchor",
-    //         d =>
-    //           (textCoords[0] < 0 && "end") ||
-    //           (textCoords[0] > 0 && "start") ||
-    //           "middle"
-    //       );
-    //   }
+    // // rework link data to include the
+    // // link type
+    // data.edges.forEach(function(link) {
+    //   //console.log(link.type);
+    //   var s = nodeById.get(link.source),
+    //     t = nodeById.get(link.target),
+    //     //i = { index: 100, vx: 0, vy: 0, x: 0, y: 0 }; // intermediate node
+    //     i = {};
+    //   //console.log(i);
+    //   //nodes.push(i);
+    //   //links.push({ source: s, target: i }, { source: i, target: t });
+    //   //link.source.type === "eyeball_asn" &&
+    //   //  link.target.type === "transit_asn" &&
+    //   bilinks.push([s, i, t, link.type]);
+    //   //console.log(bilinks);
     // });
 
-    var link0 = svg
+    var link = svg
       //.append("g")
-      .selectAll(".link")
-      .data(bilinks);
+      .selectAll(".link", d => d[4])
+      .data(this.asGraph.edges, d => d[4]);
 
-    var link = link0
+    link.exit().remove();
+
+    var link = link
       .enter()
       .append("path")
-      .attr("class", d => {
-        //console.log(d);
-        const linkClass =
-          (d[0].type === "transit_asn" &&
-            d[2].type === "transit_asn" &&
-            "transit-transit") ||
-          (d[0].type === "eyeball_asn" &&
-            d[2].type === "ixp" &&
-            "eyeball-ixp") ||
-          (d[0].type === "ixp" &&
-            d[2].type === "eyeball_asn" &&
-            "ixp-eyeball") ||
-          (d[0].type === "ixp" &&
-            d[2].type === "transit_asn" &&
-            "ixp-transit") ||
-          (d[0].type === "eyeball_asn" &&
-            d[2].type === "transit_asn" &&
-            "eyeball-transit") ||
-          (d[0].type === "transit_asn" &&
-            d[2].type === "eyeball_asn" &&
-            "transit-eyeball") ||
-          (d[0].type === "ixp" && d[2].type === "ixp" && "ixp-ixp") ||
-          (d[2].type === "eyeball_asn" && "eyeball") ||
-          (d[2].type === "transit_asn" && "transit") ||
-          (d[2].type === "ixp" && "ixp");
-        //d[0].type;
-        return `link ${linkClass} ${d[3]}`;
-      })
-      .merge(link0);
+      .attr("class", d => d[3])
+      .merge(link);
 
-    link0.exit().remove();
-
-    var node0 = svg
+    var node = svg
       .selectAll("g.node")
-      .data(nodes.filter(n => n.id || n.id === 0));
+      .data(this.asGraph.nodes, d => d.id);
+      
+    node.exit().remove();
 
-    var node = node0
+    var node = node
       .enter()
       .append("g")
       .attr("class", n => `node ${this.nodeClass(n)}`)
@@ -374,75 +593,14 @@ export class PeerToPeerFabricGraph extends React.Component {
             )
             .attr("data-asn", d => d.name)
       )
-      .merge(node0);
+      .merge(node);
 
-    node0.exit().remove();
-
-    // node.append("circle").attr("r", d => {
-    //   const scalar =
-    //     // (d.type === "eyeball_asn" && Math.max(d.eyeball_pct, BALL_MIN_SIZE)) ||
-    //     // ((d.type === "transit_asn" || d.type === "ixp") &&
-    //     d.conn_btwn_pct || props.ballMinSize;
-    //   return Math.max(Math.log(scalar * props.scaleFactor) * 3.5, 2);
-    // });
-    // .on("mouseover", function(d) {
-    //   const g = d3.select(this);
-    //   div.style("opacity", 0.9);
-    //   div
-    //     .html(
-    //       `<div class="tooltip"><h4>${d.name}</h5><p>${
-    //         d.eyeball_pct
-    //       }</p><div>`
-    //     )
-    //     .attr("left", `${d.x}px`)
-    //     .attr("top", `${d.y}px`);
-    // })
-    // .on("mouseout", function(d) {
-    //   div.style("opacity", 0);
-    // });
-
-    //node.exit().remove();
-
-    // if (!props.hideText) {
-    //   node
-    //     .append("text")
-    //     .text(
-    //       d =>
-    //         (d.type !== "eyeball_asn" &&
-    //           d.type !== "eyeball_asn_noprobe" &&
-    //           d.name) ||
-    //         ""
-    //     )
-    //     .attr("data-asn", d => d.name);
-    //  }
-
-    var simulation = d3
-      .forceSimulation()
-      .force(
-        "charge",
-        d3.forceCollide().radius(d => (d.type !== "eyeball_asn" && 12) || 0)
-      )
-      .force(
-        "x",
-        d3.forceX(d => {
-          let seg = connectedRing.find(c => c.data.name === d.name);
-          //seg && console.log(eyeBallsRing.centroid(seg));
-          return (seg && eyeBallsRing.centroid(seg)[0]) || 0;
-          //return 0;
-        })
-      )
-      .force(
-        "y",
-        d3.forceY(d => {
-          let seg = connectedRing.find(c => c.data.name === d.name);
-          //seg && console.log(eyeBallsRing.centroid(seg));
-          return (seg && eyeBallsRing.centroid(seg)[1]) || 0;
-        })
-      )
-      .nodes(nodes)
-      .on("tick", ticked);
-
-    //return { nodes: simulation.nodes(), links: links };
+    if (!update) {
+      this.simulation.on("tick", ticked).nodes(this.asGraph.nodes);
+    } else {
+      this.simulation.on("tick", ticked).nodes(this.asGraph.nodes);
+      this.simulation.alpha(1).restart();
+    }
   };
 
   componentWillReceiveProps(nextProps) {
@@ -458,7 +616,10 @@ export class PeerToPeerFabricGraph extends React.Component {
       // in parent.
       const unknownAses =
         !this.props.hideText &&
-        this.replaceAs2OrgNames(this.state.asGraph.nodes, nextProps.orgNames);
+        this.replaceAs2OrgNames(
+          this.asGraph.nodes.filter(n => !n.orgName),
+          nextProps.orgNames
+        );
       console.log(`not found in as2org :\t${unknownAses.length}`);
       unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
     }
@@ -469,21 +630,30 @@ export class PeerToPeerFabricGraph extends React.Component {
       nextProps.day !== this.props.day
     ) {
       console.log("update now...");
-
-      this.loadAsGraphData(nextProps).then(
+      this.loadAsGraphData({
+        ...nextProps,
+        countryCode: this.props.countryCode
+      }).then(
         data => {
-          console.log(this.state.asGraph.nodes);
-
-          const d3GraphNodesLinks = this.renderD3Ring({
-            ...this.props,
-            data: {
-              nodes: this.state.asGraph.nodes,
-              edges: [...data.edges]
-            }
-          });
-          this.setState({
-            asGraph: data
-          });
+          const nextAsGraph = this.transformAsGraphData(data);
+          //   console.log(this.simulation);
+          //   this.setState({
+          //     asGraph: nextAsGraph
+          //   });
+          this.renderD3Ring({ update: true });
+          //const d3GraphNodesLinks = this.renderD3Ring({
+          //...this.props,
+          // data: {
+          //   edges: this.asGraph.edges,
+          //   //nodes: nextAsGraph.stateDiff().commonState
+          //   nodes: this.asGraph.nodes
+          // },
+          //update: false
+          //});
+          //  const asGraph = this.asGraph;
+          //   this.setState({
+          //     asGraph: { nodes: nextAsGraph.nodes, edges: nextAsGraph.edges }
+          //   });
         },
         error => console.log(error)
       );
@@ -500,18 +670,8 @@ export class PeerToPeerFabricGraph extends React.Component {
       // artificially reduce number of nodes
       //data.nodes = data.nodes.filter(d => d.id < 10);
       //data.edges = data.edges.filter(l => l.source < 10 && l.target < 10);
-      const d3GraphNodesLinks = this.renderD3Ring({
-        ...this.props,
-        data: {
-          nodes: [...data.nodes].sort((a, b) => {
-            a.id < b.id;
-          }),
-          edges: [...data.edges]
-        }
-      });
-      this.setState({
-        asGraph: data
-      });
+      const tData = this.transformAsGraphData(data);
+      this.renderD3Ring({ update: false });
 
       if (this.props.orgNames) {
         console.log("as2org loaded fast, looking up...");
@@ -526,10 +686,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         const unknownAses =
           this.props.orgNames &&
           !this.props.hideText &&
-          this.replaceAs2OrgNames(
-            this.state.asGraph.nodes,
-            this.props.orgNames
-          );
+          this.replaceAs2OrgNames(this.asGraph.nodes, this.props.orgNames);
         console.log(`not found in as2org :\t${unknownAses.length}`);
         unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
       }
