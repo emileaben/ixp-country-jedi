@@ -29,6 +29,41 @@ export class PeerToPeerFabricFacts extends React.Component {
 }
 
 export class PeerToPeerFabricGraph extends React.Component {
+  /*
+ * This component renders a graph for one country and one date (a `snapshot`).
+ * 
+ * It uses a d3.pie to render the ring and a d3.forceSimulation (force graph) to render it.
+ * 
+ * In order to allow the updates to function correctly please take into account:
+ * - d3 uses the .enter()[.append()], exit()[.remove()] and .merge() functions to take cues how to update the graph.
+ *   First the initial data is associated with the d3 data structure with .data(<DATASTRUCTURE>). Nothing happens still.
+ *   Only when .nodes(DATA_STRUCTURE) is invoked will the graph be rendered or updated.
+ * - everything between .nodes() and .enter() is performed on the OLD graph, everything between .enter() and .merge()
+ *   is performed on the NEW elements in the datastructure. And everything after merge() is performed on both.
+ *   Read more here: https://bl.ocks.org/mbostock/3808218 (general update pattern)
+ * 
+ * The most important aspect of the datastructure fed into d3 is that it needs to be ONE MUTABLE DATASTRUCTURE -
+ * in this component it is called `this.asGraph`.
+ * So for every update of the graph the arrays `this.asGraph.nodes` and `this.asGraph.edges` get new elements by
+ * performing a push on them, or by performing a splice on them. This complete structure is then fed to d3 again for
+ * an update by doing this.simulation.nodes(this.asGraph.nodes).
+ * 
+ * One side-effect of this mutation (pun intended) is that we *cannot* just feed a transformed datastructure directly
+ * a json file into the graph as an update. That would be a completely new datastructure and, even though we use
+ * the same set of Ids and set the d => d.id everywhere the update WILL BE BOTCHED. So the onlyway is to go over
+ * the original datastructure and mutate it painstakingly according to the changed data, thus creating
+ * a state machine.
+ * 
+ * Just as the `this.asGraph` needs to be a mutable data-structure keeping state for the data, the graph state itself,
+ * needs to be a mutable data-structure that is alive throughout the lifetime of the component.
+ * This is why the graph state *cannot* live on the react state: the react state needs to be immutable!
+ * Hence we create a class property called `this.simulation` (the force graph) and `this.connectedRing` (the outer ring)
+ * that contain the complete state for the graph.
+ * 
+ * Also note that this component goes out on its own to resolve ASNs to names, both by downloading the as2org.json file and
+ * resolving with calls to RIPEstat.
+ */
+
   getRingId = () => {
     return `${this.props.countryCode.toLowerCase()}-${this.props.year}-${
       this.props.month
@@ -43,37 +78,36 @@ export class PeerToPeerFabricGraph extends React.Component {
     (d.type === "ixp" && "ixp") ||
     "";
 
+  /*
+  * This is the class property that holds the state for the d3 force graph
+  * throughout the lifetime of the component.
+  * 
+  * Forcing IXPs and Transits into their own orbit looks nicer, but
+  * unfortunately that keeps on resulting in transits being drawn over
+  * each other.
+  * 
+  * Also doing multiple force("charge", ...) calls doesn't seem to work.
+  */
   simulation = d3
     .forceSimulation()
+    // .force(
+    //   "charge",
+    //   d3.forceRadial(d => (d.type === "ixp" && 60) || 140).strength(0.8)
+    // )
     .force(
       "charge",
-      d3.forceCollide().radius(d => {
-        return (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe" && 0) || 24;
-      })
-    )
-    .force(
-      "x",
-      d3.forceX(d => {
-        let segAngle = this.state.segAngles[d.id];
-        return (segAngle && segAngle[0]) || 0;
-      })
-    )
-    .force(
-      "y",
-      d3.forceY(d => {
-        let segAngle = this.state.segAngles[d.id];
-        return (segAngle && segAngle[1]) || 0;
-      })
+      d3.forceCollide().radius(d => (d.type === "ixp" && 20) || 30)
     );
 
+  // Resolve the ASN to the holder name using RIPEstat
   resolveAsToName = async asn => {
     const fetchUrl = `${this.props.asResolverUrl}${asn}`;
     let response = await fetch(fetchUrl);
     let data = await response.json();
-    //console.log(`${asn} => ${data.data.holder}`);
     return data.data.holder;
   };
 
+  // Resolve ASNs en bloque to names using as2org.json (from CAIDA)
   replaceAs2OrgNames = (nodes, orgNames = []) => {
     let unknownAses = [];
     for (let node of nodes.filter(n => n.name && n.name.slice(0, 2) === "AS")) {
@@ -102,6 +136,7 @@ export class PeerToPeerFabricGraph extends React.Component {
     return unknownAses;
   };
 
+  // Inserts the ASNs into the DOM directly.
   getOrgNamesFromRipeStat = async asns => {
     for (let asn of asns.filter(
       n => n.slice(0, 2) === "AS" //&&
@@ -133,17 +168,37 @@ export class PeerToPeerFabricGraph extends React.Component {
     return data;
   };
 
-  // One stop-shop for transforming
-  // the input data from the json files to the actual format
-  // we need to diff it efficiently with
-  // the the state.asGraph data-structure.
-  //
-  // data       : raw input from asgraph.json file
-  // returns data: { nodes, links }
+  /* 
+  * this.asGraph holds the current state of the data associated
+  * with the graph.
+  * 
+  * BE SURE TO MUTATE THIS STRUCTURE BEFORE FEEDING IT INTO d3.nodes
+  * DO NOT USE IMMUTABLY BY COPYING. It will botch updates to the graph.
+  */
   asGraph = { nodes: [], edges: [] };
 
   transformAsGraphData(nextAsGraph) {
+    /* Transforms the data from snapshot files to the format used in the state machine.
+     * Updates the state machine by mutating `this.asGraph`.
+     *
+     * Note that it goes over the old data first to see which elements should be deleted
+     * and then iterates over the new data to see what should be added or changed.
+     * 
+     * arguments:
+     * nextAsGraph    : updated AS graph data from asgraph.json snapshot file
+     * 
+     * returns:
+     * diddly, it mutates `this.asGraph` in place.
+     * Also sets the React state, as an archive.
+     */
+
     const toInteger = name => {
+      // creates a uid for each node or
+      // edge by hashing it into an integer.
+      // This is the id used in the `this.asGraph` data-structure.
+      // The id fields in the json data-files cannot be used for this
+      // because their are not unique (they may be reused for different ASNs,
+      // they're not unique across snapshots for the same country)
       var hash = 0,
         i,
         chr;
@@ -165,6 +220,14 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     const isNewGraph = this.asGraph.nodes.length === 0;
 
+    /* NODES */
+
+    // pass 1: delete
+
+    // Deleting nodes from an array while iterating
+    // over the structure needs some cleverness, c.q.
+    // recursion.
+    // Should be optimized probably with a trampoline.
     const nodeSplicer = () => {
       this.asGraph.nodes.forEach((cn, idx) => {
         const matchNIdx = nextAsGraph.nodes
@@ -181,6 +244,8 @@ export class PeerToPeerFabricGraph extends React.Component {
     };
 
     nodeSplicer();
+
+    // pass 2: replace and add.
 
     nextAsGraph.nodes.forEach(n => {
       const matchNIdx = this.asGraph.nodes
@@ -201,10 +266,13 @@ export class PeerToPeerFabricGraph extends React.Component {
       }
     });
 
+    /* EDGES a.k.a. links (in d3 speak) */
+
+
+    // pass 1: delete
+
     const edgeSplicer = () => {
       this.asGraph.edges.forEach((ce, idx) => {
-        console.log(ce);
-        console.log(idx);
         const matchEIdx = nextAsGraph.edges
           .map(ne =>
             toInteger(
@@ -228,6 +296,9 @@ export class PeerToPeerFabricGraph extends React.Component {
     };
 
     edgeSplicer();
+
+
+    // pass 2: replace and add
 
     nextAsGraph.edges.forEach(e => {
       const sourceN = nextAsGraph.nodes.find(n => n.id === e.source),
@@ -431,7 +502,13 @@ export class PeerToPeerFabricGraph extends React.Component {
       .attr("class", d => d[3])
       .merge(link);
 
-    var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => d.id);
+    var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => {
+      if (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe") {
+        d.fx = this.state.segAngles[d.id][0];
+        d.fy = this.state.segAngles[d.id][1];
+      }
+      return d.id;
+    });
 
     node.exit().remove();
 
@@ -516,7 +593,6 @@ export class PeerToPeerFabricGraph extends React.Component {
   }
 
   componentDidMount() {
-
     this.loadAsGraphData(this.props).then(data => {
       const tData = this.transformAsGraphData(data);
       this.renderD3Ring({ update: false });
@@ -529,7 +605,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         // 2. lookup with a call to RIPEstat
         // doing this sync should be fast, because the as2org file
         // is loaded async by the parent and then
-        // propagates as a prop to this component when it has arrived
+        // propagated as a prop to this component when it has arrived
         // in parent.
         const unknownAses =
           this.props.orgNames &&
