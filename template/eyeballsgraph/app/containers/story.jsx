@@ -155,6 +155,17 @@ export class PeerToPeerContainer extends React.Component {
   }
 
   changeSnapshotDate = newSnapshotDate => {
+    const stateObj = {
+      country: this.state.countryCode,
+      snapshotDate: this.state.currentSnapshotDate
+    };
+    window.history.pushState(
+      stateObj, "",
+      `/${this.state.countryCode.toLowerCase()}/${newSnapshotDate.year}/${
+        newSnapshotDate.month
+      }/${newSnapshotDate.day}`
+    );
+
     this.setState({
       currentSnapshotDate: newSnapshotDate
     });
@@ -164,11 +175,14 @@ export class PeerToPeerContainer extends React.Component {
     return (
       <div id="ptp-fabric-panel">
         <PeerToPeerStoryText />
-        {this.state && this.state.currentSnapshotDate && <SnapShotTimeLine
-          snapshots={(this.state && this.state.snapshots) || []}
-          currentSnapshotDate={this.state.currentSnapshotDate}
-          handleChangeSnapshot={this.changeSnapshotDate}
-        />}
+        {this.state &&
+          this.state.currentSnapshotDate && (
+            <SnapShotTimeLine
+              snapshots={(this.state && this.state.snapshots) || []}
+              currentSnapshotDate={this.state.currentSnapshotDate}
+              handleChangeSnapshot={this.changeSnapshotDate}
+            />
+          )}
 
         {/* {(primaryFromUrl &&
           this.state &&
