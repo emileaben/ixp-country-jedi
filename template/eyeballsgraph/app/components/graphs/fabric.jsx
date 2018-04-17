@@ -35,11 +35,6 @@ export class PeerToPeerFabricGraph extends React.Component {
     }-${this.props.day}`;
   };
 
-  // puts eyeball asns on the outer circle
-  getForceRadial = d => (d.type === "eyeball_asn" && 210) || 0;
-
-  getForceX = d => d.type === "eyeball_asn";
-
   nodeClass = d =>
     (d.type === "eyeball_asn" && d.transits && "eyeball-with-transit") ||
     (d.type === "eyeball_asn_noprobe" && "eyeball-no-probe") ||
@@ -53,7 +48,7 @@ export class PeerToPeerFabricGraph extends React.Component {
     .force(
       "charge",
       d3.forceCollide().radius(d => {
-        return (d.type !== "eyeball_asn" && 24) || 0;
+        return (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe" && 0) || 24;
       })
     )
     .force(
@@ -104,14 +99,6 @@ export class PeerToPeerFabricGraph extends React.Component {
       }
     }
 
-    // batch update all the nodes in the current state
-    // this.state &&
-    //   this.setState({
-    //     asGraph: {
-    //       ...this.asGraph,
-    //       nodes: [...nodes]
-    //     }
-    //   });
     return unknownAses;
   };
 
@@ -130,15 +117,6 @@ export class PeerToPeerFabricGraph extends React.Component {
           textNode.textContent = orgName.split(/_|\.| |\,/)[0];
         }
         const newAsNode = this.asGraph.nodes.find(n => n.name === asn);
-        // this.setState({
-        //   asGraph: {
-        //     ...this.asGraph,
-        //     nodes: [
-        //       ...this.asGraph.nodes.filter(n => n.id !== newAsNode.id),
-        //       { ...newAsNode, orgName: orgName.split(/_|\.| |\,/)[0] }
-        //     ]
-        //   }
-        // });
       }
     }
   };
@@ -185,16 +163,7 @@ export class PeerToPeerFabricGraph extends React.Component {
       )} ${type}`;
     };
 
-    // const edges = nextData.edges.map(l => ({
-    //   id: toInteger(`${l.source}-${l.target}`),
-    //   type: l.type,
-    //   target: toInteger(nextData.nodes.find(n => n.id === l.target).name),
-    //   source: toInteger(nextData.nodes.find(n => n.id === l.source).name)
-    // }));
-
     const isNewGraph = this.asGraph.nodes.length === 0;
-
-    //let asGraph = (isNewGraph && this.asGraph) || nextAsGraph;
 
     const nodeSplicer = () => {
       this.asGraph.nodes.forEach((cn, idx) => {
@@ -264,18 +233,6 @@ export class PeerToPeerFabricGraph extends React.Component {
       const sourceN = nextAsGraph.nodes.find(n => n.id === e.source),
         targetN = nextAsGraph.nodes.find(n => n.id === e.target);
 
-      //   this.asGraph.edges.indexOf(toInteger(`${e.source}-${e.target}`)) < 0 &&
-      //     this.asGraph.edges.push(
-      //       //     {
-      //       //   type: e.type,
-      //       //   className: toLinkClass(s, t, e.type),
-      //       //   source: toInteger(s.name),
-      //       //   target: toInteger(t.name),
-      //       //   id: toInteger(`${e.source}-${e.target}`)
-      //       // }
-
-      //       [s, {}, t, toLinkClass(s, t, e.type)]
-      //     );
       const edgeId = toInteger(`${sourceN.name}-${targetN.name}`);
 
       // For some reason some edges AS1-AS2 end up in the json file twice in both directions.
@@ -296,78 +253,6 @@ export class PeerToPeerFabricGraph extends React.Component {
         ]);
       }
     });
-
-    //console.log(this.asGraph.edges);
-
-    // const nodes = [];
-    // if (this.state) {
-    //   nextData.nodes.forEach(n => {
-    //     // is present in the current state, but not in nextData
-    //     const nn =
-    //       (this.state &&
-    //         (this.asGraph.nodes.filter(
-    //           g => tData.nodes.map(n => n.id).indexOf(g.id) < 0
-    //         ).length > 0 &&
-    //           n)) ||
-    //       null;
-    //     if (nn) {
-    //       nn.id = n && toInteger(n.name);
-    //     }
-    //     nodes.push(nn);
-    //   });
-    // } else {
-    //   nodes = nextData.nodes;
-    // }
-
-    //nodes.filter(n => n).sort((a, b) => a.id < b.id);
-
-    // const tData = {
-    //     edges: nextData.edges.map(l => ({
-    //       id: toInteger(`${l.source}-${l.target}`),
-    //       type: l.type,
-    //       target: toInteger(nextData.nodes.find(n => n.id === l.target).name),
-    //       source: toInteger(nextData.nodes.find(n => n.id === l.source).name)
-    //     })),
-    //   nodes: nextData.nodes.map(n => ({ ...n, id: toInteger(n.name) }))
-    // };
-
-    // tData.stateDiff = () => ({
-    //   inState:
-    //     (this.state &&
-    //       this.asGraph.nodes.filter(
-    //         g => tData.nodes.map(n => n.id).indexOf(g.id) < 0
-    //       )) ||
-    //     null,
-    //   inNextState:
-    //     (this.state &&
-    //       tData.nodes.filter(
-    //         g => this.asGraph.nodes.map(n => n.id).indexOf(g.id) < 0
-    //       )) ||
-    //     null,
-    //   // keep as much as possible of the current state (it has the as2org orgNames lookups in place)
-    //   commonState:
-    //     (this.state &&
-    //       this.asGraph.nodes.filter(x => g =>
-    //         tData.nodes.map(n => n.id).indexOf(g.id) > 0
-    //       )) ||
-    //     null
-    // });
-
-    // console.log(this.state && tData.stateDiff().commonState);
-    // console.log(this.state && tData.stateDiff().inState);
-    // console.log(this.state && tData.stateDiff().inNextState);
-
-    // this.setState({
-    //   asGraph: {
-    //     nodes: nodes,
-    //     edges: edges
-    //   }
-    // });
-
-    // return (
-    //   (tData.stateDiff().commonState.length === data.nodes.length && data) ||
-    //   tData
-    // );
 
     // 'archive' the state of the graph.
     this.setState({
@@ -399,11 +284,6 @@ export class PeerToPeerFabricGraph extends React.Component {
             100)
       )
       .value(d => d.eyeball_pct);
-    //.sort(null); //(
-    //   nodes.filter(
-    //     d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
-    //   )
-    //);
 
     const eyeBallsRing = d3
       .arc()
@@ -528,45 +408,15 @@ export class PeerToPeerFabricGraph extends React.Component {
       // );
     };
     const positionNode = d => {
-      if (!d.x || !d.y) {
-        console.log("undefined (not good)");
-        console.log(d);
-      }
       return `translate(${d.x},${d.y})`;
     };
 
     const svg = d3.select(`svg#${this.getRingId()}`, d => d.id);
 
-    //   var div = d3
-    //     .select("body")
-    //     .append("div")
-    //     .attr("class", "tooltip");
-
-    // var nodes = data.nodes.filter(n => n.id || n.id === 0),
-    //   nodeById = d3.map(nodes, d => d.id),
-    //   bilinks = [];
-
     this.renderConnectedRing({
       svg,
       update: update
     });
-
-    // // rework link data to include the
-    // // link type
-    // data.edges.forEach(function(link) {
-    //   //console.log(link.type);
-    //   var s = nodeById.get(link.source),
-    //     t = nodeById.get(link.target),
-    //     //i = { index: 100, vx: 0, vy: 0, x: 0, y: 0 }; // intermediate node
-    //     i = {};
-    //   //console.log(i);
-    //   //nodes.push(i);
-    //   //links.push({ source: s, target: i }, { source: i, target: t });
-    //   //link.source.type === "eyeball_asn" &&
-    //   //  link.target.type === "transit_asn" &&
-    //   bilinks.push([s, i, t, link.type]);
-    //   //console.log(bilinks);
-    // });
 
     var link = svg
       //.append("g")
@@ -658,24 +508,7 @@ export class PeerToPeerFabricGraph extends React.Component {
       }).then(
         data => {
           const nextAsGraph = this.transformAsGraphData(data);
-          //   console.log(this.simulation);
-          //   this.setState({
-          //     asGraph: nextAsGraph
-          //   });
           this.renderD3Ring({ update: true });
-          //const d3GraphNodesLinks = this.renderD3Ring({
-          //...this.props,
-          // data: {
-          //   edges: this.asGraph.edges,
-          //   //nodes: nextAsGraph.stateDiff().commonState
-          //   nodes: this.asGraph.nodes
-          // },
-          //update: false
-          //});
-          //  const asGraph = this.asGraph;
-          //   this.setState({
-          //     asGraph: { nodes: nextAsGraph.nodes, edges: nextAsGraph.edges }
-          //   });
         },
         error => console.log(error)
       );
@@ -683,15 +516,8 @@ export class PeerToPeerFabricGraph extends React.Component {
   }
 
   componentDidMount() {
-    // if (!this.props.countryCode) {
-    //   console.log(this.props);
-    //   return;
-    // }
 
     this.loadAsGraphData(this.props).then(data => {
-      // artificially reduce number of nodes
-      //data.nodes = data.nodes.filter(d => d.id < 10);
-      //data.edges = data.edges.filter(l => l.source < 10 && l.target < 10);
       const tData = this.transformAsGraphData(data);
       this.renderD3Ring({ update: false });
 
