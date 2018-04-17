@@ -194,19 +194,24 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     const isNewGraph = this.asGraph.nodes.length === 0;
 
-    let asGraph = (isNewGraph && this.asGraph) || nextAsGraph;
+    //let asGraph = (isNewGraph && this.asGraph) || nextAsGraph;
 
-    this.asGraph.nodes.forEach((cn, idx) => {
-      const matchNIdx = nextAsGraph.nodes
-        .map(nn => toInteger(nn.name))
-        .indexOf(cn.id);
+    const nodeSplicer = () => {
+      this.asGraph.nodes.forEach((cn, idx) => {
+        const matchNIdx = nextAsGraph.nodes
+          .map(nn => toInteger(nn.name))
+          .indexOf(cn.id);
 
-      // Nodes is not in the next set of nodes, so delete it.
-      if (matchNIdx < 0) {
-        console.log(`node ${cn.name} deleted...`);
-        this.asGraph.nodes.splice(idx, 1);
-      }
-    });
+        // Nodes is not in the next set of nodes, so delete it.
+        if (matchNIdx < 0) {
+          console.log(`node ${cn.name} deleted...`);
+          this.asGraph.nodes.splice(idx, 1);
+          nodeSplicer();
+        }
+      });
+    };
+
+    nodeSplicer();
 
     nextAsGraph.nodes.forEach(n => {
       const matchNIdx = this.asGraph.nodes
@@ -215,35 +220,49 @@ export class PeerToPeerFabricGraph extends React.Component {
 
       // Add to the end of the array if the node is new.
       if (isNewGraph || matchNIdx < 0) {
-        console.log(`new node ${n.name} pushed...`);
+        console.log(`new node ${n.name} (${toInteger(n.name)}) pushed...`);
         this.asGraph.nodes.push({ ...n, id: toInteger(n.name) });
       }
 
       // Replace the existing node if the attributes have changed.
       if (matchNIdx >= 0 && this.asGraph.nodes[matchNIdx].type !== n.type) {
         console.log(`change node ${n.name}...`);
-        this.asGraph.nodes[matchNIdx] = { ...n, id: toInteger(n.name) };
+        this.asGraph.nodes[matchNIdx].type = n.type;
+        this.asGraph.nodes[matchNIdx].conn_btwn_pct = n.conn_btwn_pct;
       }
     });
 
-    this.asGraph.edges.forEach((ce, idx) => {
-      const matchEIdx = nextAsGraph.edges
-        .map(ne =>
-          toInteger(
-            `${asGraph.nodes[ne.source].name}-${asGraph.nodes[ne.target].name}`
+    const edgeSplicer = () => {
+      this.asGraph.edges.forEach((ce, idx) => {
+        console.log(ce);
+        console.log(idx);
+        const matchEIdx = nextAsGraph.edges
+          .map(ne =>
+            toInteger(
+              `${nextAsGraph.nodes[ne.source].name}-${
+                nextAsGraph.nodes[ne.target].name
+              }`
+            )
           )
-        )
-        .indexOf(ce[4]);
+          .indexOf(ce[4]);
 
-      if (matchEIdx < 0) {
-        console.log(`edge ${ce[0].name}-${ce[2].name} deleted...`);
-        this.asGraph.edges.splice(idx, 1);
-      }
-    });
+        if (matchEIdx < 0) {
+          console.log(
+            `edge ${ce[0].name}-${ce[2].name} (${
+              this.asGraph.edges[idx][4]
+            }) deleted...`
+          );
+          this.asGraph.edges.splice(idx, 1);
+          edgeSplicer();
+        }
+      });
+    };
+
+    edgeSplicer();
 
     nextAsGraph.edges.forEach(e => {
-      const s = nextAsGraph.nodes.findIndex(n => n.id === e.source),
-        t = nextAsGraph.nodes.findIndex(n => n.id === e.target);
+      const sourceN = nextAsGraph.nodes.find(n => n.id === e.source),
+        targetN = nextAsGraph.nodes.find(n => n.id === e.target);
 
       //   this.asGraph.edges.indexOf(toInteger(`${e.source}-${e.target}`)) < 0 &&
       //     this.asGraph.edges.push(
@@ -257,22 +276,27 @@ export class PeerToPeerFabricGraph extends React.Component {
 
       //       [s, {}, t, toLinkClass(s, t, e.type)]
       //     );
-      const edgeId = toInteger(
-        `${asGraph.nodes[s].name}-${asGraph.nodes[t].name}`
-      );
-      if (isNewGraph || this.asGraph.edges.map(n => n[4]).indexOf(edgeId) < 0) {
-        console.log(
-          `new edge ${asGraph.nodes[s].name}-${asGraph.nodes[t].name} pushed...`
-        );
+      const edgeId = toInteger(`${sourceN.name}-${targetN.name}`);
+
+      // For some reason some edges AS1-AS2 end up in the json file twice in both directions.
+      // So that makes four lines connecting AS1 and AS2. We don't want that.
+      // So we filter out duplicates by skipping testing for isNewGraph === true.
+      if (this.asGraph.edges.map(n => n[4]).indexOf(edgeId) < 0) {
+        console.log(`new edge ${sourceN.name}-${targetN.name} pushed...`);
         this.asGraph.edges.push([
-          this.asGraph.nodes[s],
+          this.asGraph.nodes[
+            this.asGraph.nodes.map(n => n.id).indexOf(toInteger(sourceN.name))
+          ],
           {},
-          this.asGraph.nodes[t],
-          toLinkClass(asGraph.nodes[s], asGraph.nodes[t], e.type),
+          this.asGraph.nodes[
+            this.asGraph.nodes.map(n => n.id).indexOf(toInteger(targetN.name))
+          ],
+          toLinkClass(sourceN, targetN, e.type),
           edgeId
         ]);
       }
     });
+
     //console.log(this.asGraph.edges);
 
     // const nodes = [];
@@ -557,10 +581,8 @@ export class PeerToPeerFabricGraph extends React.Component {
       .attr("class", d => d[3])
       .merge(link);
 
-    var node = svg
-      .selectAll("g.node")
-      .data(this.asGraph.nodes, d => d.id);
-      
+    var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => d.id);
+
     node.exit().remove();
 
     var node = node
