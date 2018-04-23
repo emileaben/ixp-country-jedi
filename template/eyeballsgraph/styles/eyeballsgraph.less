@@ -264,7 +264,7 @@ div#p-t-p-fabric-panel {
 }
 
 /* smallGraphs flexbox */
-.small-graphs {
+.small-graphs, .big-graphs {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -277,11 +277,17 @@ div#p-t-p-fabric-panel {
     margin-bottom: -40px;
   }
 
-  svg {
+  svg:not(.big) {
     width: 300px;
     height: 300px;
     min-width: unset;
     min-height: unset;
+  }
+
+  svg.big {
+    max-width: 1260px;
+    min-width:  800px;
+    min-height: 800px;
   }
 }
 

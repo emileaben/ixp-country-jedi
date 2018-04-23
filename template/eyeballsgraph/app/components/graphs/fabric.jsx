@@ -63,6 +63,12 @@ export class PeerToPeerFabricGraph extends React.Component {
  * Also note that this component goes out on its own to resolve ASNs to names, both by downloading the as2org.json file and
  * resolving with calls to RIPEstat.
  */
+  constructor(props) {
+    super(props);
+    this.state = {
+      segAngles: {}
+    };
+  }
 
   getRingId = () => {
     return `${this.props.countryCode.toLowerCase()}-${this.props.year}-${
@@ -175,7 +181,7 @@ export class PeerToPeerFabricGraph extends React.Component {
   * BE SURE TO MUTATE THIS STRUCTURE BEFORE FEEDING IT INTO d3.nodes
   * DO NOT USE IMMUTABLY BY COPYING. It will botch updates to the graph.
   */
-  asGraph = { nodes: [], edges: [] };
+  asGraph = { nodes: [], edges: [], ringSegments: [] };
 
   transformAsGraphData(nextAsGraph) {
     /* Transforms the data from snapshot files to the format used in the state machine.
@@ -236,8 +242,18 @@ export class PeerToPeerFabricGraph extends React.Component {
 
         // Nodes is not in the next set of nodes, so delete it.
         if (matchNIdx < 0) {
+          let changedRingSegment = this.asGraph.ringSegments.findIndex(
+            c => c.id === cn.id
+          );
           console.log(`node ${cn.name} deleted...`);
           this.asGraph.nodes.splice(idx, 1);
+          if (changedRingSegment !== -1) {
+            this.asGraph.ringSegments.splice(changedRingSegment, 1);
+            console.log(`ringSegment ${cn.name} deleted...`);
+            console.log(
+              `ringSegments left :\t${this.asGraph.ringSegments.length}`
+            );
+          }
           nodeSplicer();
         }
       });
@@ -255,7 +271,13 @@ export class PeerToPeerFabricGraph extends React.Component {
       // Add to the end of the array if the node is new.
       if (isNewGraph || matchNIdx < 0) {
         console.log(`new node ${n.name} (${toInteger(n.name)}) pushed...`);
+        //const newNode = { ...n, id: toInteger(n.name) };
+
         this.asGraph.nodes.push({ ...n, id: toInteger(n.name) });
+        if (n.type === "eyeball_asn" || n.type === "eyeball_asn_noprobe") {
+          console.log(`new ringSegment ${n.name} pushed...`);
+          this.asGraph.ringSegments.push({ ...n, id: toInteger(n.name) });
+        }
       }
 
       // Replace the existing node if the attributes have changed.
@@ -267,7 +289,6 @@ export class PeerToPeerFabricGraph extends React.Component {
     });
 
     /* EDGES a.k.a. links (in d3 speak) */
-
 
     // pass 1: delete
 
@@ -297,7 +318,6 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     edgeSplicer();
 
-
     // pass 2: replace and add
 
     nextAsGraph.edges.forEach(e => {
@@ -326,35 +346,80 @@ export class PeerToPeerFabricGraph extends React.Component {
     });
 
     // 'archive' the state of the graph.
+    // This isn't used anywhere, just for debugging purposes.
     this.setState({
-      asGraph: { nodes: this.asGraph.nodes, edges: this.asGraph.edges }
+      asGraph: {
+        nodes: this.asGraph.nodes,
+        edges: this.asGraph.edges,
+        ringSegments: this.asGraph.ringSegments
+      }
     });
   }
 
+  connectedRing = d3
+    .pie()
+    .padAngle(0.01)
+    .value(d => d.eyeball_pct);
+
   renderConnectedRing = ({ svg, update }) => {
-    const arcTween = a => {
-      var i = d3.interpolate(this._current, a);
+    function arcTween(d) {
+      var i = d3.interpolate(this._current, d);
       this._current = i(0);
-      return t => connectedArcSegment(i(t));
-    };
+      return function(t) { return connectedArcSegment(i(t)); };
+    }
 
-    var segAngles = {};
+    function findNeighborArc(i, data0, data1, key) {
+      var d;
+      return (d = findPreceding(i, data0, data1, key))
+        ? { startAngle: d.endAngle, endAngle: d.endAngle }
+        : (d = findFollowing(i, data0, data1, key))
+          ? { startAngle: d.startAngle, endAngle: d.startAngle }
+          : null;
+    }
 
-    var connectedRing = d3
-      .pie()
-      .padAngle(0.01)
-      .endAngle(
+    // Find the element in data0 that joins the highest preceding element in data1.
+    function findPreceding(i, data0, data1, key) {
+      var m = data0.length;
+      while (--i >= 0) {
+        var k = key(data1[i]);
+        for (var j = 0; j < m; ++j) {
+          if (key(data0[j]) === k) return data0[j];
+        }
+      }
+    }
+
+    // Find the element in data0 that joins the lowest following element in data1.
+    function findFollowing(i, data0, data1, key) {
+      var n = data1.length,
+        m = data0.length;
+      while (++i < n) {
+        var k = key(data1[i]);
+        for (var j = 0; j < m; ++j) {
+          if (key(data0[j]) === k) return data0[j];
+        }
+      }
+    }
+
+    const key = d => d.data.id;
+
+    // Only use the nodes that should go in to the ring
+    // var nextringSegments = nextAsGraph.nodes.filter(
+    //   d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
+    // );
+    var segAngles = this.state.segAngles;
+
+    //this.ringPath = svg.selectAll("g.connected-ring");
+    this.ringPath = svg.selectAll(".segment");
+
+    var data0 = this.ringPath.data(),
+      data1 = this.connectedRing.endAngle(
         TAU *
-          (this.asGraph.nodes
-            .filter(
-              d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
-            )
-            // calculate which percentage we're actually representing,
-            // so that we can have an open ring.
-            .reduce((acc, cur) => acc + cur.eyeball_pct, 0) /
+          (this.asGraph.ringSegments.reduce(
+            (acc, cur) => acc + cur.eyeball_pct,
+            0
+          ) /
             100)
-      )
-      .value(d => d.eyeball_pct);
+      )(this.asGraph.ringSegments);
 
     const eyeBallsRing = d3
       .arc()
@@ -372,80 +437,66 @@ export class PeerToPeerFabricGraph extends React.Component {
       .innerRadius(245)
       .outerRadius(245);
 
-    var ringPath0 = svg
-      .datum(
-        this.asGraph.nodes.filter(
-          d => d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe"
-        ),
-        d => d.id
+    this.ringPath = this.ringPath.data(data1, key);
+
+    console.log(this.ringPath);
+
+    this.ringPath
+      .enter()
+      .append("g")
+      .attr(
+        "class",
+        d =>
+          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+            "eyeball-no-probe") ||
+            "eyeball-probe"}`
       )
-      .selectAll("g.connected-ring", d => d.id)
-      .data(connectedRing, d => d.id);
-
-    if (!update) {
-      ringPath0
-        .enter()
-        .append("g")
-        .attr(
-          "class",
-          d =>
-            `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-              "eyeball-no-probe") ||
-              "eyeball-probe"}`
-        )
-        .call(p =>
+      .call(p =>
+        p
+          .append("path")
+          .each(function(d, i) {
+            this._current = findNeighborArc(i, data0, data1, key) || d;
+            segAngles[d.data.id] = eyeBallsRing.centroid(d);
+          })
+          .attr(
+            "d",
+            connectedArcSegment //.outerRadius(d => 240)(d)
+            //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+          )
+          .attr("class", "c-ring")
+      )
+      .call(
+        p =>
+          !this.props.hideText &&
           p
-            .append("path")
+            .append("text")
+            .text(d => d.data.orgName || d.data.name)
+            .attr("data-asn", d => d.data.name)
+            .attr("x", d => textOutLineSegment.centroid(d)[0])
+            .attr("y", d => textOutLineSegment.centroid(d)[1])
             .attr(
-              "d",
-              connectedArcSegment //.outerRadius(d => 240)(d)
-              //connectedArcSegment.outerRadius(d => d.data.eyeball_pct + 220)(d)
+              "text-anchor",
+              d =>
+                (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
+                (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
+                "middle"
             )
-            .attr("class", "c-ring")
-        )
-        .call(
-          p =>
-            !this.props.hideText &&
-            p
-              .append("text")
-              .text(d => d.data.orgName || d.data.name)
-              .attr("data-asn", d => d.data.name)
-              .attr("x", d => textOutLineSegment.centroid(d)[0])
-              .attr("y", d => textOutLineSegment.centroid(d)[1])
-              .attr(
-                "text-anchor",
-                d =>
-                  (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
-                  (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
-                  "middle"
-              )
-        )
-        .each(d => {
-          segAngles[d.data.id] = eyeBallsRing.centroid(d);
-          this._current = d;
-        });
-      this.setState({ ringPath: ringPath0 });
-    }
+      );
 
-    const updateRing = () => {
-      //console.log(this._current);
-      ringPath0 = this.state.ringPath.data(connectedRing, d => d.id);
-      ringPath0.transition().duration(750);
-      //.attrTween("d", arcTween.bind(this));
+    this.ringPath
+      .exit()
+      .datum(function(d, i) {
+        return findNeighborArc(i, data1, data0, key) || d;
+      })
+      // .transition()
+      // .duration(750)
+      // .attrTween("d", arcTween)
+      .remove();
 
-      ringPath0.enter().each(d => {
-        segAngles[d.data.id] = eyeBallsRing.centroid(d);
-        this._current = d;
-      });
-    };
-
-    //.merge(ringPath0);
-
-    ringPath0.exit().remove();
-
-    if (update) {
-      updateRing();
-    }
+    this.ringPath
+      .transition()
+      .duration(750)
+      .attrTween("d", arcTween);
 
     this.setState({ segAngles: segAngles });
   };
@@ -504,8 +555,16 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => {
       if (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe") {
-        d.fx = this.state.segAngles[d.id][0];
-        d.fy = this.state.segAngles[d.id][1];
+        console.log(this.state.segAngles[d.id]);
+        console.log(d);
+        // WAIT, WAIT, WAIT
+        // This is debugging code!!
+        // this.state.segAngled[d.id] should not be undefined;
+        // that would mean that this.state.segAngles & this.state.asGraph are not in sync.
+        d.fx =
+          (this.state.segAngles[d.id] && this.state.segAngles[d.id][0]) || 0;
+        d.fy =
+          (this.state.segAngles[d.id] && this.state.segAngles[d.id][1]) || 0;
       }
       return d.id;
     });
@@ -576,12 +635,14 @@ export class PeerToPeerFabricGraph extends React.Component {
     if (
       nextProps.month !== this.props.month ||
       nextProps.year !== this.props.year ||
-      nextProps.day !== this.props.day
+      nextProps.day !== this.props.day ||
+      // TODO: changing countryCode doesn't work!!!!!
+      nextProps.countryCode !== this.props.countryCode
     ) {
       console.log("update now...");
       this.loadAsGraphData({
         ...nextProps,
-        countryCode: this.props.countryCode
+        countryCode: nextProps.countryCode
       }).then(
         data => {
           const nextAsGraph = this.transformAsGraphData(data);
@@ -625,12 +686,12 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     return (
       <div>
-        <PeerToPeerFabricFacts {...this.props} key="primary-facts" />
+        {!this.props.primary && <PeerToPeerFabricFacts {...this.props} />}
         <svg
           key="primary-graph"
           width="100%"
           viewBox="-400 -250 800 500"
-          className="p-t-p-fabric"
+          className={`p-t-p-fabric ${this.props.className}`}
           transform={`scale(${this.props.scaleFactor / 2})`}
           id={this.getRingId()}
         >

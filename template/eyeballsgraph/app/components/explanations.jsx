@@ -795,11 +795,11 @@ export class ExplainLines2 extends React.Component {
             <circle className="st1" cx="223.6" cy="128.9" r="4.6" />
           </g>
           <path
-            className="link eyeball"
+            className="link eyeball-eyeball"
             d="M59.8,175.2c31.8-41.8,73.5-75.1,121.3-96.9"
           />
           <path
-            className="link eyeball i"
+            className="link eyeball-eyeball i"
             d="M181.1,78.4c-31.8,41.8-73.5,75.1-121.3,96.9"
           />
           <path className="c-ring" d="M123.7,102.1" />

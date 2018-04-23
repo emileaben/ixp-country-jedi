@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
@@ -7,6 +8,8 @@ var dir_build = path.resolve(__dirname, "build");
 var dir_html = path.resolve(__dirname, "html");
 var dir_data = path.resolve(__dirname, "data");
 
+console.log(path.resolve(__dirname));
+console.log(`da shit: ${fs.realpathSync(path.resolve(__dirname, './node_modules/@ripe-rnd/ui-components/src'))}`);
 module.exports = {
   entry: [
     "babel-polyfill",
@@ -24,8 +27,11 @@ module.exports = {
       },
       {
         test: /\.js[x]?$/,
-        exclude: [/node_modules/],
-        include: [/app/],
+        //include: [/app/],
+        // includes don't work with linked (local) modules,
+        // such as the @ripe-rnd/ui-components
+        // so excluding is the way to go.
+        exclude: /.*node_modules\/((?!@ripe-rnd).)*$/,
         use: ["babel-loader"]
       },
       {
@@ -46,14 +52,15 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ["*", ".js", ".jsx"]
+    extensions: ["*", ".js", ".jsx"],
+    symlinks: false
   },
   output: {
     path: dir_build,
     publicPath: "/",
     filename: "bundle.js"
   },
-  context: dir_app,
+  //context: dir_app,
   devtool: "cheap-module-source-map",
   devServer: {
     host: "4042.ripe.net",
