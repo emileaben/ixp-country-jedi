@@ -143,9 +143,18 @@ export class PeerToPeerContainer extends React.Component {
           ];
           this.setState({
             snapshots: snaps,
-            allCountriesWithSnaps: this.state.countries.geometries.filter(c =>
-              cA.find(sA => sA.country === c.properties.countryCode)
-            ),
+            allCountriesWithValidSnaps: cA
+              .filter(snapsForC =>
+                snapsForC.dates.filter(
+                  d => new Date(d) >= new Date("2018-01-01")
+                ).length > 0
+              )
+              .map(snapsForC => ({
+                ...this.state.countries.geometries.find(c => c.properties.countryCode === snapsForC.country),
+                dates: snapsForC.dates.filter(
+                  d => new Date(d) >= new Date("2018-01-01")
+                )
+              })),
             countryCode: countryCode,
             currentSnapshotDate: { year, month, day },
             countryInfo: this.state.countries.geometries.find(
@@ -196,9 +205,9 @@ export class PeerToPeerContainer extends React.Component {
     window.history.pushState(
       stateObj,
       "",
-      `/${countryCode}/${
-        snapshotDate.year
-      }/${snapshotDate.month}/${snapshotDate.day}`
+      `/${countryCode}/${snapshotDate.year}/${snapshotDate.month}/${
+        snapshotDate.day
+      }`
     );
 
     this.setState({
@@ -222,7 +231,7 @@ export class PeerToPeerContainer extends React.Component {
               )
             }
             countryCode={this.state.countryCode}
-            countries={this.state.allCountriesWithSnaps}
+            countries={this.state.allCountriesWithValidSnaps}
             changeCountry={this.changeCountry}
           >
             <SnapShotTimeLine
@@ -232,15 +241,6 @@ export class PeerToPeerContainer extends React.Component {
             />
           </PeerToPeerDialog>
         )}
-
-        {/* {(primaryFromUrl &&
-          this.state &&
-          this.state.countries && (
-            <PeerToPeerFabricGraph
-              primary={true}
-              {...destructureCountryInfoFromUrl()}
-            />
-          )) || */}
 
         {(this.state.countryCode &&
           this.state.countries &&

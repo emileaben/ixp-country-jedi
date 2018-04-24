@@ -42,6 +42,13 @@ export class PeerToPeerFabricGraph extends React.Component {
  *   is performed on the NEW elements in the datastructure. And everything after merge() is performed on both.
  *   Read more here: https://bl.ocks.org/mbostock/3808218 (general update pattern)
  * 
+ * We keep a distinct array on `this.asGraph` (`ringSegments`) for bookkeeping the segments of the circle (although 
+ * they are calculated from the same set of nodes). The elements in the array are references to the this.asGraph.nodes,
+ * so that we only have to mutate once the original inserted node.
+ * This ringSegments array is consumed by the d3.pie that forms the outer ring. 
+ * Note that this pie reassembles its data state from the DOM (`selectAll('.segments').data()`) and then compares 
+ * to the updated state from `this.asGraph.ringSegments`.
+ * 
  * The most important aspect of the datastructure fed into d3 is that it needs to be ONE MUTABLE DATASTRUCTURE -
  * in this component it is called `this.asGraph`.
  * So for every update of the graph the arrays `this.asGraph.nodes` and `this.asGraph.edges` get new elements by
@@ -250,9 +257,6 @@ export class PeerToPeerFabricGraph extends React.Component {
           if (changedRingSegment !== -1) {
             this.asGraph.ringSegments.splice(changedRingSegment, 1);
             console.log(`ringSegment ${cn.name} deleted...`);
-            console.log(
-              `ringSegments left :\t${this.asGraph.ringSegments.length}`
-            );
           }
           nodeSplicer();
         }
@@ -267,24 +271,41 @@ export class PeerToPeerFabricGraph extends React.Component {
       const matchNIdx = this.asGraph.nodes
         .map(n => n.id)
         .indexOf(toInteger(n.name));
+      const matchRSIdx = this.asGraph.ringSegments.findIndex(
+        s => s.id === toInteger(n.name)
+      );
+
+      const newNode = { ...n, id: toInteger(n.name) };
+      let changeNode =
+        (matchNIdx >= 0 && this.asGraph.nodes[matchNIdx]) || null;
+      let changeRingSegment =
+        (matchRSIdx >= 0 && this.asGraph.ringSegments[matchRSIdx]) || null;
 
       // Add to the end of the array if the node is new.
       if (isNewGraph || matchNIdx < 0) {
         console.log(`new node ${n.name} (${toInteger(n.name)}) pushed...`);
         //const newNode = { ...n, id: toInteger(n.name) };
 
-        this.asGraph.nodes.push({ ...n, id: toInteger(n.name) });
+        this.asGraph.nodes.push(newNode);
         if (n.type === "eyeball_asn" || n.type === "eyeball_asn_noprobe") {
           console.log(`new ringSegment ${n.name} pushed...`);
-          this.asGraph.ringSegments.push({ ...n, id: toInteger(n.name) });
+          this.asGraph.ringSegments.push(newNode);
         }
       }
 
       // Replace the existing node if the attributes have changed.
-      if (matchNIdx >= 0 && this.asGraph.nodes[matchNIdx].type !== n.type) {
-        console.log(`change node ${n.name}...`);
+      if (
+        matchNIdx >= 0 &&
+        (this.asGraph.nodes[matchNIdx].type !== n.type ||
+          this.asGraph.nodes[matchNIdx].conn_btwn_pct !== n.conn_btwn_pct ||
+          this.asGraph.nodes[matchNIdx].eyeball_pct !== n.eyeball_pct)
+      ) {
+        console.log(
+          `change node ${changeNode.name} ${changeNode.type} -> ${n.type}`
+        );
         this.asGraph.nodes[matchNIdx].type = n.type;
         this.asGraph.nodes[matchNIdx].conn_btwn_pct = n.conn_btwn_pct;
+        this.asGraph.nodes[matchNIdx].eyeball_pct = n.eyeball_pct;
       }
     });
 
@@ -343,6 +364,22 @@ export class PeerToPeerFabricGraph extends React.Component {
           edgeId
         ]);
       }
+
+      const changeEdgeIdx = this.asGraph.edges.findIndex(e => e[4] === edgeId);
+      if (changeEdgeIdx >= 0) {
+        console.log(
+          `change edge ${edgeId} ${this.asGraph.edges[changeEdgeIdx][3]} -> ${toLinkClass(
+            sourceN,
+            targetN,
+            e.type
+          )}`
+        );
+        this.asGraph.edges[changeEdgeIdx][3] = toLinkClass(
+          sourceN,
+          targetN,
+          e.type
+        );
+      }
     });
 
     // 'archive' the state of the graph.
@@ -365,7 +402,9 @@ export class PeerToPeerFabricGraph extends React.Component {
     function arcTween(d) {
       var i = d3.interpolate(this._current, d);
       this._current = i(0);
-      return function(t) { return connectedArcSegment(i(t)); };
+      return function(t) {
+        return connectedArcSegment(i(t));
+      };
     }
 
     function findNeighborArc(i, data0, data1, key) {
@@ -439,18 +478,9 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     this.ringPath = this.ringPath.data(data1, key);
 
-    console.log(this.ringPath);
-
     this.ringPath
       .enter()
       .append("g")
-      .attr(
-        "class",
-        d =>
-          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
-            "eyeball-no-probe") ||
-            "eyeball-probe"}`
-      )
       .call(p =>
         p
           .append("path")
@@ -481,6 +511,14 @@ export class PeerToPeerFabricGraph extends React.Component {
                 (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
                 "middle"
             )
+      )
+      .merge(this.ringPath)
+      .attr(
+        "class",
+        d =>
+          `segment ${(d.data.type === "eyeball_asn_noprobe" &&
+            "eyeball-no-probe") ||
+            "eyeball-probe"}`
       );
 
     this.ringPath
@@ -510,7 +548,6 @@ export class PeerToPeerFabricGraph extends React.Component {
     const data = this.asGraph,
       props = this.props;
     console.log("render ring...");
-    console.log(data);
     function ticked() {
       link.attr("d", positionLink);
       node.attr("transform", positionNode);
@@ -550,21 +587,13 @@ export class PeerToPeerFabricGraph extends React.Component {
     var link = link
       .enter()
       .append("path")
-      .attr("class", d => d[3])
-      .merge(link);
+      .merge(link)
+      .attr("class", d => d[3]);
 
     var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => {
       if (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe") {
-        console.log(this.state.segAngles[d.id]);
-        console.log(d);
-        // WAIT, WAIT, WAIT
-        // This is debugging code!!
-        // this.state.segAngled[d.id] should not be undefined;
-        // that would mean that this.state.segAngles & this.state.asGraph are not in sync.
-        d.fx =
-          (this.state.segAngles[d.id] && this.state.segAngles[d.id][0]) || 0;
-        d.fy =
-          (this.state.segAngles[d.id] && this.state.segAngles[d.id][1]) || 0;
+        d.fx = this.state.segAngles[d.id][0];
+        d.fy = this.state.segAngles[d.id][1];
       }
       return d.id;
     });
@@ -574,10 +603,10 @@ export class PeerToPeerFabricGraph extends React.Component {
     var node = node
       .enter()
       .append("g")
-      .attr("class", n => `node ${this.nodeClass(n)}`)
       .call(parent =>
         parent
           .append("circle")
+          .merge(node)
           //.select("circle")
           .attr("r", d => {
             const scalar =
@@ -599,9 +628,11 @@ export class PeerToPeerFabricGraph extends React.Component {
                   (d.orgName || d.name)) ||
                 ""
             )
+            .merge(node)
             .attr("data-asn", d => d.name)
       )
-      .merge(node);
+      .merge(node)
+      .attr("class", n => `node ${this.nodeClass(n)}`);
 
     if (!update) {
       this.simulation.on("tick", ticked).nodes(this.asGraph.nodes);
