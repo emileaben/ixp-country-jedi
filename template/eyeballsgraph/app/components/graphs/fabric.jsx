@@ -5,6 +5,11 @@ import "../../../styles/eyeballsgraph.less";
 
 const TAU = 2 * Math.PI;
 
+function NoSnapshotException(jsonMsg) {
+  this.error = jsonMsg;
+  this.name = "NoSnapshotException";
+}
+
 export class PeerToPeerFabricFacts extends React.Component {
   loadCountryGeoInfo = async countryGeoInfoUrl => {
     let response = await fetch(countryGeoInfoUrl);
@@ -73,7 +78,8 @@ export class PeerToPeerFabricGraph extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      segAngles: {}
+      segAngles: {},
+      error: null
     };
   }
 
@@ -174,10 +180,22 @@ export class PeerToPeerFabricGraph extends React.Component {
       this.props.dataBaseUrl
     }${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
 
-    let response = await fetch(countryDataForDateUrl);
+    let response = await fetch(countryDataForDateUrl).catch(err => {
+      console.error(
+        `snapshot ${countryCode} ${year}/${month}/${day} does not exist.`
+      );
+      throw new NoSnapshotException({
+        msg: `Sorry, there is no data available for this country at this date`,
+        countryCode,
+        year,
+        month,
+        day
+      });
+    });
     let data = await response.json();
-    console.log("as-graph loaded without errors.");
-    console.log(data);
+    // if (!data.error) {
+    //   console.log("as-graph loaded without errors.");
+    // }
     return data;
   };
 
@@ -193,7 +211,15 @@ export class PeerToPeerFabricGraph extends React.Component {
   transformAsGraphData(nextAsGraph) {
     /* Transforms the data from snapshot files to the format used in the state machine.
      * Updates the state machine by mutating `this.asGraph`.
+     * Right now, it features the sub-structures:
+     * nodes        : stores all the transformed nodes, including the ones in the ring.
+     * edges        : stores all the transformed edges.
+     * ringSegments : These are references to the nodes for the ones in the outer ring.
      *
+     * Note that the `id` and `index` field in the input data are *not* used, instead
+     * a id field is generated from the `name` field (holding the AS) for the nodes
+     * and the resolved names of source and target for the edges.
+     * 
      * Note that it goes over the old data first to see which elements should be deleted
      * and then iterates over the new data to see what should be added or changed.
      * 
@@ -303,6 +329,17 @@ export class PeerToPeerFabricGraph extends React.Component {
         console.log(
           `change node ${changeNode.name} ${changeNode.type} -> ${n.type}`
         );
+        console.log(
+          `change node ${changeNode.name} conn_btwn_pct ${
+            changeNode.conn_btwn_pct
+          } -> ${n.conn_btwn_pct}`
+        );
+        console.log(
+          `change node ${changeNode.name} eyeball_pct ${
+            changeNode.eyeball_pct
+          } -> ${n.eyeball_pct}`
+        );
+
         this.asGraph.nodes[matchNIdx].type = n.type;
         this.asGraph.nodes[matchNIdx].conn_btwn_pct = n.conn_btwn_pct;
         this.asGraph.nodes[matchNIdx].eyeball_pct = n.eyeball_pct;
@@ -351,7 +388,7 @@ export class PeerToPeerFabricGraph extends React.Component {
       // So that makes four lines connecting AS1 and AS2. We don't want that.
       // So we filter out duplicates by skipping testing for isNewGraph === true.
       if (this.asGraph.edges.map(n => n[4]).indexOf(edgeId) < 0) {
-        console.log(`new edge ${sourceN.name}-${targetN.name} pushed...`);
+        //console.log(`new edge ${sourceN.name}-${targetN.name} pushed...`);
         this.asGraph.edges.push([
           this.asGraph.nodes[
             this.asGraph.nodes.map(n => n.id).indexOf(toInteger(sourceN.name))
@@ -368,11 +405,9 @@ export class PeerToPeerFabricGraph extends React.Component {
       const changeEdgeIdx = this.asGraph.edges.findIndex(e => e[4] === edgeId);
       if (changeEdgeIdx >= 0) {
         console.log(
-          `change edge ${edgeId} ${this.asGraph.edges[changeEdgeIdx][3]} -> ${toLinkClass(
-            sourceN,
-            targetN,
-            e.type
-          )}`
+          `change edge ${edgeId} ${
+            this.asGraph.edges[changeEdgeIdx][3]
+          } -> ${toLinkClass(sourceN, targetN, e.type)}`
         );
         this.asGraph.edges[changeEdgeIdx][3] = toLinkClass(
           sourceN,
@@ -592,8 +627,17 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     var node = svg.selectAll("g.node").data(this.asGraph.nodes, d => {
       if (d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe") {
-        d.fx = this.state.segAngles[d.id][0];
-        d.fy = this.state.segAngles[d.id][1];
+        try {
+          const sA = this.state.segAngles;
+          d.fx = this.state.segAngles[d.id][0];
+          d.fy = this.state.segAngles[d.id][1];
+        } catch (e) {
+          // This would happen if a node is updated and moves from the inner circle area
+          // (a transit or ixp) to the outer ring (a end-user network).
+          // In that case it gets moved to the center of the graph.
+          console.error(`no segAngles for: ${d.id}`);
+          d.fx = d.fy = 0;
+        }
       }
       return d.id;
     });
@@ -606,7 +650,7 @@ export class PeerToPeerFabricGraph extends React.Component {
       .call(parent =>
         parent
           .append("circle")
-          .merge(node)
+          //.merge(node)
           //.select("circle")
           .attr("r", d => {
             const scalar =
@@ -628,10 +672,24 @@ export class PeerToPeerFabricGraph extends React.Component {
                   (d.orgName || d.name)) ||
                 ""
             )
-            .merge(node)
             .attr("data-asn", d => d.name)
       )
       .merge(node)
+      // This call is only used when the circle is already present, i.e.
+      // when the node is updated, hence the `'.select` instead of `.append`
+      .call(parent =>
+        parent
+          //.append("circle")
+          //.merge(node)
+          .select("circle")
+          .attr("r", d => {
+            const scalar =
+              // (d.type === "eyeball_asn" && Math.max(d.eyeball_pct, BALL_MIN_SIZE)) ||
+              // ((d.type === "transit_asn" || d.type === "ixp") &&
+              d.conn_btwn_pct || props.ballMinSize;
+            return Math.max(Math.log(scalar * props.scaleFactor) * 3.5, 2);
+          })
+      )
       .attr("class", n => `node ${this.nodeClass(n)}`);
 
     if (!update) {
@@ -671,42 +729,53 @@ export class PeerToPeerFabricGraph extends React.Component {
       nextProps.countryCode !== this.props.countryCode
     ) {
       console.log("update now...");
+
       this.loadAsGraphData({
         ...nextProps,
         countryCode: nextProps.countryCode
       }).then(
         data => {
+          // reset any error state that might have been set earlier on
+          this.setState({ error: null });
+
           const nextAsGraph = this.transformAsGraphData(data);
           this.renderD3Ring({ update: true });
         },
-        error => console.log(error)
+        error => {
+          this.setState({ error: error.error });
+        }
       );
     }
   }
 
   componentDidMount() {
-    this.loadAsGraphData(this.props).then(data => {
-      const tData = this.transformAsGraphData(data);
-      this.renderD3Ring({ update: false });
+    this.loadAsGraphData(this.props).then(
+      data => {
+        const tData = this.transformAsGraphData(data);
+        this.renderD3Ring({ update: false });
 
-      if (this.props.orgNames) {
-        console.log("as2org loaded fast, looking up...");
-        // now lookup all the organisation names for ASes
-        // in two steps:
-        // 1. lookup in a json file (from CAIDA) that we'll load async
-        // 2. lookup with a call to RIPEstat
-        // doing this sync should be fast, because the as2org file
-        // is loaded async by the parent and then
-        // propagated as a prop to this component when it has arrived
-        // in parent.
-        const unknownAses =
-          this.props.orgNames &&
-          !this.props.hideText &&
-          this.replaceAs2OrgNames(this.asGraph.nodes, this.props.orgNames);
-        console.log(`not found in as2org :\t${unknownAses.length}`);
-        unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+        if (this.props.orgNames) {
+          console.log("as2org loaded fast, looking up...");
+          // now lookup all the organisation names for ASes
+          // in two steps:
+          // 1. lookup in a json file (from CAIDA) that we'll load async
+          // 2. lookup with a call to RIPEstat
+          // doing this sync should be fast, because the as2org file
+          // is loaded async by the parent and then
+          // propagated as a prop to this component when it has arrived
+          // in parent.
+          const unknownAses =
+            this.props.orgNames &&
+            !this.props.hideText &&
+            this.replaceAs2OrgNames(this.asGraph.nodes, this.props.orgNames);
+          console.log(`not found in as2org :\t${unknownAses.length}`);
+          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+        }
+      },
+      error => {
+        this.setState({ error: error.error });
       }
-    });
+    );
   }
 
   render() {
@@ -717,23 +786,33 @@ export class PeerToPeerFabricGraph extends React.Component {
 
     return (
       <div>
+        {this.state.error && (
+          <div>
+            <h5>{this.state.error.msg}</h5>
+            <p>
+              {this.state.error.countryCode} {this.state.error.year}-{this.state.error.month}-{this.state.error.day}
+            </p>
+          </div>
+        )}
         {!this.props.primary && <PeerToPeerFabricFacts {...this.props} />}
-        <svg
-          key="primary-graph"
-          width="100%"
-          viewBox="-400 -250 800 500"
-          className={`p-t-p-fabric ${this.props.className}`}
-          transform={`scale(${this.props.scaleFactor / 2})`}
-          id={this.getRingId()}
-        >
-          <defs>
-            <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#05a" />
-              <stop offset="100%" stopColor="#0a5" />
-            </linearGradient>
-          </defs>
-          <circle r="245" cx="0" cy="0" className="interior-circle" />
-        </svg>
+        {!this.state.error && (
+          <svg
+            key="primary-graph"
+            width="100%"
+            viewBox="-400 -250 800 500"
+            className={`p-t-p-fabric ${this.props.className}`}
+            transform={`scale(${this.props.scaleFactor / 2})`}
+            id={this.getRingId()}
+          >
+            <defs>
+              <linearGradient id="linear" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#05a" />
+                <stop offset="100%" stopColor="#0a5" />
+              </linearGradient>
+            </defs>
+            <circle r="245" cx="0" cy="0" className="interior-circle" />
+          </svg>
+        )}
       </div>
     );
   }
