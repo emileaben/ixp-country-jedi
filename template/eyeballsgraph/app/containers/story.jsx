@@ -177,6 +177,10 @@ export class PeerToPeerContainer extends React.Component {
   }
 
   changeSnapshotDate = newSnapshotDate => {
+    const primaryFromUrl = window.location.pathname.match(
+      /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
+    );
+
     const stateObj = {
       country: this.state.countryCode,
       snapshotDate: this.state.currentSnapshotDate
@@ -184,7 +188,7 @@ export class PeerToPeerContainer extends React.Component {
     window.history.pushState(
       stateObj,
       "",
-      `/${this.state.countryCode.toLowerCase()}/${newSnapshotDate.year}/${
+      `${primaryFromUrl && window.location.pathname.replace(primaryFromUrl[0], "") || "/"}${this.state.countryCode.toLowerCase()}/${newSnapshotDate.year}/${
         newSnapshotDate.month
       }/${newSnapshotDate.day}`
     );
@@ -195,6 +199,10 @@ export class PeerToPeerContainer extends React.Component {
   };
 
   changeCountry = newCountry => {
+    const primaryFromUrl = window.location.pathname.match(
+      /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
+    );
+
     const countryCode = newCountry.properties.countryCode.toLowerCase(),
       snapshotDate = this.state.currentSnapshotDate;
     const stateObj = {
@@ -205,7 +213,7 @@ export class PeerToPeerContainer extends React.Component {
     window.history.pushState(
       stateObj,
       "",
-      `/${countryCode}/${snapshotDate.year}/${snapshotDate.month}/${
+      `${primaryFromUrl && window.location.pathname.replace(primaryFromUrl[0], "") || "/"}${countryCode}/${snapshotDate.year}/${snapshotDate.month}/${
         snapshotDate.day
       }`
     );
