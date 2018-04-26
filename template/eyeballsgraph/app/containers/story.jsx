@@ -20,7 +20,7 @@ import {
 } from "../components/explanations.jsx";
 
 const countryGeoInfoUrl = "./world-geo150_ne50m.topo.json";
-const primaryFromUrl = window.location.pathname.match(
+const primaryFromUrl = () => window.location.pathname.match(
   /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
 );
 
@@ -31,7 +31,7 @@ export class PeerToPeerContainer extends React.Component {
   }
 
   destructureCountryInfoFromUrl = () => {
-    const paths = primaryFromUrl || null;
+    const paths = primaryFromUrl() || null;
     return (paths && paths.slice(1, 6)) || [null, null, null, null];
     // console.log({
     //     countryCode,
@@ -144,13 +144,16 @@ export class PeerToPeerContainer extends React.Component {
           this.setState({
             snapshots: snaps,
             allCountriesWithValidSnaps: cA
-              .filter(snapsForC =>
-                snapsForC.dates.filter(
-                  d => new Date(d) >= new Date("2018-01-01")
-                ).length > 0
+              .filter(
+                snapsForC =>
+                  snapsForC.dates.filter(
+                    d => new Date(d) >= new Date("2018-01-01")
+                  ).length > 0
               )
               .map(snapsForC => ({
-                ...this.state.countries.geometries.find(c => c.properties.countryCode === snapsForC.country),
+                ...this.state.countries.geometries.find(
+                  c => c.properties.countryCode === snapsForC.country
+                ),
                 dates: snapsForC.dates.filter(
                   d => new Date(d) >= new Date("2018-01-01")
                 )
@@ -177,10 +180,6 @@ export class PeerToPeerContainer extends React.Component {
   }
 
   changeSnapshotDate = newSnapshotDate => {
-    const primaryFromUrl = window.location.pathname.match(
-      /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
-    );
-
     const stateObj = {
       country: this.state.countryCode,
       snapshotDate: this.state.currentSnapshotDate
@@ -188,7 +187,12 @@ export class PeerToPeerContainer extends React.Component {
     window.history.pushState(
       stateObj,
       "",
-      `${primaryFromUrl && window.location.pathname.replace(primaryFromUrl[0], "") || "/"}${this.state.countryCode.toLowerCase()}/${newSnapshotDate.year}/${
+      `${(primaryFromUrl() &&
+        window.location.pathname.replace(primaryFromUrl()[0], "")) ||
+        window.location.pathname.replace(
+          /\/?$/,
+          "/"
+        )}${this.state.countryCode.toLowerCase()}/${newSnapshotDate.year}/${
         newSnapshotDate.month
       }/${newSnapshotDate.day}`
     );
@@ -199,10 +203,6 @@ export class PeerToPeerContainer extends React.Component {
   };
 
   changeCountry = newCountry => {
-    const primaryFromUrl = window.location.pathname.match(
-      /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
-    );
-
     const countryCode = newCountry.properties.countryCode.toLowerCase(),
       snapshotDate = this.state.currentSnapshotDate;
     const stateObj = {
@@ -213,9 +213,11 @@ export class PeerToPeerContainer extends React.Component {
     window.history.pushState(
       stateObj,
       "",
-      `${primaryFromUrl && window.location.pathname.replace(primaryFromUrl[0], "") || "/"}${countryCode}/${snapshotDate.year}/${snapshotDate.month}/${
-        snapshotDate.day
-      }`
+      `${(primaryFromUrl() &&
+        window.location.pathname.replace(primaryFromUrl()[0], "")) ||
+        window.location.pathname.replace(/\/?$/, "/")}${countryCode}/${
+        snapshotDate.year
+      }/${snapshotDate.month}/${snapshotDate.day}`
     );
 
     this.setState({
