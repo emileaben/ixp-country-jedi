@@ -1,0 +1,40 @@
+{
+  /* This really needs to be a separate .babelrc file inside the folder holding all the React stuff.
+   * DO NOT MERGE THIS WITH THE OPTIONS SECTION OF THE BABEL SECTION IN THE WEBPACK CONFIG FILE!
+   * HMR WILL STOP WORKING IF YOU DO.
+   */
+
+  "env": {
+    "production": {
+      "plugins": [
+        // Do not use react-hot-loader in production
+        // these are all loaded in preset stage-2
+        //"transform-async-to-generator",
+        //"transform-object-rest-spread",
+        //"transform-class-properties"
+      ]
+    }
+  },
+  "presets": [
+    [
+      // This is for babel-preset-env plugin, that selects what to translate from ES2015 to ES5
+      "env",
+      {
+        "targets": {
+          "browsers": ["last 2 versions", "safari >= 7"]
+        },
+        "modules": false
+      }
+    ],
+    "stage-2",
+    "react"
+  ],
+  "plugins": [
+    "react-hot-loader/babel",
+    // all loaded in preset stage-2
+    //"transform-async-to-generator",
+    //"transform-object-rest-spread",
+    //"transform-class-properties",
+    "babel-root-import"
+  ]
+}
