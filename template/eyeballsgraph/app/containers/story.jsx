@@ -20,9 +20,10 @@ import {
 } from "../components/explanations.jsx";
 
 const countryGeoInfoUrl = "./world-geo150_ne50m.topo.json";
-const primaryFromUrl = () => window.location.pathname.match(
-  /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
-);
+const primaryFromUrl = () =>
+  window.location.pathname.match(
+    /([a-zA-Z]{2})[\/\-]([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/
+  );
 
 export class PeerToPeerContainer extends React.Component {
   constructor(props) {
@@ -109,7 +110,10 @@ export class PeerToPeerContainer extends React.Component {
         //       countryCode: countryCode
         //     });
         //   }
-
+        const now = new Date(),
+          mostRecentFirstInMonth = `${now.getYear() + 1900}/${(
+            "0" + (now.getMonth() + 1).toString()
+          ).slice(-2)}/01`;
         this.loadAs2GeojsonIndex().then(cA => {
           console.log(this.destructureCountryInfoFromUrl());
           let [
@@ -122,18 +126,20 @@ export class PeerToPeerContainer extends React.Component {
             (urlCountryCode && urlCountryCode.toUpperCase()) ||
             l.country.toUpperCase();
           console.log(countryCode);
-          const snaps = cA
-            .find(snap => snap.country === countryCode)
-            .dates.map(d => {
-              const [year, month, day] = d
-                .match(/([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/)
-                .slice(1, 4);
-              return {
-                year,
-                month,
-                day
-              };
-            });
+          const snaps = (
+            cA.find(snap => snap.country === countryCode) || {
+              dates: [mostRecentFirstInMonth]
+            }
+          ).dates.map(d => {
+            const [year, month, day] = d
+              .match(/([0-9]{4})[\/\-]([0-9]{2})[\/\-]([0-9]{2})/)
+              .slice(1, 4);
+            return {
+              year,
+              month,
+              day
+            };
+          });
 
           console.log(snaps);
           let [year, month, day] = [
