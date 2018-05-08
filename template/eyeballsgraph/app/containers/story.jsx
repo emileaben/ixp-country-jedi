@@ -102,19 +102,16 @@ export class PeerToPeerContainer extends React.Component {
 
       // try to get the country of the user
       this.whatsMyGeoLocation().then(l => {
-        //let countryCode = (l.country && l.country.toLowerCase()) || null;
-        //console.log(`user country:\t${countryCode}`);
-
-        //   if (countryCode) {
-        //     this.setState({
-        //       countryCode: countryCode
-        //     });
-        //   }
         const now = new Date(),
           mostRecentFirstInMonth = `${now.getYear() + 1900}/${(
             "0" + (now.getMonth() + 1).toString()
           ).slice(-2)}/01`;
+
+        // load the generic country data
         this.loadAs2GeojsonIndex().then(cA => {
+          // try to construct country and snapshot date from url,
+          // if it is not there then use the guessed country based on
+          // the user IP address.
           console.log(this.destructureCountryInfoFromUrl());
           let [
             urlCountryCode,
@@ -126,6 +123,10 @@ export class PeerToPeerContainer extends React.Component {
             (urlCountryCode && urlCountryCode.toUpperCase()) ||
             l.country.toUpperCase();
           console.log(countryCode);
+
+          // Now see which snapshot dates we have for this country
+          // if we don't find anything (either because the user put a countrycode in the url
+          // or we have guessed the country) we're using the first of the current month.
           const snaps = (
             cA.find(snap => snap.country === countryCode) || {
               dates: [mostRecentFirstInMonth]
@@ -216,6 +217,16 @@ export class PeerToPeerContainer extends React.Component {
       snapshotDate: snapshotDate
     };
 
+    // load all available snapshotdates for this country
+    const snapshots = (newCountry.dates || []).map(d => ({
+      year: d.slice(0, 4),
+      month: d.slice(5, 7),
+      day: d.slice(8, 10)
+    }));
+
+    console.log("new snapshots");
+    console.log(newCountry.dates);
+
     window.history.pushState(
       stateObj,
       "",
@@ -227,7 +238,8 @@ export class PeerToPeerContainer extends React.Component {
     );
 
     this.setState({
-      countryCode: countryCode
+      countryCode: countryCode,
+      snapshots: snapshots
     });
   };
 
