@@ -181,7 +181,7 @@ export class PeerToPeerFabricGraph extends React.Component {
     }${year}-${month}-${day}/${countryCode.toUpperCase()}/eyeballasgraph/asgraph.json`;
 
     let response = await fetch(countryDataForDateUrl).catch(err => {
-      console.error(
+      console.log(
         `snapshot ${countryCode} ${year}/${month}/${day} does not exist.`
       );
       throw new NoSnapshotException({
