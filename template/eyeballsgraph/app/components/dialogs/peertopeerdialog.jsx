@@ -11,7 +11,7 @@ export class PeerToPeerDialog extends React.Component {
 
   render() {
     return (
-      <div className="small-graphs">
+      <div className="dialog">
         <CountryAutoCompleteInput
           title="Country"
           countries={this.props.countries}

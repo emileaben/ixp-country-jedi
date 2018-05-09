@@ -270,36 +270,41 @@ export class PeerToPeerContainer extends React.Component {
           </PeerToPeerDialog>
         )}
 
-        {(this.state.countryCode &&
-          this.state.countries &&
-          this.state.currentSnapshotDate && (
-            <PeerToPeerFabricGraph
-              primary={true}
-              countryInfo={
-                this.state.countryCode &&
+        {
+          <PeerToPeerFabricGraph
+            primary={true}
+            countryInfo={
+              this.state.countryCode &&
+              this.state.countries &&
+              this.state.countries.geometries.find(
+                c =>
+                  c.properties.countryCode ===
+                  this.state.countryCode.toUpperCase()
+              )
+            }
+            countryCode={this.state.countryCode}
+            year={
+              this.state.currentSnapshotDate &&
+              this.state.currentSnapshotDate.year
+            }
+            month={
+              this.state.currentSnapshotDate &&
+              this.state.currentSnapshotDate.month
+            }
+            day={
+              this.state.currentSnapshotDate &&
+              this.state.currentSnapshotDate.day
+            }
+            orgNames={this.state.orgnames}
+            status={
+              (this.state.countryCode &&
                 this.state.countries &&
-                this.state.countries.geometries.find(
-                  c =>
-                    c.properties.countryCode ===
-                    this.state.countryCode.toUpperCase()
-                )
-              }
-              countryCode={this.state.countryCode}
-              year={
                 this.state.currentSnapshotDate &&
-                this.state.currentSnapshotDate.year
-              }
-              month={
-                this.state.currentSnapshotDate &&
-                this.state.currentSnapshotDate.month
-              }
-              day={
-                this.state.currentSnapshotDate &&
-                this.state.currentSnapshotDate.day
-              }
-              orgNames={this.state.orgnames}
-            />
-          )) || <div>waiting...</div>}
+                "ready") ||
+              "waiting"
+            }
+          />
+        }
 
         <Legend />
         <div className="small-graphs">

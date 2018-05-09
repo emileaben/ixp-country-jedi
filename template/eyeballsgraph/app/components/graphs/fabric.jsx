@@ -711,7 +711,7 @@ export class PeerToPeerFabricGraph extends React.Component {
   };
 
   componentWillReceiveProps(nextProps) {
-    if (this.state && nextProps.orgNames) {
+    if (nextProps.orgNames) {
       console.log("as2org loaded, looking up...");
       // now lookup all the organisation names for ASes
       // in two steps:
@@ -752,7 +752,9 @@ export class PeerToPeerFabricGraph extends React.Component {
           this.renderD3Ring({ update: true });
         },
         error => {
+          this.asGraph = { nodes: [], edges: [], ringSegments: [] };
           this.setState({ error: error.error });
+          this.renderD3Ring({ update: true });
         }
       );
     }
@@ -791,13 +793,13 @@ export class PeerToPeerFabricGraph extends React.Component {
   render() {
     if (!this.props.countryCode) {
       console.log("skip rendering...");
-      return null;
+      return <div className="status-msg"><h5>{this.props.status}</h5></div>;
     }
 
     return (
       <div>
         {this.state.error && (
-          <div>
+          <div className="status-msg">
             <h5>{this.state.error.msg}</h5>
             <p>
               {this.state.error.countryCode} {this.state.error.year}-{
@@ -807,12 +809,12 @@ export class PeerToPeerFabricGraph extends React.Component {
           </div>
         )}
         {!this.props.primary && <PeerToPeerFabricFacts {...this.props} />}
-        {!this.state.error && (
+        {
           <svg
             key="primary-graph"
             width="100%"
             viewBox="-400 -250 800 500"
-            className={`p-t-p-fabric ${this.props.className}`}
+            className={`p-t-p-fabric ${this.props.className || ""}`}
             transform={`scale(${this.props.scaleFactor / 2})`}
             id={this.getRingId()}
           >
@@ -822,9 +824,9 @@ export class PeerToPeerFabricGraph extends React.Component {
                 <stop offset="100%" stopColor="#0a5" />
               </linearGradient>
             </defs>
-            <circle r="245" cx="0" cy="0" className="interior-circle" />
+            <circle r="240" cx="0" cy="0" className={`interior-circle ${this.state.error && "error-state"}`} />
           </svg>
-        )}
+        }
       </div>
     );
   }

@@ -136,6 +136,13 @@ circle.interior-circle {
   opacity: 1;
 }
 
+circle.error-state {
+  fill: none;
+  opacity: 1;
+  stroke-width: 0.5;
+  stroke: @jedi-anthracite;
+}
+
 .outline-ring {
   opacity: 1.0;
 
@@ -329,6 +336,11 @@ class.story {
   p {
     //margin-bottom: 59px;
     max-width: 670px;
+  }
+
+  .status-msg {
+    position: absolute;
+    z-index: 10;
   }
 }
 
