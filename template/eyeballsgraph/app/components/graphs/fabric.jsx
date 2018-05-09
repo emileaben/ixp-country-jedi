@@ -540,6 +540,23 @@ export class PeerToPeerFabricGraph extends React.Component {
           )
           .attr("class", "c-ring")
       )
+      .call(p =>
+        p
+          .append("rect")
+          .attr("width", 82)
+          .attr("height", 36)
+          .attr(
+            "x",
+            d =>
+              textOutLineSegment.centroid(d)[0] -
+              4 +
+              (textOutLineSegment.centroid(d)[0] < 0 && -74)
+          )
+          .attr("y", d => textOutLineSegment.centroid(d)[1] - 30)
+          .attr("rx", "4px")
+          .attr("ry", "4px")
+          .attr("class", "tooltip-bg")
+      )
       .call(
         p =>
           !this.props.hideText &&
@@ -556,6 +573,23 @@ export class PeerToPeerFabricGraph extends React.Component {
                 (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
                 "middle"
             )
+      )
+      .call(p =>
+        p
+          .append("text")
+          .text(
+            d => `${d.data.name} (${Math.round(d.data.eyeball_pct * 10) / 10})`
+          )
+          .attr("x", d => textOutLineSegment.centroid(d)[0])
+          .attr("y", d => textOutLineSegment.centroid(d)[1] - 15)
+          .attr("class", "tooltip")
+          .attr(
+            "text-anchor",
+            d =>
+              (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
+              (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
+              "middle"
+          )
       )
       .merge(this.ringPath)
       .attr(
@@ -670,6 +704,17 @@ export class PeerToPeerFabricGraph extends React.Component {
             return Math.max(Math.log(scalar * props.scaleFactor) * 3.5, 2);
           })
       )
+      .call(p =>
+        p
+          .append("rect")
+          .attr("width", 82)
+          .attr("height", 36)
+          .attr("y","-30")
+          .attr("x","-4")
+          .attr("rx", "4px")
+          .attr("ry", "4px")
+          .attr("class", "tooltip-bg")
+      )
       .call(
         parent =>
           !props.hideText &&
@@ -683,6 +728,14 @@ export class PeerToPeerFabricGraph extends React.Component {
                 ""
             )
             .attr("data-asn", d => d.name)
+            .attr("class", "org-name")
+      )
+      .call(parent =>
+        parent
+          .append("text")
+          .text(d => `${d.name} (${Math.round(d.conn_btwn_pct * 10) / 10})`)
+          .attr("class", "tooltip")
+          .attr("dy", -15)
       )
       .merge(node)
       // This call is only used when the circle is already present, i.e.
@@ -793,7 +846,11 @@ export class PeerToPeerFabricGraph extends React.Component {
   render() {
     if (!this.props.countryCode) {
       console.log("skip rendering...");
-      return <div className="status-msg"><h5>{this.props.status}</h5></div>;
+      return (
+        <div className="status-msg">
+          <h5>{this.props.status}</h5>
+        </div>
+      );
     }
 
     return (
@@ -824,7 +881,12 @@ export class PeerToPeerFabricGraph extends React.Component {
                 <stop offset="100%" stopColor="#0a5" />
               </linearGradient>
             </defs>
-            <circle r="240" cx="0" cy="0" className={`interior-circle ${this.state.error && "error-state"}`} />
+            <circle
+              r="240"
+              cx="0"
+              cy="0"
+              className={`interior-circle ${this.state.error && "error-state"}`}
+            />
           </svg>
         }
       </div>

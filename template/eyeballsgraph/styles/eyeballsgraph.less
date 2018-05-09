@@ -144,20 +144,20 @@ circle.error-state {
 }
 
 .outline-ring {
-  opacity: 1.0;
+  opacity: 1;
 
   path,
   circle,
   line {
-    opacity: 1.0;
-    stroke-opacity: 1.0;
+    opacity: 1;
+    stroke-opacity: 1;
     fill: none;
     stroke: @oim-antracite;
   }
 
   // arrowheads!
   polygon {
-    stroke-opacity: 1.0;
+    stroke-opacity: 1;
     fill: @oim-antracite;
     stroke: none;
   }
@@ -270,8 +270,66 @@ div#p-t-p-fabric-panel {
   max-width: 1220px;
 }
 
+g.node:hover text.tooltip {
+  opacity: 1;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+  fill: white;
+}
+
+g.node:hover text {
+  fill: white;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+  fill: white;
+}
+
+g.node:hover rect.tooltip-bg {
+  opacity: 1;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+}
+
+g.segment:hover text.tooltip {
+  opacity: 1;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+  fill: white;
+}
+
+g.segment:hover text {
+  fill: white;
+  opacity: 1;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+}
+
+g.segment:hover rect.tooltip-bg {
+  opacity: 1;
+  transition: 0.1s all ease;
+  transition-delay: 0.1s;
+}
+
+g.node text.tooltip {
+  opacity: 0;
+  fill: @jedi-anthracite;
+  cursor: default;
+}
+
+g.segment text.tooltip {
+  opacity: 0;
+  fill: @jedi-anthracite;
+  cursor: default;
+}
+
+rect.tooltip-bg {
+  fill: @jedi-anthracite;
+  opacity: 0;
+}
+
 /* smallGraphs flexbox */
-.small-graphs, .big-graphs {
+.small-graphs,
+.big-graphs {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -293,7 +351,7 @@ div#p-t-p-fabric-panel {
 
   svg.big {
     max-width: 1260px;
-    min-width:  800px;
+    min-width: 800px;
     min-height: 800px;
   }
 }
