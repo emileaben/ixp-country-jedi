@@ -184,6 +184,9 @@ export class PeerToPeerFabricGraph extends React.Component {
       console.log(
         `snapshot ${countryCode} ${year}/${month}/${day} does not exist.`
       );
+
+      // 40x does not throw a NetworkError but a TypeError which is *not* propagated.
+      // Beware that a CORS error *does* throw a NetworkError, so then a .catch would work.
       throw new NoSnapshotException({
         msg: `Sorry, there is no data available for this country at this date`,
         countryCode,
@@ -192,10 +195,17 @@ export class PeerToPeerFabricGraph extends React.Component {
         day
       });
     });
+
+    if (!response.ok) {
+      throw new NoSnapshotException({
+        msg: `Sorry, there is no data available for this country at this date`,
+        countryCode,
+        year,
+        month,
+        day
+      });
+    }
     let data = await response.json();
-    // if (!data.error) {
-    //   console.log("as-graph loaded without errors.");
-    // }
     return data;
   };
 
@@ -790,7 +800,9 @@ export class PeerToPeerFabricGraph extends React.Component {
           <div>
             <h5>{this.state.error.msg}</h5>
             <p>
-              {this.state.error.countryCode} {this.state.error.year}-{this.state.error.month}-{this.state.error.day}
+              {this.state.error.countryCode} {this.state.error.year}-{
+                this.state.error.month
+              }-{this.state.error.day}
             </p>
           </div>
         )}
