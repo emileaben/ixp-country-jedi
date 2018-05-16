@@ -270,63 +270,48 @@ div#p-t-p-fabric-panel {
   max-width: 1220px;
 }
 
-g.node:hover text.tooltip {
-  opacity: 1;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-  fill: white;
+.p-t-p-fabric {
+  // show overflow for labels
+  // hard to know in advance what their length is
+  overflow: visible;
 }
 
-g.node:hover text {
-  fill: white;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-  fill: white;
-}
-
-g.node:hover rect.tooltip-bg {
-  opacity: 1;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-}
-
-g.segment:hover text.tooltip {
-  opacity: 1;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-  fill: white;
-}
-
-g.segment:hover text {
-  fill: white;
-  opacity: 1;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-}
-
-g.segment:hover rect.tooltip-bg {
-  opacity: 1;
-  transition: 0.1s all ease;
-  transition-delay: 0.1s;
-}
-
-g.node text.tooltip {
-  opacity: 0;
-  fill: @jedi-anthracite;
+text {
+  // no text-selection cursor, please
+  // this is confusing with a tooltip
   cursor: default;
-}
-
-g.segment text.tooltip {
-  opacity: 0;
   fill: @jedi-anthracite;
-  cursor: default;
 }
 
-rect.tooltip-bg {
-  fill: @jedi-anthracite;
-  opacity: 0;
-}
+g.tooltip {
+  text {
+    font-size: 0.7em;
+    fill: white;
+    cursor: default;
+  }
 
+  text.tooltip-header {
+    font-weight: regular;
+    fill: white;
+  }
+
+  text.tooltip-subheader {
+    fill: lighten(@l-color, 12%);
+    stroke: none;
+  }
+
+  rect.tooltip-bg {
+    fill: @jedi-anthracite;
+    stroke: @jedi-anthracite;
+    stroke-width: 1;
+    opacity: 1;
+  }
+
+  polyline {
+    fill: @jedi-anthracite;
+    stroke: none;
+  }
+}
 /* smallGraphs flexbox */
 .small-graphs,
 .big-graphs {

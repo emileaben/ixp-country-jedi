@@ -3,6 +3,8 @@ import React from "react";
 import * as d3 from "d3";
 import "../../../styles/eyeballsgraph.less";
 
+import { SvgToolTip } from "../ui-elements/tooltip.jsx";
+
 const TAU = 2 * Math.PI;
 
 function NoSnapshotException(jsonMsg) {
@@ -79,7 +81,8 @@ export class PeerToPeerFabricGraph extends React.Component {
     super(props);
     this.state = {
       segAngles: {},
-      error: null
+      error: null,
+      tooltip: null
     };
   }
 
@@ -118,12 +121,145 @@ export class PeerToPeerFabricGraph extends React.Component {
       d3.forceCollide().radius(d => (d.type === "ixp" && 20) || 30)
     );
 
+  textOutLineSegment = d3
+    .arc()
+    .innerRadius(245)
+    .outerRadius(245);
+
   // Resolve the ASN to the holder name using RIPEstat
   resolveAsToName = async asn => {
     const fetchUrl = `${this.props.asResolverUrl}${asn}`;
     let response = await fetch(fetchUrl);
     let data = await response.json();
     return data.data.holder;
+  };
+
+  showToolTip = (d, i) => {
+    const scalar = d.conn_btwn_pct || this.props.ballMinSize;
+    const fontSize = 10,
+      lineHeight = fontSize + 2,
+      marginHor = 1.2 * fontSize,
+      isEyeball =
+        d.type === "eyeball_asn" || d.type === "eyeball_asn_noprobe" || false,
+      // Offset the tooltip with ring-size + twice the margin
+      dx =
+        Math.max(Math.log(scalar * this.props.scaleFactor) * 3.5, 2) +
+        1.5 * marginHor,
+      dy = ((isEyeball && 6) || 4.5) * lineHeight + 2 * marginHor;
+    this.setState({
+      tooltip: (
+        <SvgToolTip
+          header={
+            (isEyeball && "END USER NETWORK") ||
+            (d.type === "ixp" && "IXP") ||
+            (d.type === "transit_asn" && "TRANSIT PROVIDER")
+          }
+          x={d.x}
+          y={d.y}
+          dx={dx}
+          dy={dy}
+          fontsize={fontSize}
+          minwidth={135}
+          textlines={[
+            d.name,
+            { header: "name", content: d.orgName || "-" },
+            isEyeball && {
+              header: "end users",
+              content: `${(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%`
+            },
+            d.type !== "eyeball_asn_noprobe" && {
+              header: "connectedness",
+              content: `${Math.round(d.conn_btwn_pct * 100 / 100).toFixed(1)}%`
+            }
+          ].filter(t => t)}
+        />
+      )
+      //(
+      //   <g className="tooltip" transform={`matrix(1 0 0 1 ${dx} ${dy})`}>
+      //     <rect
+      //       className="tooltip-bg"
+      //       width={Math.max(24 + d.name.length * 8, 135)}
+      //       height={((isEyeball && 12) || 9) * lineHeight + 2 * marginHor}
+      //       y={d.y - 13 * lineHeight - 2 * marginHor}
+      //       x={d.x}
+      //       rx="4"
+      //       ry="4"
+      //     />
+      //     <text
+      //       className="tooltip-header"
+      //       x={d.x + marginHor}
+      //       y={d.y - 13 * lineHeight - 3}
+      //     >
+      //       {(isEyeball && "END USER NETWORK") ||
+      //         (d.type === "ixp" && "IXP") ||
+      //         (d.type === "transit_asn" && "TRANSIT PROVIDER")}
+      //     </text>,
+      //     <text x={d.x + marginHor} y={d.y - 11 * lineHeight - 3}>
+      //       {d.name}
+      //     </text>
+      //     <text
+      //       x={d.x + marginHor}
+      //       y={d.y - 9 * lineHeight}
+      //       className="tooltip-subheader"
+      //       textAnchor="start"
+      //     >
+      //       name
+      //     </text>
+      //     <text x={d.x + marginHor} y={d.y - 8 * lineHeight}>
+      //       {(d.orgName !== "" && d.orgName) || "-"}
+      //     </text>
+      //     {isEyeball && [
+      //       <text
+      //         key={`${d.name}_1`}
+      //         x={d.x + marginHor}
+      //         y={d.y - 6 * lineHeight}
+      //         className="tooltip-subheader"
+      //         textAnchor="start"
+      //       >
+      //         end users
+      //       </text>,
+      //       <text
+      //         x={d.x + marginHor}
+      //         y={d.y - 5 * lineHeight}
+      //         key={`${d.name}_2`}
+      //       >
+      //         {(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%
+      //       </text>
+      //     ]}
+      //     <text
+      //       x={d.x + marginHor}
+      //       y={d.y - ((isEyeball && 3) || 6) * lineHeight}
+      //       className="tooltip-subheader"
+      //       textAnchor="start"
+      //     >
+      //       connectedness
+      //     </text>
+      //     <text
+      //       x={d.x + marginHor}
+      //       y={d.y - ((isEyeball && 2) || 5) * lineHeight}
+      //     >
+      //       {(d.type !== "eyeball_asn_noprobe" &&
+      //         `${Math.round(d.conn_btwn_pct * 100 / 100).toFixed(1)}%`) ||
+      //         "-"}
+      //     </text>
+      //     <polyline
+      //       points={`${d.x},${d.y - dy - marginHor / Math.sqrt(2)} ${d.x -
+      //         marginHor},${d.y - dy} ${d.x},${d.y -
+      //         dy +
+      //         marginHor / Math.sqrt(2)}`}
+      //     />
+      //   </g>
+      // )
+    });
+  };
+
+  hideToolTip = (d, i) => {
+    console.log("mouse out");
+    console.log(d);
+    console.log(i);
+    this.setState({
+      tooltip: null
+    });
   };
 
   // Resolve ASNs en bloque to names using as2org.json (from CAIDA)
@@ -138,14 +274,26 @@ export class PeerToPeerFabricGraph extends React.Component {
         const textNode = document.querySelector(
           `text[data-asn="${node.name}"]`
         );
+        const bgRect = document.querySelector(`rect[data-asn=${node.name}`);
 
         // add the orgName to the node, so it can be stored in the components
         // state later on.
         node.orgName = orgName.name.split(/_|\.| |\,/)[0];
 
         if (textNode) {
+          const shortOrgName = orgName.name.split(/_|\.| |\,/)[0];
           // Manipulate DOM directly
-          textNode.textContent = orgName.name.split(/_|\.| |\,/)[0];
+          textNode.textContent = shortOrgName;
+          if (bgRect) {
+            const curWidth = bgRect.getAttribute("width"),
+              curX = bgRect.getAttribute("x"),
+              nextWidth = 20 + shortOrgName.length * 8;
+            bgRect.setAttribute("width", 20 + shortOrgName.length * 8);
+
+            if (textNode.getAttribute("text-anchor") === "end") {
+              bgRect.setAttribute("x", curX - (nextWidth - curWidth));
+            }
+          }
         }
       } else {
         unknownAses.push(node.name);
@@ -167,8 +315,25 @@ export class PeerToPeerFabricGraph extends React.Component {
         console.log(`inject from RIPEstat\t: ${orgName}`);
         // manipulate the DOM directly
         const textNode = document.querySelector(`text[data-asn="${asn}"]`);
+        const bgRect = document.querySelector(`bgRect[data-asn="${asn}"]`);
+        // add the orgName to the node, so it can be stored in the components
+        // state later on.
+        //node.orgName = orgName.name.split(/_|\.| |\,/)[0];
+
         if (textNode) {
-          textNode.textContent = orgName.split(/_|\.| |\,/)[0];
+          const shortOrgName = orgName.split(/_|\.| |\,/)[0];
+          // Manipulate DOM directly
+          textNode.textContent = shortOrgName;
+          if (bgRect) {
+            const curWidth = bgRect.getAttribute("width"),
+              curX = bgRect.getAttribute("x"),
+              nextWidth = 20 + shortOrgName.length * 8;
+            bgRect.setAttribute("width", 20 + shortOrgName.length * 8);
+
+            if (textNode.getAttribute("text-anchor") === "end") {
+              bgRect.setAttribute("x", curX - (nextWidth - curWidth));
+            }
+          }
         }
         const newAsNode = this.asGraph.nodes.find(n => n.name === asn);
       }
@@ -540,23 +705,6 @@ export class PeerToPeerFabricGraph extends React.Component {
           )
           .attr("class", "c-ring")
       )
-      .call(p =>
-        p
-          .append("rect")
-          .attr("width", 82)
-          .attr("height", 36)
-          .attr(
-            "x",
-            d =>
-              textOutLineSegment.centroid(d)[0] -
-              4 +
-              (textOutLineSegment.centroid(d)[0] < 0 && -74)
-          )
-          .attr("y", d => textOutLineSegment.centroid(d)[1] - 30)
-          .attr("rx", "4px")
-          .attr("ry", "4px")
-          .attr("class", "tooltip-bg")
-      )
       .call(
         p =>
           !this.props.hideText &&
@@ -573,23 +721,6 @@ export class PeerToPeerFabricGraph extends React.Component {
                 (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
                 "middle"
             )
-      )
-      .call(p =>
-        p
-          .append("text")
-          .text(
-            d => `${d.data.name} (${Math.round(d.data.eyeball_pct * 10) / 10})`
-          )
-          .attr("x", d => textOutLineSegment.centroid(d)[0])
-          .attr("y", d => textOutLineSegment.centroid(d)[1] - 15)
-          .attr("class", "tooltip")
-          .attr(
-            "text-anchor",
-            d =>
-              (textOutLineSegment.centroid(d)[0] < 0 && "end") ||
-              (textOutLineSegment.centroid(d)[0] > 0 && "start") ||
-              "middle"
-          )
       )
       .merge(this.ringPath)
       .attr(
@@ -704,17 +835,8 @@ export class PeerToPeerFabricGraph extends React.Component {
             return Math.max(Math.log(scalar * props.scaleFactor) * 3.5, 2);
           })
       )
-      .call(p =>
-        p
-          .append("rect")
-          .attr("width", 82)
-          .attr("height", 36)
-          .attr("y","-30")
-          .attr("x","-4")
-          .attr("rx", "4px")
-          .attr("ry", "4px")
-          .attr("class", "tooltip-bg")
-      )
+      .on("mouseenter", this.showToolTip)
+      .on("mouseleave", this.hideToolTip)
       .call(
         parent =>
           !props.hideText &&
@@ -730,13 +852,13 @@ export class PeerToPeerFabricGraph extends React.Component {
             .attr("data-asn", d => d.name)
             .attr("class", "org-name")
       )
-      .call(parent =>
-        parent
-          .append("text")
-          .text(d => `${d.name} (${Math.round(d.conn_btwn_pct * 10) / 10})`)
-          .attr("class", "tooltip")
-          .attr("dy", -15)
-      )
+      // .call(parent =>
+      //   parent
+      //     .append("text")
+      //     .text(d => `${d.name} (${Math.round(d.conn_btwn_pct * 10) / 10})`)
+      //     .attr("class", "tooltip")
+      //     .attr("dy", -15)
+      // )
       .merge(node)
       // This call is only used when the circle is already present, i.e.
       // when the node is updated, hence the `'.select` instead of `.append`
@@ -887,6 +1009,7 @@ export class PeerToPeerFabricGraph extends React.Component {
               cy="0"
               className={`interior-circle ${this.state.error && "error-state"}`}
             />
+            {this.state.tooltip}
           </svg>
         }
       </div>
