@@ -17,7 +17,6 @@ export class SvgToolTip extends React.Component {
 
   render() {
     let curLine = this.numTextLines;
-    console.log(this.props.textlines);
     return (
       <g
         className="tooltip"
