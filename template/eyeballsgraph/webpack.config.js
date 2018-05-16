@@ -14,7 +14,6 @@ module.exports = {
   entry: [
     "babel-polyfill",
     "react-hot-loader/patch",
-    "webpack-dev-server/client?http://4042.ripe.net",
     "webpack/hot/only-dev-server",
     path.resolve(dir_app, "index.js")
   ],
