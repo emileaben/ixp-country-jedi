@@ -151,7 +151,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         <SvgToolTip
           header={
             (isEyeball && "END USER NETWORK") ||
-            (d.type === "ixp" && "Internet Exchange") ||
+            (d.type === "ixp" && "INTERNET EXCHANGE") ||
             (d.type === "transit_asn" && "TRANSIT PROVIDER")
           }
           x={d.x}
