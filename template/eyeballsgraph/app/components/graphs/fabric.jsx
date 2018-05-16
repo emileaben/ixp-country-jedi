@@ -240,7 +240,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         // add the orgName to the node, so it can be stored in the components
         // state later on.
         const nodeNr = this.asGraph.nodes.findIndex(n => n.name === asn);
-        if (this.asGraph.nodes[nodesNr]) {
+        if (this.asGraph.nodes[nodeNr]) {
           this.asGraph.nodes[nodeNr].orgName = orgName.split(/_|\.| |\,/)[0];
         }
 
