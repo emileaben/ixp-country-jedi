@@ -151,7 +151,7 @@ export class PeerToPeerFabricGraph extends React.Component {
         <SvgToolTip
           header={
             (isEyeball && "END USER NETWORK") ||
-            (d.type === "ixp" && "IXP") ||
+            (d.type === "ixp" && "Internet Exchange") ||
             (d.type === "transit_asn" && "TRANSIT PROVIDER")
           }
           x={d.x}
@@ -162,7 +162,7 @@ export class PeerToPeerFabricGraph extends React.Component {
           minwidth={135}
           textlines={[
             d.name,
-            { header: "name", content: d.orgName || "-" },
+            d.type !== "ixp" && { header: "name", content: d.orgName || "-" },
             isEyeball && {
               header: "end users",
               content: `${(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%`
@@ -239,7 +239,8 @@ export class PeerToPeerFabricGraph extends React.Component {
         const bgRect = document.querySelector(`bgRect[data-asn="${asn}"]`);
         // add the orgName to the node, so it can be stored in the components
         // state later on.
-        //node.orgName = orgName.name.split(/_|\.| |\,/)[0];
+        const nodeNr = this.asGraph.nodes.findIndex(n => n.name === asn);
+        this.asGraph.nodes[nodeNr].orgName = orgName.split(/_|\.| |\,/)[0];
 
         if (textNode) {
           const shortOrgName = orgName.split(/_|\.| |\,/)[0];
@@ -256,7 +257,6 @@ export class PeerToPeerFabricGraph extends React.Component {
             }
           }
         }
-        const newAsNode = this.asGraph.nodes.find(n => n.name === asn);
       }
     }
   };
@@ -374,11 +374,11 @@ export class PeerToPeerFabricGraph extends React.Component {
           let changedRingSegment = this.asGraph.ringSegments.findIndex(
             c => c.id === cn.id
           );
-          console.log(`node ${cn.name} deleted...`);
+          //console.log(`node ${cn.name} deleted...`);
           this.asGraph.nodes.splice(idx, 1);
           if (changedRingSegment !== -1) {
             this.asGraph.ringSegments.splice(changedRingSegment, 1);
-            console.log(`ringSegment ${cn.name} deleted...`);
+            //console.log(`ringSegment ${cn.name} deleted...`);
           }
           nodeSplicer();
         }
@@ -405,12 +405,12 @@ export class PeerToPeerFabricGraph extends React.Component {
 
       // Add to the end of the array if the node is new.
       if (isNewGraph || matchNIdx < 0) {
-        console.log(`new node ${n.name} (${toInteger(n.name)}) pushed...`);
+        //console.log(`new node ${n.name} (${toInteger(n.name)}) pushed...`);
         //const newNode = { ...n, id: toInteger(n.name) };
 
         this.asGraph.nodes.push(newNode);
         if (n.type === "eyeball_asn" || n.type === "eyeball_asn_noprobe") {
-          console.log(`new ringSegment ${n.name} pushed...`);
+          //console.log(`new ringSegment ${n.name} pushed...`);
           this.asGraph.ringSegments.push(newNode);
         }
       }
@@ -422,19 +422,19 @@ export class PeerToPeerFabricGraph extends React.Component {
           this.asGraph.nodes[matchNIdx].conn_btwn_pct !== n.conn_btwn_pct ||
           this.asGraph.nodes[matchNIdx].eyeball_pct !== n.eyeball_pct)
       ) {
-        console.log(
-          `change node ${changeNode.name} ${changeNode.type} -> ${n.type}`
-        );
-        console.log(
-          `change node ${changeNode.name} conn_btwn_pct ${
-            changeNode.conn_btwn_pct
-          } -> ${n.conn_btwn_pct}`
-        );
-        console.log(
-          `change node ${changeNode.name} eyeball_pct ${
-            changeNode.eyeball_pct
-          } -> ${n.eyeball_pct}`
-        );
+        // console.log(
+        //   `change node ${changeNode.name} ${changeNode.type} -> ${n.type}`
+        // );
+        // console.log(
+        //   `change node ${changeNode.name} conn_btwn_pct ${
+        //     changeNode.conn_btwn_pct
+        //   } -> ${n.conn_btwn_pct}`
+        // );
+        // console.log(
+        //   `change node ${changeNode.name} eyeball_pct ${
+        //     changeNode.eyeball_pct
+        //   } -> ${n.eyeball_pct}`
+        // );
 
         this.asGraph.nodes[matchNIdx].type = n.type;
         this.asGraph.nodes[matchNIdx].conn_btwn_pct = n.conn_btwn_pct;
@@ -459,11 +459,11 @@ export class PeerToPeerFabricGraph extends React.Component {
           .indexOf(ce[4]);
 
         if (matchEIdx < 0) {
-          console.log(
-            `edge ${ce[0].name}-${ce[2].name} (${
-              this.asGraph.edges[idx][4]
-            }) deleted...`
-          );
+          // console.log(
+          //   `edge ${ce[0].name}-${ce[2].name} (${
+          //     this.asGraph.edges[idx][4]
+          //   }) deleted...`
+          // );
           this.asGraph.edges.splice(idx, 1);
           edgeSplicer();
         }
@@ -500,11 +500,11 @@ export class PeerToPeerFabricGraph extends React.Component {
 
       const changeEdgeIdx = this.asGraph.edges.findIndex(e => e[4] === edgeId);
       if (changeEdgeIdx >= 0) {
-        console.log(
-          `change edge ${edgeId} ${
-            this.asGraph.edges[changeEdgeIdx][3]
-          } -> ${toLinkClass(sourceN, targetN, e.type)}`
-        );
+        // console.log(
+        //   `change edge ${edgeId} ${
+        //     this.asGraph.edges[changeEdgeIdx][3]
+        //   } -> ${toLinkClass(sourceN, targetN, e.type)}`
+        // );
         this.asGraph.edges[changeEdgeIdx][3] = toLinkClass(
           sourceN,
           targetN,
@@ -799,9 +799,33 @@ export class PeerToPeerFabricGraph extends React.Component {
       .attr("class", n => `node ${this.nodeClass(n)}`);
 
     if (!update) {
-      this.simulation.on("tick", ticked).nodes(this.asGraph.nodes);
+      this.simulation
+        .on("end", () => {
+          const unknownAses =
+            this.props.primary &&
+            this.replaceAs2OrgNames(
+              this.asGraph.nodes.filter(n => !n.orgName),
+              props.orgNames
+            );
+          console.log(`not found in as2org :\t${unknownAses.length}`);
+          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+        })
+        .on("tick", ticked)
+        .nodes(this.asGraph.nodes);
     } else {
-      this.simulation.on("tick", ticked).nodes(this.asGraph.nodes);
+      this.simulation
+        .on("end", () => {
+          const unknownAses =
+            this.props.primary &&
+            this.replaceAs2OrgNames(
+              this.asGraph.nodes.filter(n => !n.orgName),
+              props.orgNames
+            );
+          console.log(`not found in as2org :\t${unknownAses.length}`);
+          unknownAses.length > 0 && this.getOrgNamesFromRipeStat(unknownAses);
+        })
+        .on("tick", ticked)
+        .nodes(this.asGraph.nodes);
       this.simulation.alpha(1).restart();
     }
   };
@@ -831,7 +855,6 @@ export class PeerToPeerFabricGraph extends React.Component {
       nextProps.month !== this.props.month ||
       nextProps.year !== this.props.year ||
       nextProps.day !== this.props.day ||
-      // TODO: changing countryCode doesn't work!!!!!
       nextProps.countryCode !== this.props.countryCode
     ) {
       console.log("update now...");
