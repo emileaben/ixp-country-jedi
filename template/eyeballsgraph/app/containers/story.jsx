@@ -327,11 +327,11 @@ export class PeerToPeerContainer extends React.Component {
           <SmallGraphs hasGraphs={true}>
             <PeerToPeerFabricGraph
               countryInfo={this.state.countries.geometries.find(
-                c => c.properties.countryCode === "ES"
+                c => c.properties.countryCode === "KR"
               )}
-              countryCode="ES"
+              countryCode="KR"
               year="2018"
-              month="03"
+              month="05"
               day="01"
               hideText={true}
             />
@@ -341,7 +341,7 @@ export class PeerToPeerContainer extends React.Component {
               )}
               countryCode="IE"
               year="2018"
-              month="03"
+              month="05"
               day="01"
               hideText={true}
             />
@@ -351,7 +351,7 @@ export class PeerToPeerContainer extends React.Component {
               )}
               countryCode="CZ"
               year="2018"
-              month="02"
+              month="05"
               day="01"
               hideText={true}
             />
