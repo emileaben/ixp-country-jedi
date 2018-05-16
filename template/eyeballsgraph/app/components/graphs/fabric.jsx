@@ -174,89 +174,10 @@ export class PeerToPeerFabricGraph extends React.Component {
           ].filter(t => t)}
         />
       )
-      //(
-      //   <g className="tooltip" transform={`matrix(1 0 0 1 ${dx} ${dy})`}>
-      //     <rect
-      //       className="tooltip-bg"
-      //       width={Math.max(24 + d.name.length * 8, 135)}
-      //       height={((isEyeball && 12) || 9) * lineHeight + 2 * marginHor}
-      //       y={d.y - 13 * lineHeight - 2 * marginHor}
-      //       x={d.x}
-      //       rx="4"
-      //       ry="4"
-      //     />
-      //     <text
-      //       className="tooltip-header"
-      //       x={d.x + marginHor}
-      //       y={d.y - 13 * lineHeight - 3}
-      //     >
-      //       {(isEyeball && "END USER NETWORK") ||
-      //         (d.type === "ixp" && "IXP") ||
-      //         (d.type === "transit_asn" && "TRANSIT PROVIDER")}
-      //     </text>,
-      //     <text x={d.x + marginHor} y={d.y - 11 * lineHeight - 3}>
-      //       {d.name}
-      //     </text>
-      //     <text
-      //       x={d.x + marginHor}
-      //       y={d.y - 9 * lineHeight}
-      //       className="tooltip-subheader"
-      //       textAnchor="start"
-      //     >
-      //       name
-      //     </text>
-      //     <text x={d.x + marginHor} y={d.y - 8 * lineHeight}>
-      //       {(d.orgName !== "" && d.orgName) || "-"}
-      //     </text>
-      //     {isEyeball && [
-      //       <text
-      //         key={`${d.name}_1`}
-      //         x={d.x + marginHor}
-      //         y={d.y - 6 * lineHeight}
-      //         className="tooltip-subheader"
-      //         textAnchor="start"
-      //       >
-      //         end users
-      //       </text>,
-      //       <text
-      //         x={d.x + marginHor}
-      //         y={d.y - 5 * lineHeight}
-      //         key={`${d.name}_2`}
-      //       >
-      //         {(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%
-      //       </text>
-      //     ]}
-      //     <text
-      //       x={d.x + marginHor}
-      //       y={d.y - ((isEyeball && 3) || 6) * lineHeight}
-      //       className="tooltip-subheader"
-      //       textAnchor="start"
-      //     >
-      //       connectedness
-      //     </text>
-      //     <text
-      //       x={d.x + marginHor}
-      //       y={d.y - ((isEyeball && 2) || 5) * lineHeight}
-      //     >
-      //       {(d.type !== "eyeball_asn_noprobe" &&
-      //         `${Math.round(d.conn_btwn_pct * 100 / 100).toFixed(1)}%`) ||
-      //         "-"}
-      //     </text>
-      //     <polyline
-      //       points={`${d.x},${d.y - dy - marginHor / Math.sqrt(2)} ${d.x -
-      //         marginHor},${d.y - dy} ${d.x},${d.y -
-      //         dy +
-      //         marginHor / Math.sqrt(2)}`}
-      //     />
-      //   </g>
-      // )
     });
   };
 
   hideToolTip = (d, i) => {
-    console.log("mouse out");
-    console.log(d);
-    console.log(i);
     this.setState({
       tooltip: null
     });
