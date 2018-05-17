@@ -159,8 +159,12 @@ export class PeerToPeerFabricGraph extends React.Component {
           dx={dx}
           dy={dy}
           fontsize={fontSize}
-          minwidth={135}
+          minwidth={100}
           textlines={[
+            d.type === "eyeball_asn" && d.transits && "also provides transit",
+            //d.type === "eyeball_asn" && d.transits && " ",
+            d.type === "eyeball_asn_noprobe" && "not measured",
+            " ",
             d.name,
             d.type !== "ixp" && { header: "name", content: d.orgName || "-" },
             isEyeball && {
@@ -203,7 +207,8 @@ export class PeerToPeerFabricGraph extends React.Component {
 
         if (textNode) {
           const shortOrgName = orgName.name.split(/_|\.| |\,/)[0];
-          // Manipulate DOM directly
+          // Manipulate DOM directly,
+          // not sweet, but this is D3 territory, so we cant' use React components here.
           textNode.textContent = shortOrgName;
           if (bgRect) {
             const curWidth = bgRect.getAttribute("width"),
