@@ -4,14 +4,14 @@ import PropTypes from "prop-types";
 export class SvgToolTip extends React.Component {
   constructor(props) {
     super(props);
-    let width = this.props.minwidth;
+    let width = Math.max(this.props.minwidth,this.props.header.length * this.props.fontsize * 0.7);
     this.numTextLines = this.props.textlines.reduce((acc, t) => {
       width = Math.max(
         width,
         ((typeof t === "string" && t.length) ||
           ((t.content && t.content.length) || 0)) * (this.props.fontsize * 0.7)
       );
-      return acc + ((typeof t === "object" && 3) || 2);
+      return acc + ((typeof t === "object" && 3) || 1);
     }, 1);
     this.margin = 1.2 * this.props.fontsize;
     this.lineHeight = this.props.fontsize + 2;
@@ -22,7 +22,6 @@ export class SvgToolTip extends React.Component {
     this.state = {
       width: width
     };
-    console.log(width);
   }
 
   render() {
@@ -51,10 +50,10 @@ export class SvgToolTip extends React.Component {
         >
           {this.props.header}
         </text>
-        {(curLine -= 2)}
+        
         {this.props.textlines.map((child, i) => {
           if (typeof child === "string") {
-            //curLine -= 1;
+            curLine -= 1;
             return (
               <text
                 x={this.props.x + this.margin}
