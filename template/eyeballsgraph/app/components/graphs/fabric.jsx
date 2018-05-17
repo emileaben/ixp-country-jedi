@@ -168,7 +168,7 @@ export class PeerToPeerFabricGraph extends React.Component {
               content: `${(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%`
             },
             d.type !== "eyeball_asn_noprobe" && {
-              header: "connectedness",
+              header: "betweenness",
               content: `${Math.round(d.conn_btwn_pct * 100 / 100).toFixed(1)}%`
             }
           ].filter(t => t)}
