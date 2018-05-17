@@ -4,15 +4,25 @@ import PropTypes from "prop-types";
 export class SvgToolTip extends React.Component {
   constructor(props) {
     super(props);
-    this.numTextLines = this.props.textlines.reduce(
-      (acc, t) => acc + ((typeof t === "object" && 3) || 2),
-      1
-    );
+    let width = this.props.minwidth;
+    this.numTextLines = this.props.textlines.reduce((acc, t) => {
+      width = Math.max(
+        width,
+        ((typeof t === "string" && t.length) ||
+          ((t.content && t.content.length) || 0)) * (this.props.fontsize * 0.7)
+      );
+      return acc + ((typeof t === "object" && 3) || 2);
+    }, 1);
     this.margin = 1.2 * this.props.fontsize;
     this.lineHeight = this.props.fontsize + 2;
     this.height = this.numTextLines * this.lineHeight + 2 * this.margin;
     this.y = this.props.y - this.height;
     this.x = this.props.x;
+
+    this.state = {
+      width: width
+    };
+    console.log(width);
   }
 
   render() {
@@ -25,7 +35,7 @@ export class SvgToolTip extends React.Component {
         <rect
           className="tooltip-bg"
           width={Math.max(
-            24 + this.props.header.length * 8,
+            2 * this.margin + this.state.width,
             this.props.minwidth
           )}
           height={this.height}
@@ -75,64 +85,6 @@ export class SvgToolTip extends React.Component {
             </text>
           ];
         })}
-        {/* ///////
-      <text
-        x={this.props.x + this.margin}
-        y={this.props.y - 11 * this.lineHeight - 3}
-      >
-        {d.name}
-      </text>
-      <text
-        x={this.props.x + this.margin}
-        y={this.props.y - 9 * this.lineHeight}
-        className="tooltip-subheader"
-        textAnchor="start"
-      >
-        name
-      </text>
-      <text
-        x={this.props.x + this.margin}
-        y={this.props.y - 8 * this.lineHeight}
-      >
-        {(d.orgName !== "" && d.orgName) || "-"}
-      </text>
-      {isEyeball && [
-        <text
-          key={`${d.name}_1`}
-          x={this.props.x + this.margin}
-          y={this.props.y - 6 * this.lineHeight}
-          className="tooltip-subheader"
-          textAnchor="start"
-        >
-          end users
-        </text>,
-        <text
-          x={this.props.x + this.margin}
-          y={this.props.y - 5 * this.lineHeight}
-          key={`${d.name}_2`}
-        >
-          {(Math.round(d.eyeball_pct * 100) / 100).toFixed(1)}%
-        </text>
-      ]}
-      <text
-        x={this.props.x + this.margin}
-        y={this.props.y - ((isEyeball && 3) || 6) * this.lineHeight}
-        className="tooltip-subheader"
-        textAnchor="start"
-      >
-        connectedness
-      </text>
-      <text
-        x={this.props.x + this.margin}
-        y={this.props.y - ((isEyeball && 2) || 5) * this.lineHeight}
-      >
-        {(d.type !== "eyeball_asn_noprobe" &&
-          `${Math.round(d.conn_btwn_pct * 100 / 100).toFixed(1)}%`) ||
-          "-"}
-      </text>
-
-
-    ////// */}
         <polyline
           points={`${this.props.x},${this.props.y -
             this.props.dy -
