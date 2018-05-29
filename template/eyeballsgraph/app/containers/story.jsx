@@ -1,23 +1,12 @@
 import React from "react";
 
-import { Legend } from "../components/legend.jsx";
+import { Legend, MoreLegend } from "../components/legend.jsx";
 import { SmallGraphs } from "../components/ui-elements/flexbox";
 import { PeerToPeerDialog } from "../components/dialogs/peertopeerdialog.jsx";
 import { PeerToPeerFabricGraph } from "../components/graphs/fabric.jsx";
 import OtherCountries from "../../texts/other-countries.md";
 import PeerToPeerStoryText from "../../texts/ptp-story.md";
 import { SnapShotTimeLine } from "../components/ui-elements/timeline";
-import {
-  ExplainCircle1,
-  ExplainCircle2,
-  ExplainCircle3,
-  ExplainSmallCircles1,
-  ExplainSmallCircles2,
-  ExplainSmallCircles3,
-  ExplainLines1,
-  ExplainLines2,
-  ExplainLines3
-} from "../components/explanations.jsx";
 
 const countryGeoInfoUrl = "./world-geo150_ne50m.topo.json";
 const primaryFromUrl = () =>
@@ -28,7 +17,7 @@ const primaryFromUrl = () =>
 export class PeerToPeerContainer extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { currentSnapshotDate: null };
+    this.state = { currentSnapshotDate: null, showMore: false };
   }
 
   destructureCountryInfoFromUrl = () => {
@@ -297,31 +286,48 @@ export class PeerToPeerContainer extends React.Component {
             }
             orgNames={this.state.orgnames}
             status={
-              (this.state.countryCode &&
-                this.state.countries &&
-                this.state.currentSnapshotDate &&
-                "ready") ||
-              "waiting"
+              this.state.countryCode &&
+              this.state.countries &&
+              this.state.currentSnapshotDate &&
+              "ready" || "waiting for data to load"
             }
           />
         }
+        {(!this.state.countryCode ||
+          !this.state.countries ||
+          !this.state.currentSnapshotDate) && (
+          <div>
+            <svg
+              width="100%"
+              viewBox="-400 -250 800 500"
+              className="p-t-p-fabric"
+              transform={`scale(1)`}
+              //id={this.getRingId()}
+            >
+              <circle
+                r="240"
+                cx="0"
+                cy="0"
+                className="interior-circle error-state"
+              />
+            </svg>
+          </div>
+        )}
 
-        <Legend />
-        <div className="small-graphs">
-          <ExplainCircle1 />
-          <ExplainCircle2 />
-          <ExplainCircle3 />
-        </div>
-        <div className="small-graphs">
-          <ExplainSmallCircles1 />
-          <ExplainSmallCircles2 />
-          <ExplainSmallCircles3 />
-        </div>
-        <div className="small-graphs">
-          <ExplainLines1 />
-          <ExplainLines2 />
-          <ExplainLines3 />
-        </div>
+        <Legend
+          onClick={e => {
+            this.setState({ showMore: !this.state.showMore });
+          }}
+          showMore={this.state.showMore}
+        >
+          <MoreLegend
+            showMore={this.state.showMore}
+            onClick={e => {
+              this.setState({ showMore: !this.state.showMore });
+            }}
+          />
+        </Legend>
+
         <OtherCountries />
         {this.state.countries && (
           <SmallGraphs hasGraphs={true}>

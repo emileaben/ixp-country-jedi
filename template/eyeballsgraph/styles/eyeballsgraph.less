@@ -1,7 +1,14 @@
-@import url('https://www.ripe.net/++resource++ripe.plonetheme.stylesheets/open-sans.css');
+@import url("https://www.ripe.net/++resource++ripe.plonetheme.stylesheets/open-sans.css");
 
 // Light is not in the css file above currently, so for now load it manually
-@font-face {font-family:'Open Sans';font-style:light;font-weight:100;src:local('Open Sans Light'),local('OpenSans-Light'),url('https://www.ripe.net/++resource++ripe.plonetheme.stylesheets/fonts/OpenSans-Light.ttf') format('truetype');}
+@font-face {
+  font-family: "Open Sans";
+  font-style: light;
+  font-weight: 100;
+  src: local("Open Sans Light"), local("OpenSans-Light"),
+    url("https://www.ripe.net/++resource++ripe.plonetheme.stylesheets/fonts/OpenSans-Light.ttf")
+      format("truetype");
+}
 
 /* standard colours */
 
@@ -29,6 +36,7 @@
 @oim-marker-yellow: #ffff99;
 
 @oim-land: #eff1d7;
+@oim-ocean: #9ab;
 
 @atlas-green: #85a056;
 @atlas-red: #f84417;
@@ -262,11 +270,49 @@ path.d:not(".eyeball") {
   align-content: center;
   margin: 60px 0 20px;
 
+  max-width: 1104px;
+  padding: 24px;
+  background-color: lighten(aliceblue, 0.4%);
+
+  h2 {
+    margin-bottom: 24px;
+    margin-top: 0;
+  }
+
   svg {
-    width: 300px;
+    width: 366px;
     height: 125px;
     min-width: unset;
     min-height: unset;
+  }
+
+  .more-text {
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85em;
+    margin-bottom: 18px;
+    margin-left: 4px;
+  }
+
+  .more-panel {
+    overflow: hidden;
+
+    .emerge {
+      height: 105%;
+      transition: height 0.8s 0.2s;
+    }
+
+    .disappear {
+      height: 0;
+      transition: height 0.8s 0.2s;
+    }
+
+    .small-graphs {
+      div {
+        height: 456px;
+        margin: 0;
+      }
+    }
   }
 }
 
@@ -279,6 +325,7 @@ div#p-t-p-fabric-panel {
   // show overflow for labels
   // hard to know in advance what their length is
   overflow: visible;
+  max-height: 1060px;
 }
 
 text {
@@ -326,15 +373,11 @@ g.tooltip {
   justify-content: flex-start;
   align-items: center;
   align-content: center;
-  margin-bottom: 60px;
-
-  p {
-    margin-bottom: -40px;
-  }
+  //margin-bottom: 60px;
 
   svg:not(.big) {
     width: 300px;
-    height: 300px;
+    height: 225px;
     min-width: unset;
     min-height: unset;
   }
@@ -343,6 +386,17 @@ g.tooltip {
     max-width: 1260px;
     min-width: 800px;
     min-height: 800px;
+  }
+}
+
+.big-graphs {
+  margin-bottom: -40px;
+}
+
+.small-graphs {
+  p {
+    width: 350px;
+    padding-right: 16px;
   }
 }
 
@@ -357,7 +411,7 @@ body {
 
 svg text {
   font-family: "Open Sans", Helvetica, Arial, "sans-serif";
-  font-size: 0.7em;
+  font-size: 0.85em;
   transform: translate(3 0 0);
 }
 
@@ -377,6 +431,11 @@ div#labs-playground {
 
 class.story {
   font-size: 1em;
+}
+
+.small-graphs p {
+  font-size: 0.85em;
+  line-height: 1.5em;
 }
 
 #ptp-fabric-panel {
