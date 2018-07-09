@@ -23,7 +23,7 @@ for p in probes:
       v4src.append( p['probe_id'] )
    else:
       print "skipping v4 measurements for probe: %s" % ( p['probe_id'] )
-   if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags']:
+   if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags'] and 'system-ipv6-ula' not in p['tags']:
       v6src.append( p['probe_id'] )
    else:
       print "skipping v6 measurements for probe: %s" % ( p['probe_id'] )
