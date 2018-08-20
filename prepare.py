@@ -12,12 +12,16 @@ from bs4 import BeautifulSoup
 from math import radians, cos, sin, asin, sqrt
 import os
 import sys
+import ssl
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import ProbeInfo
+from lib.Atlas import ProbeInfo
 import fetch_news_sites
 
 # One-off traceroute msm cost 
 COST_OF_TRACEROUTE = 60
+
+# SSL Context
+ssl._create_default_https_context = ssl._create_unverified_context
 
 ## find connected probes
 
