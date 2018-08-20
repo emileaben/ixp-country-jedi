@@ -2,11 +2,11 @@
 import os
 import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import MeasurementInfo
-from Atlas import MeasurementFetch
-from Atlas import MeasurementPrint
-from Atlas import MeasurementEnhance
-from Atlas import ProbeInfo
+from lib.Atlas import MeasurementInfo
+from lib.Atlas import MeasurementFetch
+from lib.Atlas import MeasurementPrint
+from lib.Atlas import MeasurementEnhance
+from lib.Atlas import ProbeInfo
 import json
 import re
 import time

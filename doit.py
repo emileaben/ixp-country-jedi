@@ -8,7 +8,7 @@ import json
 import errno
 import requests
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import ProbeInfo
+from lib.Atlas import ProbeInfo
 
 WEBROOT='/var/www/html/emile/ixp-country-jedi'
 
