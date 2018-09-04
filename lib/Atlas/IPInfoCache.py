@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-import socket
-import urllib2
 import json
+import socket
+import ssl
 import sys
-import dns.resolver
-import traceback
-#import ssl
 import time
+import traceback
+import urllib2
+
+import dns.resolver
 
 #if hasattr(socket, 'setdefaulttimeout'):
 #   socket.setdefaulttimeout(20)
+
+# SSL Context
+ssl._create_default_https_context = ssl._create_unverified_context
 
 class IPInfoCache():
     def __init__(self,**kwargs):
