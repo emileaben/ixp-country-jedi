@@ -191,7 +191,7 @@ def main():
     os.chdir( basedir )
     os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./data/20*/*/*json*' % (WEBROOT) )
     #os.system('find %s/history -name "asgraph.json" | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
-    os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
+    os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/history/country-timelines.json' % (WEBROOT,WEBROOT) )
     # now print characteristics for this run
     WEBDEST_EXECLOG = "%s/history/%s/exec_log.json" % (WEBROOT,rundate)
     with open(WEBDEST_EXECLOG,'w') as outf:
