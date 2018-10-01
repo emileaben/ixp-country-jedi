@@ -499,8 +499,12 @@ def init_eyeballasgraph( basedata, probes ):
 def do_eyeballasgraph_entry( d, proto, entry ):
    if d == None:
       return
-   src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
-   dst_prb_asn =  PROBES_BY_ID[ entry['dst_prb_id'] ]['asn_v4']
+   #print "REMOVE ME: %s %s" % ( entry['src_prb_id'], entry['dst_prb_id'] )
+   try:
+      src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
+      dst_prb_asn =  PROBES_BY_ID[ entry['dst_prb_id'] ]['asn_v4']
+   except:
+      print >>sys.stderr, "EEPS, this is weird %s" % ( entry )
    src_asn_str = "AS%s" % src_prb_asn # string versions
    dst_asn_str = "AS%s" % dst_prb_asn
    if src_asn_str in d['eyeball_asns'] and dst_asn_str in d['eyeball_asns']:
