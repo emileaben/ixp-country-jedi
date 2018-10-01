@@ -104,4 +104,7 @@ def oneofftrace( probes_def, dst, **kwargs ):
 
     (is_success, response) = atlas_request.create()
 
-    return response['measurements'][0]
+    if 'measurements' in response: 
+        return response['measurements'][0]
+    else:
+        print >>sys.stderr, response

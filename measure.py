@@ -51,7 +51,8 @@ for mtype in basedata['measurement-types']:
    if mtype == 'probe-mesh':
       for v4target in v4dst:
          #TODO remove probe itself from list?
-         msm_id = Measure.oneofftrace(v4src, v4target, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
+         tag_list = ['ixp-country-jedi','probe-mesh-ipv4', 'country-%s' % ( "-".join( basedata['countries'] ).lower() ) ]
+         msm_id = Measure.oneofftrace(v4src, v4target, tags=tag_list, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
          msms['v4'].append({
             'msm_id': msm_id,
             'dst': v4target,
@@ -61,7 +62,8 @@ for mtype in basedata['measurement-types']:
          time.sleep(2)
 
       for v6target in v6dst:
-         msm_id = Measure.oneofftrace(v6src, v6target, af=6, paris=1, description="ixp-country-jedi to %s (IPv6)" % ( v6target ) )
+         tag_list = ['ixp-country-jedi','probe-mesh-ipv6', 'country-%s' % ( "-".join( basedata['countries'] ).lower() ) ]
+         msm_id = Measure.oneofftrace(v6src, v6target, tags=tag_list, af=6, paris=1, description="ixp-country-jedi to %s (IPv6)" % ( v6target ) )
          msms['v6'].append({
             'msm_id': msm_id,
             'dst': v6target,
