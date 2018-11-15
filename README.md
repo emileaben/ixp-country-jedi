@@ -185,6 +185,7 @@ To do so:
   - Go into the root of the library with `cd ui-components`
   - Make a linked local package out of this repo with `npm link`
   - Now go (back) into the `template/eyeballsgraph/` diretory of the ixp-country-jedi repo and install the linked package with `npm link @ripe-rnd/ui-components`.
+  - Edit `template/eyeballsgraph/webpack.config.js` replacing `4042.ripe.net` to `localhost` (lines 65 and 68).
 - Now you can start the dev server with `npm start` and go with you favourite web-browser to `localhost:4042`
 
 In the future we will have a npm package of the @ripe-rnd/ui-components and the link steps will go away.

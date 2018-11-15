@@ -2,7 +2,7 @@
 import os
 import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
+from lib.Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
 import json
 import urllib2
 import ripe.atlas.sagan
