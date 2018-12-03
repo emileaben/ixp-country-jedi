@@ -12,7 +12,8 @@ console.log(path.resolve(__dirname));
 console.log(`da shit: ${fs.realpathSync(path.resolve(__dirname, './node_modules/@ripe-rnd/ui-components/src'))}`);
 module.exports = {
   entry: [
-    "babel-polyfill",
+    // "babel-polyfill",
+    "core-js",
     "react-hot-loader/patch",
     "webpack/hot/only-dev-server",
     path.resolve(dir_app, "index.js")

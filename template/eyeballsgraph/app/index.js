@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
 import * as d3 from "d3";
 import "../styles/eyeballsgraph.less";
 
-import "babel-polyfill";
+// import "babel-polyfill";
 
 import { AppContainer } from "react-hot-loader";
 import App from "./App";
