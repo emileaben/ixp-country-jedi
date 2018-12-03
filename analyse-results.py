@@ -499,8 +499,12 @@ def init_eyeballasgraph( basedata, probes ):
 def do_eyeballasgraph_entry( d, proto, entry ):
    if d == None:
       return
-   src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
-   dst_prb_asn =  PROBES_BY_ID[ entry['dst_prb_id'] ]['asn_v4']
+   #print "REMOVE ME: %s %s" % ( entry['src_prb_id'], entry['dst_prb_id'] )
+   try:
+      src_prb_asn =  PROBES_BY_ID[ entry['src_prb_id'] ]['asn_v4']
+      dst_prb_asn =  PROBES_BY_ID[ entry['dst_prb_id'] ]['asn_v4']
+   except:
+      print >>sys.stderr, "EEPS, this is weird %s" % ( entry )
    src_asn_str = "AS%s" % src_prb_asn # string versions
    dst_asn_str = "AS%s" % dst_prb_asn
    if src_asn_str in d['eyeball_asns'] and dst_asn_str in d['eyeball_asns']:
@@ -526,36 +530,39 @@ def do_eyeballasgraph_entry( d, proto, entry ):
    #   print "%s -> %s, not eyeballs?" % ( src_prb_asn , dst_prb_asn )
 
 def do_eyeballasgraph_printresult( d ):
+   if d is None: return
    # loop over all in eyeball_asns
    cummulative=0
    asn_between = Counter()
    does_transit = set()
-   for eye_asn,eye_data in d['eyeball_asns'].iteritems():
-       fract = eye_data['percent']/100 # percent->fraction
-       cummulative += fract
-       betweenness = 1-(1-fract)**2
-       asn_between[ eye_asn ] = betweenness # this can become higher if the eyeb also functions as transit
-       # we could even separate out the betweenness due to hosting users from btwness due to transit function
+   if d is not None:
+        for eye_asn,eye_data in d['eyeball_asns'].iteritems():
+            fract = eye_data['percent']/100 # percent->fraction
+            cummulative += fract
+            betweenness = 1-(1-fract)**2
+            asn_between[ eye_asn ] = betweenness # this can become higher if the eyeb also functions as transit
+            # we could even separate out the betweenness due to hosting users from btwness due to transit function
 
    ## now add a 'blob' for 1-cummaliteve that we couldn't map
    asn_between[ '_other' ] = 1-(cummulative)**2
 
    ## now iterate over everything that was between a source and a dest
-   for pair, btw_set in d['things_between'].iteritems():
-      (src,dst) = pair
-      src_frac = d['eyeball_asns'][ src ]['percent']/100
-      dst_frac = d['eyeball_asns'][ dst ]['percent']/100
-      weight = src_frac*dst_frac*2  # 2 = both directions
-      for between in btw_set:
-          #asn_between.setdefault( between, 0)
-          asn_between[ between ] += weight
-          does_transit.add( between )
+   if d and d['things_between'].iteritems():
+        for pair, btw_set in d['things_between'].iteritems():
+            (src,dst) = pair
+            src_frac = d['eyeball_asns'][ src ]['percent']/100
+            dst_frac = d['eyeball_asns'][ dst ]['percent']/100
+            weight = src_frac*dst_frac*2  # 2 = both directions
+            for between in btw_set:
+                #asn_between.setdefault( between, 0)
+                asn_between[ between ] += weight
+                does_transit.add( between )
 
    ## now print all the things in ASN_between
    ## now all nodes should have a betweenness
    for asn,weight in asn_between.most_common():
        eyeball_fract = 0
-       if asn in d['eyeball_asns']:
+       if d and asn in d['eyeball_asns']:
           eyeball_fract = d['eyeball_asns'][ asn ]['percent']/100
        print "%s %s %s" % ( asn,weight,eyeball_fract )
    #print json.dumps( d['nodes'] )
