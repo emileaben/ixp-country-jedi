@@ -111,5 +111,10 @@ SvgToolTip.propTypes = {
     PropTypes.oneOfType([PropTypes.object, PropTypes.string])
   ),
   fontsize: PropTypes.number,
-  minwidth: PropTypes.number
+  minwidth: PropTypes.number,
+  zoomFactor: PropTypes.number
 };
+
+SvgToolTip.defaultProps = {
+  zoomFactor: 1
+}

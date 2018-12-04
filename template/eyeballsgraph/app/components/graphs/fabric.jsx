@@ -5,6 +5,10 @@ import "../../../styles/eyeballsgraph.less";
 
 import { SvgToolTip } from "../ui-elements/tooltip.jsx";
 
+// TODO: reconcile the local SvgToolTip with the ui-components library
+// is it used by measurement-detail and now tailored for that.
+// import { SvgToolTip } from "@ripe-rnd/ui-components";
+
 const TAU = 2 * Math.PI;
 
 function NoSnapshotException(jsonMsg) {
