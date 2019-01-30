@@ -133,10 +133,10 @@ def do_probe_selection( probes, conf, basedata ):
       if status != 1:
          continue
       ## Exclude probes with system tag IPv4 or IPv4 not working
-      #if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
-      #   continue
-      if("system-ipv4-stable-1d" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
+      if("system-ipv4-works" not in probes[prb_id]['tags'] and "system-ipv6-works" not in probes[prb_id]['tags']):
          continue
+      #if("system-ipv4-stable-1d" not in probes[prb_id]['tags'] and "system-ipv6-stable-1d" not in probes[prb_id]['tags']):
+      #   continue
       ## probes with auto-geoloc have unreliable geolocation :( :( :(
       if 'tags' in prb_info and 'system-auto-geoip-country' in prb_info['tags']:
          print >>sys.stderr, "EEPS system-auto-geoip-country %s" % ( prb_id )
@@ -417,7 +417,6 @@ def locstr2latlng( locstring ):
       resp = json.loads(req.read())
       if 'error_message' in resp:
          raise SystemExit("Maps geocode error: %s" % resp['error_message'])
-
 
       ll = resp['results'][0]['geometry']['location']
       return (ll['lat'], ll['lng'])
