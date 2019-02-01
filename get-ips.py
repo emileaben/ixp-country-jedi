@@ -3,6 +3,9 @@ import os
 import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
+sys.path.append( os.path.dirname(os.path.realpath(__file__) ) )
+from libixpcountryjedi import ip2asn,ip2hostname
+import requests
 import json
 import urllib2
 import ripe.atlas.sagan
@@ -13,8 +16,33 @@ import threading
 from multiprocessing import cpu_count
 #import random
 
+from math import radians, cos, sin, asin, sqrt
+
+def haversine(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # convert decimal degrees to radians 
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+
+    # haversine formula 
+    dlon = lon2 - lon1 
+    dlat = lat2 - lat1 
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a)) 
+    r = 6371 # Radius of earth in kilometers. Use 3956 for miles
+    return c * r
+
 ipinfo = {}
 counter = 1
+
+### read openipmap info, and key by IP
+openipmap = {}
+with open("ips-openipmap.json-fragments") as inf:
+    for line in inf:
+        d = json.loads( line )
+        openipmap[ d['ip'] ] = d
 
 def get_asnmeta( asn ):
    meta = {'asn': asn, 'as_name': '<unknown>', 'as_description': '<unknown>', 'as_country': 'XX', 'ips_v4': None, '48s_v6': None}
@@ -89,31 +117,67 @@ def main():
                   if ip != None:
                      ips.add( ip )
          count+=1
-   no_ips = len(ips)
-   print >>sys.stderr, "ip gathering finished, now analysing. ip count: %s" % ( no_ips )
-   ipcache = IPInfoCache.IPInfoCache()
-   
+   ip_count = len(ips)
+   print >>sys.stderr, "ip gathering finished, now analysing. ip count: %s" % ( ip_count )
    ips = list(ips)
    ips.sort()
-   asns = set()
+   outf = open("ips.json-fragments","w")
 
-   lock = threading.Lock()
+   no_result_cnt = 0
+   for ip in ips:
+        print >>sys.stderr, "attempting %s" % ip
+        j = None
+        try:
+            out = {'ip': ip, 'lon': None, 'location': '', 'lat': None, 'oloc': None, 'hostname': "", 'asn': ""}
+            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=20 )
+            j = req.json()
+            j['ip'] = ip
+            #del( j['meta'] )
+            #print "%s" % json.dumps( j )
+            have_result = False
+            try:
+                out['hostname'] = ip2hostname( ip )
+            except:
+                print >>sys.stderr, "hostname lookup failed for %s" % ip
+                pass
+            try:
+                out['asn'] = ip2asn( ip )
+            except:
+                print >>sys.stderr, "asn lookup failed for %s" % ip
+                pass
+            try:
+                if ip in openipmap and 'location' in openipmap[ ip ]:
+                    out['oloc'] = openipmap[ip]['location']
+            except:
+                    continue
+            if 'partials' in j and len( j['partials'] ) > 0:
+                for p in j['partials']:
+                    if not have_result and p['engine'] in ('probelocations','crowdsourced','ixp') and len( p['locations'] ) > 0:
+                        #print '# %s' % ( p['locations'][0], )
+                        for loc in p['locations']:
+                            if 'cityNameAscii' in loc:
+                                out['lat'] = loc['latitude']
+                                out['lon'] = loc['longitude']
+                                out['location'] = u"%s,%s" % ( loc['cityNameAscii'], loc['countryCodeAlpha2'] )
+                                # {"ip": "213.19.197.126", "hostname": "infopact-ne.ear3.amsterdam1.level3.net", "lon": null, "location": "", "lat": null, "asn": 3356}
+                                #print u'%s %s "%s"' % ( ip, p['engine'], loc['cityName'], loc['countryCodeAlpha2'] )
+                                have_result = True
+                                if ip in openipmap and 'lat' in openipmap[ip] and 'lon' in openipmap[ip] and openipmap[ip]['lat'] != None and openipmap[ip]['lon'] != None:
+                                    if out['lon'] and out['lat']:
+                                        dist = haversine( out['lon'], out['lat'], openipmap[ip]['lon'], openipmap[ip]['lat'] )
+                                        out['dist'] = dist
+                                    else:
+                                        print >>sys.stderr, "#error: no lat/lon in new ipmap?! %s" % ( out )
+                                break
+        except:
+            print >>sys.stderr, "#error on json for %s: %s" % (ip, j )
+        print >>outf, u'%s' % json.dumps( out )
+        if not have_result:
+            no_result_cnt += 1
+        #if 'locations' in j and len( j['locations'] ) > 0:
+        # do something smart with ipmap
+   # and write out to ipmap.json-fragments
 
-   def findInfo(ip):
-      global counter
-      res= ipcache.findIPInfo( ip )
-      with lock:
-         print '(%d/%d) %s / %s' % (counter, no_ips, ip, res)
-         counter += 1
-         sys.stdout.flush()
-      if 'asn' in res and res['asn'] != None and res['asn'] != '':
-         asns.add( res['asn'] )
-
-   with concurrent.futures.ThreadPoolExecutor(max_workers=cpu_count()) as executor:
-      executor.map(findInfo,ips)
-
-   # writes this file
-   ipcache.toJsonFragments('ips.json-fragments')
    # RIPEstat API slow/times out on very large ASNs 
    #asn_info = []
    #for asn in asns:
