@@ -5,6 +5,10 @@ import "../../../styles/eyeballsgraph.less";
 
 import { SvgToolTip } from "../ui-elements/tooltip.jsx";
 
+// TODO: reconcile the local SvgToolTip with the ui-components library
+// is it used by measurement-detail and now tailored for that.
+// import { SvgToolTip } from "@ripe-rnd/ui-components";
+
 const TAU = 2 * Math.PI;
 
 function NoSnapshotException(jsonMsg) {
@@ -203,10 +207,10 @@ export class PeerToPeerFabricGraph extends React.Component {
 
         // add the orgName to the node, so it can be stored in the components
         // state later on.
-        node.orgName = orgName.name.split(/_|\.| |\,/)[0];
+        node.orgName = orgName.name.split(/\.| |\,/)[0].replace(/_/g, " ");
 
         if (textNode) {
-          const shortOrgName = orgName.name.split(/_|\.| |\,/)[0];
+          const shortOrgName = orgName.name.split(/\.| |\,/)[0].replace(/_/g, " ");
           // Manipulate DOM directly,
           // not sweet, but this is D3 territory, so we cant' use React components here.
           textNode.textContent = shortOrgName;

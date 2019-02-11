@@ -19,6 +19,10 @@ import fetch_news_sites
 # One-off traceroute msm cost 
 COST_OF_TRACEROUTE = 60
 
+# Number of Alexa top sites to be included in the analysis
+# Maximum is 50
+TOP_ALEXA_SITES = 25
+
 ## find connected probes
 
 MEASUREMENT_TYPES = set([
@@ -335,21 +339,32 @@ alexa_blacklist = set([
 ])
 
 def alexa_country_top25( countries ):
-   targets = []
    for cc in countries:
+      targets = []
+      targetsitenames = []
       al_url= "http://www.alexa.com/topsites/countries/%s" % ( cc )
       req = urllib2.urlopen( al_url )
       # when alexa changes layout this needs to change too
       soup = BeautifulSoup( req )
-      tr = soup.findAll('p', class_='desc-paragraph')
+      tr = soup.findAll('div', class_='td DescriptionCell')
+      targetsites = 0
       for t in tr:
          site = t.find('a').string.lower()
          if site in alexa_blacklist:
             print >>sys.stderr, "this alexa-top site for country:%s was blocked by ixp-country-jedi blacklist: %s" % ( cc, site )
             print >>sys.stderr, "please adapt the blacklist (in source code) if you want this site measured anyways"
             continue
-         ## add 'www'?
-         targets.append( site )
+         # Check if the site is a duplicate (e.g. google.com, google.ru)
+         site_elements = site.split(".")
+         sitename = site_elements[0]
+         if sitename in targetsitenames:
+            print >>sys.stderr, "this site for country:%s is a duplicate: %s" % ( cc, site )
+         else:
+            targetsitenames.append(sitename)
+            ## add 'www'?
+            if targetsites < TOP_ALEXA_SITES:
+               targets.append( site )
+               targetsites = targetsites + 1
    print >>sys.stderr, "WARNING: when using alexa-country-top25 lists, some sites may be considered offensive"
    print >>sys.stderr, "WARNING: please consider looking at the 'targets' list in basedata.json and see if any of the sites"
    print >>sys.stderr, "WARNING: that are going to be measured to might be offensive. Please be considerate to our RIPE Atlas Probe hosts"
