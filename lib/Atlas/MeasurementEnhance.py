@@ -168,7 +168,7 @@ def aslinksplus( data, teh_radix ):
                this_hop_ases.add( '_%s' % (nodename) )
             else:
                info = getipinfo( ip )
-               if 'asn' in info and info['asn'] != '':
+               if 'asn' in info and info['asn'] != '' and info['asn'] != None:
                   this_hop_ases.add( 'AS%d' % (info['asn']) )
          
          if len(this_hop_ases) == 1 and len(last_resp_hop_ases) == 1:
