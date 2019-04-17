@@ -114,10 +114,11 @@ export class SnapShotTimeLine extends React.Component {
           <text transform="matrix(1 0 0 1 203.9561 55.998)">1 October</text>
         <text transform="matrix(1 0 0 1 302.0596 55.998)">December</text>*/}
           <text transform="matrix(1 0 0 1 165.8276 13.7109)">
-            {firstDate &&
+            {/* {firstDate &&
               new Date(
                 `${firstDate.year}/${firstDate.month}/${firstDate.day}`
-              ).getYear() + 1900}
+              ).getYear() + 1900} */}
+            {this.props.currentSnapshotDate.year}
           </text>
           {/* <circle className="st2" cx="237.3" cy="79.2" r="12" /> */}
           {/* <circle className="st3" cx="237.3" cy="79.2" r="9" /> */}
