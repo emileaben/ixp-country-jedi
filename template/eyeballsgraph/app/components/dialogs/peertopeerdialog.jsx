@@ -13,10 +13,9 @@ export class PeerToPeerDialog extends React.Component {
     return (
       <div className="dialog">
         <CountryAutoCompleteInput
-          title="Country"
           countries={this.props.countries}
           initialCountry={this.props.countryInfo}
-          emptyHint="type a country name, country code or space"
+          emptyHint="type a country name, country code or select one"
           onSubmit={this.props.changeCountry}
         />
         {this.props.children}
