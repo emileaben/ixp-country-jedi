@@ -27,6 +27,8 @@
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.0.0",
+    "@ripe-rnd/ui-components": "^0.1.2",
+    "@ripe-rnd/ui-datastores": "^0.2.0",
     "babel-minify-webpack-plugin": "^0.3.1",
     "babel-plugin-styled-components": "^1.10.0",
     "d3": "^4.13.0",
