@@ -26,7 +26,7 @@ for line in sys.stdin:
 
 out = []
 for cc in sorted( d.keys() ):
-    dates = sorted( d[ cc ] )
+    dates = sorted( set( d[ cc ] ) )
     out.append( {'country': cc, 'dates': dates } )
 
 if len( sys.argv ) == 2:

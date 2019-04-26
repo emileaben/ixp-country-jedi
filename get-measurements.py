@@ -139,9 +139,12 @@ def main():
          dst_prb_id = None
          dst_prb = None
          try:
-            dst_prb_id = probes_by_ip[ data['dst_addr'] ]
+            dst_prb_id = probes_by_ip[ data['dst_name'] ] # dst name always has the IP that is in msmset/probeset
             dst_prb = probes_by_id[  dst_prb_id ]
-         except: pass
+         except:
+            ### 2a01:7700:0:1033:220:4aff:fee0:2694 vs. 2a01:7700::1033:220:4aff:fee0:2694
+            ##AAAAAAAAAAA
+            print >>sys.stderr, "can't find dst_prb_id for this dst_name. SHOULD NOT HAPPEN"
          if src_prb_id == dst_prb_id:
             ### probe to itself is not interesting/useful
             ## TODO filter this out in the measurement creation
