@@ -73,7 +73,7 @@
 @jedi-eyeballs-no-probes: #dcede6;
 @jedi-anthracite: #363738;
 
-line {
+line.p-t-p-fabric {
   stroke: @jedi-anthracite;
   opacity: 0.1;
 }
@@ -452,7 +452,24 @@ class.story {
   }
 }
 
+form {
+  max-width: 352px;
+  
+  svg[class*="-icon"] {
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.suggester {
+  background-color: @oim-antracite;
+  color: white;
+  padding-left: 8px;
+}
+
 .snapshot-timeline {
+  padding: 32px 0;
+
   line,
   polyline,
   circle,

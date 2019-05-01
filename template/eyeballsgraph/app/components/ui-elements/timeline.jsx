@@ -1,6 +1,8 @@
 import React from "react";
 
 const MIN_SNAPSHOT_DATE = new Date("2018/01/01");
+// TODO: horizontal lines + arrows are still hardcoded in their spots.
+const MONTHS_NO = 4;
 
 class SnapshotDot extends React.Component {
   constructor(props) {
@@ -44,7 +46,21 @@ export class SnapShotTimeLine extends React.Component {
     const currentSnapshots = this.props.snapshots.filter(
       s => new Date(`${s.year}-${s.month}-${s.day}`) >= MIN_SNAPSHOT_DATE
     );
-    const firstDate = (currentSnapshots && currentSnapshots[0]) || null;
+    // const firstDate = (currentSnapshots && currentSnapshots[0]) || null;
+    const snapshotSlice = currentSnapshots.slice(-MONTHS_NO);
+    const yearSlices = snapshotSlice.reduce((slices, s, i) => {
+      slices[s.year] = (slices[s.year] && [
+        slices[s.year][0],
+        slices[s.year][1] + 1
+      ]) || [i, i];
+      return slices;
+    }, {});
+    console.log(yearSlices);
+    // const endYear = snapshotSlice[3].year;
+    // const startYear = snapshotSlice[0].year;
+    // console.log(endYear);
+    // console.log(snapshotSlice);
+    // console.log(startYear);
     return (
       <svg
         className="snapshot-timeline"
@@ -71,10 +87,7 @@ export class SnapShotTimeLine extends React.Component {
           {/* <circle className="st2" cx="39.3" cy="79.2" r="9" />
           <circle className="st2" cx="338.3" cy="79.2" r="9" />
     <circle className="st2" cx="137.1" cy="79.2" r="9" /> */}
-          <polyline
-            className="st0"
-            points="338.4,31.2 338.4,22.2 338.4,21.5 38.6,21.5 38.6,30.5 	"
-          />
+
           <g>
             <g>
               <line className="st1" x1="376.4" y1="79.2" x2="353" y2="79.2" />
@@ -87,7 +100,7 @@ export class SnapShotTimeLine extends React.Component {
             </g>
           </g>
           {/* by default show the four most recent snapshots in the timeline */}
-          {currentSnapshots.slice(-4).map((s, i) => {
+          {snapshotSlice.map((s, i) => {
             const date = new Date(`${s.year}-${s.month}-${s.day} 00:00`);
             // JS is funny like that: a Date is never equal to a Date.
             const isCurrentDate =
@@ -98,6 +111,7 @@ export class SnapShotTimeLine extends React.Component {
             const monthName = date.toLocaleDateString("en-us", {
               month: "long"
             });
+
             return (
               <SnapshotDot
                 monthName={monthName}
@@ -113,12 +127,23 @@ export class SnapShotTimeLine extends React.Component {
           <text transform="matrix(1 0 0 1 101.7588 55.998)">September</text>
           <text transform="matrix(1 0 0 1 203.9561 55.998)">1 October</text>
         <text transform="matrix(1 0 0 1 302.0596 55.998)">December</text>*/}
-          <text transform="matrix(1 0 0 1 165.8276 13.7109)">
-            {firstDate &&
-              new Date(
-                `${firstDate.year}/${firstDate.month}/${firstDate.day}`
-              ).getYear() + 1900}
-          </text>
+          {Object.entries(yearSlices).map((s, i) => {
+            const maxX = 38.4 + s[1][1] * 100;
+            const minX = s[1][0] * 100 + 38.4;
+            return (
+              <>
+                <polyline
+                  className="st0"
+                  points={`${minX},31.2 ${minX},21.5 ${maxX},21.5 ${maxX},31.2`}
+                />
+                <text
+                  transform={`matrix(1 0 0 1 ${maxX - (maxX - minX) / 2 } 13.7109)`}
+                >
+                  {s[0]}
+                </text>
+              </>
+            );
+          })}
           {/* <circle className="st2" cx="237.3" cy="79.2" r="12" /> */}
           {/* <circle className="st3" cx="237.3" cy="79.2" r="9" /> */}
         </g>
