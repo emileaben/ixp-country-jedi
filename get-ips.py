@@ -4,7 +4,7 @@ import sys
 sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
 from Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
 sys.path.append( os.path.dirname(os.path.realpath(__file__) ) )
-from libixpcountryjedi import ip2asn,ip2hostname
+from libixpcountryjedi import ip2asn,ip2hostname,ICJRun
 import requests
 import json
 import urllib2
@@ -37,12 +37,14 @@ def haversine(lon1, lat1, lon2, lat2):
 ipinfo = {}
 counter = 1
 
+run = ICJRun('.')
+
 ### read openipmap info, and key by IP
-openipmap = {}
-with open("ips-openipmap.json-fragments") as inf:
-    for line in inf:
-        d = json.loads( line )
-        openipmap[ d['ip'] ] = d
+#openipmap = {}
+#with open("ips-openipmap.json-fragments") as inf:
+#    for line in inf:
+#        d = json.loads( line )
+#        openipmap[ d['ip'] ] = d
 
 def get_asnmeta( asn ):
    meta = {'asn': asn, 'as_name': '<unknown>', 'as_description': '<unknown>', 'as_country': 'XX', 'ips_v4': None, '48s_v6': None}
@@ -99,7 +101,7 @@ def get_asnmeta( asn ):
    return meta
 
 def main():
-   ips=set()
+   iprtt={}
    with open('measurementset.json','r') as infile:
       msms = json.load( infile )
       msm_list = msms['v4'] + msms['v6']
@@ -112,24 +114,34 @@ def main():
             for hop in tr.hops:
                for pkt in hop.packets:
                   ip = pkt.origin
+                  rtt = pkt.rtt
                   if pkt.arrived_late_by: ## these are 'weird' packets ignore ehm (better would be to filter out pkts with 'edst')
                      continue
                   if ip != None:
-                     ips.add( ip )
+                     if not ip in iprtt or iprtt[ ip ]['rtt'] > rtt:
+                        iprtt[ ip ] = {
+                            'rtt': rtt, 
+                            'prb_id': tr.probe_id,
+                            'msm_id': tr.measurement_id,
+                        }
+
+
          count+=1
-   ip_count = len(ips)
-   print >>sys.stderr, "ip gathering finished, now analysing. ip count: %s" % ( ip_count )
-   ips = list(ips)
+   ips = list( iprtt.keys() )
    ips.sort()
+   ip_count = len( ips )
+   print >>sys.stderr, "ip gathering finished, now analysing. ip count: %s" % ( ip_count )
    outf = open("ips.json-fragments","w")
+   outf_geoerr = open('geo-err.json-fragments',"w")
 
    no_result_cnt = 0
    for ip in ips:
         print >>sys.stderr, "attempting %s" % ip
         j = None
+        #if True:
         try:
-            out = {'ip': ip, 'lon': None, 'location': '', 'lat': None, 'oloc': None, 'hostname': "", 'asn': ""}
-            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=20 )
+            out = {'ip': ip, 'lon': None, 'location': '', 'lat': None, 'hostname': "", 'asn': "", 'geo_error': None}
+            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=25 )
             j = req.json()
             j['ip'] = ip
             #del( j['meta'] )
@@ -145,11 +157,6 @@ def main():
             except:
                 print >>sys.stderr, "asn lookup failed for %s" % ip
                 pass
-            try:
-                if ip in openipmap and 'location' in openipmap[ ip ]:
-                    out['oloc'] = openipmap[ip]['location']
-            except:
-                    continue
             if 'partials' in j and len( j['partials'] ) > 0:
                 for p in j['partials']:
                     if not have_result and p['engine'] in ('probelocations','crowdsourced','ixp') and len( p['locations'] ) > 0:
@@ -162,11 +169,29 @@ def main():
                                 # {"ip": "213.19.197.126", "hostname": "infopact-ne.ear3.amsterdam1.level3.net", "lon": null, "location": "", "lat": null, "asn": 3356}
                                 #print u'%s %s "%s"' % ( ip, p['engine'], loc['cityName'], loc['countryCodeAlpha2'] )
                                 have_result = True
-                                if ip in openipmap and 'lat' in openipmap[ip] and 'lon' in openipmap[ip] and openipmap[ip]['lat'] != None and openipmap[ip]['lon'] != None:
-                                    if out['lon'] and out['lat']:
-                                        dist = haversine( out['lon'], out['lat'], openipmap[ip]['lon'], openipmap[ip]['lat'] )
-                                        out['dist'] = dist
-                                    else:
+                                # now get the probe lat/lon and compare to ipmap + RTT
+                                if out['lon'] and out['lat']:
+                                        prb = run.probes_by_id[ iprtt[ ip ]['prb_id'] ]
+                                        geodist = haversine( out['lon'], out['lat'], prb['lon'], prb['lat'] )
+                                        rttdist = iprtt[ ip ]['rtt'] * 100
+                                        # don't make geo_err judgements when prb-ip distance is under 100km
+                                        if geodist < 100 or geodist < rttdist:
+                                            out['geo_error'] = False
+                                        else:
+                                            out['geo_error'] = True
+                                            g = out
+                                            g['prb_id'] = iprtt[ip]['prb_id']
+                                            g['msm_id'] = iprtt[ip]['msm_id']
+                                            g['rtt'] = iprtt[ip]['rtt']
+                                            g['geo_km'] = geodist
+                                            g['rtt_km'] = rttdist
+                                            print >>outf_geoerr, json.dumps( g )
+                                            ## now reset the location, as we don't want it to be used in the real jedi
+                                            out['lat'] = None
+                                            out['lon'] = None
+                                            out['location'] = ''
+                                        print >>sys.stderr, "#RTT %s geo_km:%.2f rtt_km:%.2f prb_id:%s rtt:%.2f (%s)" % ( ip, geodist, rttdist, iprtt[ip]['prb_id'], iprtt[ip]['rtt'], out['geo_error'] )
+                                else:
                                         print >>sys.stderr, "#error: no lat/lon in new ipmap?! %s" % ( out )
                                 break
         except:
