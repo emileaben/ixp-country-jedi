@@ -19,11 +19,14 @@ class ICJRun(object):
             self.probes = json.load( inf )
         with open( "%s/measurementset.json" % basedir ) as inf:
             self.measurements = json.load( inf )
-        with open( "%s/ips.json-fragments" % basedir ) as inf:
             self.iplocs = []
-            for line in inf:
-                iploc = json.loads( line )
-                self.iplocs.append( iploc )
+        try:
+            with open( "%s/ips.json-fragments" % basedir ) as inf:
+                for line in inf:
+                    iploc = json.loads( line )
+                    self.iplocs.append( iploc )
+        except: #doesn't exist yet?
+            pass
         with open( "%s/basedata.json" % basedir ) as inf:
             self.basedata = json.load( inf )
         # keyed by useful keys
