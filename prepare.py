@@ -34,6 +34,16 @@ MEASUREMENT_TYPES = set([
    'local-tld-traceroute',
 ])
 
+GEONAMES_USER=None
+authfile = "%s/.geonames/auth" % os.path.dirname(os.path.realpath(__file__) )
+if not os.path.exists(authfile):
+    print >>sys.stderr, ("Geonames authentication file %s not found" % authfile)
+    sys.exit(1)
+auth = open(authfile)
+GEONAMES_USER = auth.readline()[:-1]
+auth.close()
+GEONAMES_USER.rstrip()
+
 sources = {}
 dests = {}
 
@@ -422,10 +432,7 @@ def capital_city_for_country( country_code ):
 def locstr2latlng( locstring ):
    try:
       locstr = urllib2.quote( locstring )
-      geocode_url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&sensor=false" % locstr
-      apikey = os.getenv('GOOGLEMAPS_API_KEY')
-      if apikey:
-         geocode_url += "&key=%s" % apikey
+      geocode_url = "http://api.geonames.org/searchJSON?q=%s&maxRows=10&username=%s" % ( locstr, GEONAMES_USER )
 
       req = urllib2.urlopen(geocode_url)
 
@@ -433,8 +440,8 @@ def locstr2latlng( locstring ):
       if 'error_message' in resp:
          raise SystemExit("Maps geocode error: %s" % resp['error_message'])
 
-      ll = resp['results'][0]['geometry']['location']
-      return (ll['lat'], ll['lng'])
+      ll = resp['geonames'][0]
+      return (float(ll['lat']), float(ll['lng']))
    except (ValueError, IndexError):
       print "could not determine lat/long for '%s'" % ( locstring )
       pass
