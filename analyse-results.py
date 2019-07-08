@@ -5,6 +5,7 @@ import os
 import shutil
 import math
 import codecs
+import requests
 from collections import Counter
 
 ## this allows to pipe output to a file and have it be utf-8
@@ -15,6 +16,7 @@ BASEDIR=os.path.dirname( os.path.realpath(__file__) )
 PROBE_BLACKLIST_FILE="%s/probe-blacklist.txt" % BASEDIR
 
 ### this is a hack
+# copy from: /var/www/html/petros/population_coverage/data_sources if needed
 EYEBALL_FILE="%s/eyeballs.json" % BASEDIR
 
 # globally available
@@ -471,20 +473,22 @@ def do_rttmesh_printresult( rttmesh ):
    print "RTTMESH viz results available in %s" % ( VIZPATH )
 
 #### aspath for eyeballs
+## fetch live from: http://v6data.data.labs.apnic.net/ipv6-measurement/Economies/NL/NL.asns.json?m=0.01 ??
 def init_eyeballasgraph( basedata, probes ):
    if len( basedata['countries'] ) != 1:
        print >>sys.stderr, "can't do an eyeball graph if countries != 1"
        return None
    try:
-       with open( EYEBALL_FILE ) as inf:
-           eb = json.load( inf )
-           cc = basedata['countries'][0]
-           eyeball_data = {}
-           for entry in eb['countries'][ cc ]['apnic']:
-               #key it by the asn. as a string ...
-               ## use a 1% threshold
-               if entry['percent'] > 1:
-                   eyeball_data[ "AS%s" % entry['as'] ] = entry
+       cc = basedata['countries'][0]
+       pop_url = "http://v6data.data.labs.apnic.net/ipv6-measurement/Economies/%s/%s.asns.json?m=1" % ( cc, cc)
+       req = requests.get( pop_url )
+       j = req.json()
+       eyeball_data = {}
+       for entry in j:
+            #key it by the asn. as a string ...
+            ## use a 1% threshold
+            if entry['percent'] > 1:
+                eyeball_data[ "AS%s" % entry['as'] ] = entry
    except:
        print >>sys.stderr, "can't do an eyeball graph without eyeball data in file: '%s'" % EYEBALL_FILE
        return None
