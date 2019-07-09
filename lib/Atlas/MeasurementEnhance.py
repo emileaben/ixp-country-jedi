@@ -140,7 +140,7 @@ def togeojson( data, srcprb, dstprb ):
          print "Uncaught situation at end of trace no %s: %s" % ( last_resp_hop_nr, last_resp_hop_ases )
    return entries
 
-def aslinksplus( data, teh_radix ):
+def aslinksplus( data, teh_radix, src_asn=None ):
    '''
    Takes a raw traceroute result and returns a datastructure with ASes and links between them
    extra_nets_radix is an optional Radix object (for instance for IXP peering LANs) that specifies non-ASes prefixes that
@@ -153,8 +153,15 @@ def aslinksplus( data, teh_radix ):
       has_radix = True
    if 'result' in data:
       res = data['result']
-      last_resp_hop_nr = None
-      last_resp_hop_ases = set()
+      if src_asn == None:
+        last_resp_hop_nr = None
+        last_resp_hop_ases = set()
+      else:
+        # make sure it starts with 'AS' (it's a mess!)
+        if isinstance(src_asn, int):
+            src_asn = "AS%d" % src_asn
+        last_resp_hop_nr = 0
+        last_resp_hop_ases = set( [src_asn] )
       for hop in res:
          this_resp_hop_nr = hop['hop']
          ips = __ipsetforhop( hop )

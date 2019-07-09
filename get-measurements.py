@@ -136,6 +136,11 @@ def main():
              continue
          src_prb_id = data['prb_id']
          src_prb = probes_by_id[ src_prb_id ]
+         src_asn = None
+         if data['af'] == 4:
+            src_asn = src_prb['asn_v4']
+         elif data['af'] == 6:
+            src_asn = src_prb['asn_v6']
          dst_prb_id = None
          dst_prb = None
          try:
@@ -155,7 +160,7 @@ def main():
          #print "IXPS: %s" % ( ixps )
          #print tracetxt
          locs = MeasurementPrint.trace2locs( data )
-         as_links = MeasurementEnhance.aslinksplus( data, ixp_radix )
+         as_links = MeasurementEnhance.aslinksplus( data, ixp_radix, src_asn=src_asn )
          geojson = MeasurementEnhance.togeojson( data, src_prb , dst_prb )
          #print as_links
          countries = basedata['countries']
