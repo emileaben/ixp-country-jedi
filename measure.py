@@ -52,7 +52,14 @@ for mtype in basedata['measurement-types']:
       for v4target in v4dst:
          #TODO remove probe itself from list?
          tag_list = ['ixp-country-jedi','probe-mesh-ipv4', 'country-%s' % ( "-".join( basedata['countries'] ).lower() ) ]
-         msm_id = Measure.oneofftrace(v4src, v4target, tags=tag_list, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
+         msm_id = None
+         max_attempts = 10
+         attempts = 0
+         while attempts <= max_attempts and msm_id == None:
+            msm_id = Measure.oneofftrace(v4src, v4target, tags=tag_list, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
+            attempts += 1
+            if msm_id == None:
+                time.sleep( attempts * 30) # assume there is an API problem, and exponential backoff works?
          msms['v4'].append({
             'msm_id': msm_id,
             'dst': v4target,
