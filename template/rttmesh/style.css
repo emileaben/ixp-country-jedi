@@ -46,7 +46,7 @@ path.domain {
 }
 
   .legend p { float: left; margin-right: 10px; }
-  .legend span { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
+  .legend .box { border: 1px solid #ccc; float: left; width: 15px; height: 15px; margin: 2px; margin-right: 8px; }
   /* your colors */
   .legend .lowrtt { background-color: green; }
   .legend .midrtt { background-color: orange; }

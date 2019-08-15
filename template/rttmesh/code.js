@@ -289,7 +289,7 @@ function redraw(){
     d3.select("svg").remove();
 
     if(row_count_f > 0){
-        plot_vizualization(rows_f, cols_f, cells_f, row_count_f, col_count_f, row_by_idx_f);
+        plot_vizualization(rows_f, cols_f, cells_f, row_count_f, col_count_f, row_by_idx_f, data_n['pct']);
     }
 
 }
@@ -375,7 +375,7 @@ window.onresize = function() {
 };
 
   
-function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx) {
+function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx, pct) {
 
     var height = 1200;
     var width = height;
@@ -471,6 +471,8 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
 
     d3.select("#adjacencyG").append("g").attr("class",'axis').call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
     d3.select("#adjacencyG").append("g").attr("class",'axis').call(yAxis);
+    document.getElementById("pct25").innerHTML = pct["25"];
+    document.getElementById("pct75").innerHTML = pct["75"];
     /*
     function text_from_datacell( d ) {
         var txt = [];
@@ -485,10 +487,12 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx)
     */
 
     function cellcolor( d ) {
-        median_rtt = get_median(d.data.dst_rtts);
-        if (median_rtt > 0) { /* if the median RTT exists */
-            if (median_rtt < 10) { return "green"; }
-            if (median_rtt > 50) { return "red"; }
+        console.log( d.data.dst_rtts );
+        //min_rtt = Math.min(d.data.dst_rtts);
+        min_rtt = Math.min.apply(null, d.data.dst_rtts); // wtf?
+        if (min_rtt > 0) { /* if the median RTT exists */
+            if (min_rtt <= pct[25] ) { return "green"; }
+            if (min_rtt >= pct[75] ) { return "red"; }
             return "orange";
         }
         else { return "grey"; } /* No RTT to destination or something went wrong */
