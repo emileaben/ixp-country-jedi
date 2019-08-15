@@ -489,10 +489,10 @@ function plot_vizualization(rows, cols, cells, row_count, col_count, row_by_idx,
     function cellcolor( d ) {
         console.log( d.data.dst_rtts );
         //min_rtt = Math.min(d.data.dst_rtts);
-        min_rtt = Math.min.apply(null, d.data.dst_rtts); // wtf?
-        if (min_rtt > 0) { /* if the median RTT exists */
-            if (min_rtt <= pct[25] ) { return "green"; }
-            if (min_rtt >= pct[75] ) { return "red"; }
+        if ( d.data.dst_rtts.length > 0 ) {
+            min_rtt = Math.min.apply(null, d.data.dst_rtts); // wtf?
+            if (min_rtt < pct[25] ) { return "green"; }
+            if (min_rtt > pct[75] ) { return "red"; }
             return "orange";
         }
         else { return "grey"; } /* No RTT to destination or something went wrong */
