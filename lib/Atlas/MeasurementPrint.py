@@ -53,7 +53,11 @@ def trace2locs( data ):
       try:
          loc = ipdata['location']
          if loc != '' and loc != None:
-            locs.add( loc )
+            ## take into account geoloc_err
+            if not 'geo_error' in ipdata or not ipdata['geo_error'] == True:
+                locs.add( loc )
+            #else:
+            #    print >>sys.stderr, "not adding loc to 'locs' trace2loc: %s" % ( loc )
       except: pass
    return locs
 

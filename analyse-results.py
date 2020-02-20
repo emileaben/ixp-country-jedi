@@ -5,7 +5,9 @@ import os
 import shutil
 import math
 import codecs
+import requests
 from collections import Counter
+import math
 
 ## this allows to pipe output to a file and have it be utf-8
 # adapted from http://stackoverflow.com/questions/4545661/unicodedecodeerror-when-redirecting-to-file
@@ -15,6 +17,7 @@ BASEDIR=os.path.dirname( os.path.realpath(__file__) )
 PROBE_BLACKLIST_FILE="%s/probe-blacklist.txt" % BASEDIR
 
 ### this is a hack
+# copy from: /var/www/html/petros/population_coverage/data_sources if needed
 EYEBALL_FILE="%s/eyeballs.json" % BASEDIR
 
 # globally available
@@ -356,14 +359,14 @@ def init_ixpcountry( basedata, probes ):
         if(probe['address_v6'][:4] == '2002'):
           _6to4.append(probe['probe_id'])
 
-      if('address_v4' in probe and probe['address_v4'] != None and "system-ipv4-stable-1d" in probe['tags']):
+      if('address_v4' in probe and probe['address_v4'] != None):
          rows['v4'].append({
             'id': probe['probe_id'],
             'asn_v4': probe['asn_v4'],
             'asn_v6': probe['asn_v6']
          })
 
-      if('address_v6' in probe and probe['address_v6'] != None and "system-ipv6-stable-1d" in probe['tags']):
+      if('address_v6' in probe and probe['address_v6'] != None):
          rows['v6'].append({
             'id': probe['probe_id'],
             'asn_v4': probe['asn_v4'],
@@ -411,7 +414,7 @@ def do_ixpcountry_printresult( ixpcountry ):
 ### rttmesh
 def init_rttmesh( basedata, probes ):
 
-   rows = { 'v4' : list(), 'v6' : list() }
+   rows = { 'v4' : list(), 'v6' : list(), }
    _6to4 = []
    for probe in PROBES:
       if(probe['asn_v6'] == None and 'address_v6' in probe.keys() and probe['address_v6'] != None):
@@ -433,13 +436,14 @@ def init_rttmesh( basedata, probes ):
          })
 
    ## can do data reduction step here if data is too big
-   d = {'summary':{},'details':{}}
+   d = {'summary':{},'details':{},'rttseries':{ 'v4':[], 'v6': [] } }
    for proto in ('v4','v6'):
       d['summary'][proto] = {
          'rows': rows[proto],
          'cols': rows[proto],
          'cells': [],
          '_6to4': _6to4,
+         'pct': {} # holds the percentiles for plotting/axis
       }
       d['details'][proto] = {}
    return d
@@ -451,9 +455,33 @@ def do_rttmesh_entry( rttmesh, proto, data ):
       'col': data['dst_prb_id'],
       'data': {'dst_rtts': data['dst_rtts']}
    })
+   #rttseries for determining coloring of cells later
+   if len( data['dst_rtts'] ) > 0:
+       rttmesh['rttseries'][ proto ].append( min( data['dst_rtts'] ) )
    details = rttmesh['details'][proto]
    detail_key = '.'.join(map(str,[ data['src_prb_id'] , data['dst_prb_id'] ]))
    details[ detail_key ] = data
+
+def _percentile(N, percent, key=lambda x:x):
+    """
+    Find the percentile of a list of values.
+
+    @parameter N - is a list of values. Note N MUST BE already sorted.
+    @parameter percent - a float value from 0.0 to 1.0.
+    @parameter key - optional key function to compute value from each element of N.
+
+    @return - the percentile of the values
+    """
+    if not N:
+        return None
+    k = (len(N)-1) * percent
+    f = math.floor(k)
+    c = math.ceil(k)
+    if f == c:
+        return key(N[int(k)])
+    d0 = key(N[int(f)]) * (c-k)
+    d1 = key(N[int(c)]) * (k-f)
+    return d0+d1
 
 def do_rttmesh_printresult( rttmesh ):
    VIZPATH='./analysis/rttmesh/'
@@ -463,6 +491,13 @@ def do_rttmesh_printresult( rttmesh ):
    if not os.path.exists( VIZDETAILSPATH ):
       os.makedirs( VIZDETAILSPATH )
    for proto in ('v4','v6'):
+      # calculate stats for the rttseries
+      series = sorted( rttmesh['rttseries'][proto] )
+      p25 = _percentile( series, 0.25 )
+      p75 = _percentile( series, 0.75 )
+      print "series (proto:%s): pct25:%s pct75:%s" % (proto, p25, p75 )
+      rttmesh['summary'][proto]['pct'][25] = p25
+      rttmesh['summary'][proto]['pct'][75] = p75
       with open('%s/rttmesh.%s.json' % (VIZPATH,proto), 'w') as outfile:
          json.dump( rttmesh['summary'][ proto ], outfile )
       for detail_key in rttmesh['details'][ proto ].keys():
@@ -471,20 +506,22 @@ def do_rttmesh_printresult( rttmesh ):
    print "RTTMESH viz results available in %s" % ( VIZPATH )
 
 #### aspath for eyeballs
+## fetch live from: http://v6data.data.labs.apnic.net/ipv6-measurement/Economies/NL/NL.asns.json?m=0.01 ??
 def init_eyeballasgraph( basedata, probes ):
    if len( basedata['countries'] ) != 1:
        print >>sys.stderr, "can't do an eyeball graph if countries != 1"
        return None
    try:
-       with open( EYEBALL_FILE ) as inf:
-           eb = json.load( inf )
-           cc = basedata['countries'][0]
-           eyeball_data = {}
-           for entry in eb['countries'][ cc ]['apnic']:
-               #key it by the asn. as a string ...
-               ## use a 1% threshold
-               if entry['percent'] > 1:
-                   eyeball_data[ "AS%s" % entry['as'] ] = entry
+       cc = basedata['countries'][0]
+       pop_url = "http://v6data.data.labs.apnic.net/ipv6-measurement/Economies/%s/%s.asns.json?m=1" % ( cc, cc)
+       req = requests.get( pop_url )
+       j = req.json()
+       eyeball_data = {}
+       for entry in j:
+            #key it by the asn. as a string ...
+            ## use a 1% threshold
+            if entry['percent'] > 1:
+                eyeball_data[ "AS%s" % entry['as'] ] = entry
    except:
        print >>sys.stderr, "can't do an eyeball graph without eyeball data in file: '%s'" % EYEBALL_FILE
        return None

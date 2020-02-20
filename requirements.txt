@@ -1,4 +1,3 @@
-Jinja2==2.7.3
 beautifulsoup4==4.3.2
 py-radix==0.7.0
 ripe.atlas.sagan==0.1.15

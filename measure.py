@@ -19,14 +19,19 @@ with open("basedata.json",'r') as infile:
 v6src=[] # src are probe IDs
 v4src=[]
 for p in probes:
-   if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-stable-1d' in p['tags']:
+   # select probes with stable properties
+
+   stable_tag4_cnt = len( filter(lambda x: x.startswith('system-ipv4-stable-'), p['tags'] ) )
+   if 'address_v4' in p and p['address_v4'] != None and stable_tag4_cnt > 0:
       v4src.append( p['probe_id'] )
    else:
-      print "skipping v4 measurements for probe: %s" % ( p['probe_id'] )
-   if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags']:
+      print "skipping v4 measurements for probe: %s (stable tag cnt:%s)" % ( p['probe_id'], stable_tag4_cnt )
+
+   stable_tag6_cnt = len( filter(lambda x: x.startswith('system-ipv6-stable-'), p['tags'] ) )
+   if 'address_v6' in p and p['address_v6'] != None and stable_tag6_cnt > 0:
       v6src.append( p['probe_id'] )
    else:
-      print "skipping v6 measurements for probe: %s" % ( p['probe_id'] )
+      print "skipping v6 measurements for probe: %s (stable tag cnt:%s)" % ( p['probe_id'], stable_tag6_cnt )
 
 v4dst=[] # dst are IP addresses
 v6dst=[]
@@ -34,9 +39,9 @@ v6dst=[]
 for mtype in basedata['measurement-types']:
    if mtype == 'probe-mesh':
       for p in probes:
-         if 'address_v4' in p and p['address_v4'] != None and 'system-ipv4-stable-1d' in p['tags']:
+         if 'address_v4' in p and p['address_v4'] != None:
             v4dst.append( p['address_v4'] )
-         if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-stable-1d' in p['tags'] and 'system-ipv6-ula' not in p['tags']:
+         if 'address_v6' in p and p['address_v6'] != None and 'system-ipv6-ula' not in p['tags']:
             v6dst.append( p['address_v6'] )
    elif mtype in ('traceroute','http-traceroute',
                     'https-traceroute', 'local-news-traceroute', 'local-tld-traceroute'):
@@ -52,7 +57,14 @@ for mtype in basedata['measurement-types']:
       for v4target in v4dst:
          #TODO remove probe itself from list?
          tag_list = ['ixp-country-jedi','probe-mesh-ipv4', 'country-%s' % ( "-".join( basedata['countries'] ).lower() ) ]
-         msm_id = Measure.oneofftrace(v4src, v4target, tags=tag_list, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
+         msm_id = None
+         max_attempts = 10
+         attempts = 0
+         while attempts <= max_attempts and msm_id == None:
+            msm_id = Measure.oneofftrace(v4src, v4target, tags=tag_list, af=4, paris=1, description="ixp-country-jedi to %s (IPv4)" % ( v4target ) )
+            attempts += 1
+            if msm_id == None:
+                time.sleep( attempts * 30) # assume there is an API problem, and exponential backoff works?
          msms['v4'].append({
             'msm_id': msm_id,
             'dst': v4target,

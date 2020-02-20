@@ -137,6 +137,7 @@ def main():
     datadir = "%s/data/%s" % ( basedir, rundate )
     prep_cmd = "%s/prepare.py" % basedir
     meas_cmd = "%s/measure.py" % basedir
+    #ips_old_cmd = "%s/get-ips-old.py" % basedir
     ips_cmd = "%s/get-ips.py" % basedir
     fetch_cmd = "%s/get-measurements.py" % basedir
     anal_cmd = "%s/analyse-results.py" % basedir
@@ -169,6 +170,7 @@ def main():
             os.system( prep_cmd )
             os.system( meas_cmd )
             time.sleep( 360 ) # 6 mins ok?
+            #os.system( ips_old_cmd )
             os.system( ips_cmd )
             os.system( fetch_cmd )
             ## now create symlink
