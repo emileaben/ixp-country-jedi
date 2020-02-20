@@ -60,7 +60,13 @@ export class PeerToPeerContainer extends React.Component {
     );
     let geoLocation = await geoResponse.json();
     return (
-      (geoLocation.data.locations && geoLocation.data.locations[0]) || null
+      (geoLocation.data &&
+        geoLocation.data["located_resources"][0] &&
+        geoLocation.data["located_resources"].length > 0 &&
+        geoLocation.data["located_resources"][0] &&
+        geoLocation.data["located_resources"][0].locations &&
+        geoLocation.data["located_resources"][0].locations[0]) ||
+      null
     );
   };
 
@@ -110,7 +116,9 @@ export class PeerToPeerContainer extends React.Component {
           ] = this.destructureCountryInfoFromUrl();
           const countryCode =
             (urlCountryCode && urlCountryCode.toUpperCase()) ||
-            l.country.toUpperCase();
+            (l && l.country.toUpperCase()) ||
+            // If all else fails let's get a random country
+            cA[Math.floor(Math.random() * (cA.length - 1))].country;
           console.log(countryCode);
 
           // Now see which snapshot dates we have for this country
@@ -286,10 +294,11 @@ export class PeerToPeerContainer extends React.Component {
             }
             orgNames={this.state.orgnames}
             status={
-              this.state.countryCode &&
-              this.state.countries &&
-              this.state.currentSnapshotDate &&
-              "ready" || "waiting for data to load"
+              (this.state.countryCode &&
+                this.state.countries &&
+                this.state.currentSnapshotDate &&
+                "ready") ||
+              "waiting for data to load"
             }
           />
         }
