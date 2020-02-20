@@ -8,6 +8,10 @@
     "start": "webpack-dev-server -d --progress --port 4042 --config webpack.config.js",
     "build": "BABEL_ENV=production webpack --config webpack.config.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emileaben/ixp-country-jedi.git"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
