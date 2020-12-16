@@ -1,0 +1,17 @@
+{
+  "name": "jedi-transforms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "transform-msm-linestrings.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@turf/turf": "^5.1.6",
+    "async-throttle": "^1.1.0",
+    "cacache": "^15.0.5",
+    "node-fetch": "^2.6.1"
+  }
+}
