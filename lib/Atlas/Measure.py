@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import os
-from jinja2 import Environment
 
 from datetime import datetime
 from ripe.atlas.cousteau import (
@@ -20,25 +19,6 @@ KEY = auth.readline()[:-1]
 auth.close()
 KEY.rstrip()
 ### END AUTH
-
-def measure_from_template( template_file, template_vars ):
-    env = Environment()
-    template = env.get_template( template_file )
-    msm_spec = template.render(**{template_vars})
-
-    traceroute = Traceroute( ** msm_spec['definitions']  )
-    source = AtlasSource( ** msm_spec['probes']  )
-    atlas_request = AtlasCreateRequest(
-        start_time = datetime.utcnow(),
-        key = KEY,
-        measurements = [traceroute],
-        sources = [source],
-        is_oneoff = True
-    )
-
-    (is_success, response) = atlas_request.create()
-
-    return response['measurements'][0]
 
 def measure( msm_spec ):
     traceroute = Traceroute( ** msm_spec['definitions']  )
