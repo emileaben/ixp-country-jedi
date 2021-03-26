@@ -75,7 +75,7 @@ def oneofftrace( probes_def, dst, **kwargs ):
     traceroute = Traceroute( ** data['definitions']  )
     source = AtlasSource( ** data['probes']  )
     atlas_request = AtlasCreateRequest(
-        start_time = datetime.utcnow(),
+        # start_time = datetime.utcnow(), # this was generating "Measurements must have the start time in future"
         key = KEY,
         measurements = [traceroute],
         sources = [source],
