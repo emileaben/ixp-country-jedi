@@ -25,14 +25,14 @@ TOP_ALEXA_SITES = 25
 
 ## find connected probes
 
-MEASUREMENT_TYPES = set([
+MEASUREMENT_TYPES = {
    'probe-mesh',
    'traceroute',
    'http-traceroute',
    'https-traceroute',
    'local-news-traceroute',
    'local-tld-traceroute',
-])
+}
 
 GEONAMES_USER=None
 authfile = "%s/.geonames/auth" % os.path.dirname(os.path.realpath(__file__) )
