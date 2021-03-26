@@ -3,7 +3,7 @@
 import socket
 import urllib2
 import json
-from Atlas import IPInfoCache
+from lib.Atlas import IPInfoCache
 from ripe.atlas.sagan import TracerouteResult
 # http://code.google.com/p/py-radix/
 from radix import Radix

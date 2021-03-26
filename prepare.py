@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 from math import radians, cos, sin, asin, sqrt
 import os
 import sys
-sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import ProbeInfo
+
+from lib.Atlas import ProbeInfo
 import fetch_news_sites
 
 # One-off traceroute msm cost 
