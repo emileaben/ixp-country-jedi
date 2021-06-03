@@ -23,6 +23,15 @@ parser.add_argument(
     help='Webroot directory'
 )
 parser.add_argument(
+    '--ccs',
+    dest='ccs',
+    type=str,
+    nargs='+',
+    default=None,
+    required=False,
+    help='CCs to run the Jedi through'
+)
+parser.add_argument(
     '--parallel',
     dest='parallel',
     type=int,
@@ -40,6 +49,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 WEBROOT = args.webroot
+CCS = args.ccs
 PARALLEL = args.parallel
 LOGFILE = args.logfile
 
@@ -226,6 +236,12 @@ def main():
 
     countries = countries_with_enough_diversity( min_asn_v4_diversity=3 )
     random.shuffle( countries )
+
+    if CCS:
+        # we keep those countries chosen by the user
+        countries = list(
+            set(countries).intersection(CCS)
+        )
 
     pool = Pool(PARALLEL)
     went_wrong = pool.map(
