@@ -138,10 +138,11 @@ def main():
    for ip in ips:
         print >>sys.stderr, "attempting %s" % ip
         j = None
-        #if True:
+        #if True
+        have_result = False
         try:
             out = {'ip': ip, 'lon': None, 'location': '', 'lat': None, 'hostname': "", 'asn': "", 'geo_error': None}
-            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=25 )
+            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=25, verify=False )
             j = req.json()
             j['ip'] = ip
             #del( j['meta'] )

@@ -191,3 +191,7 @@ In the future we will have a npm package of the @ripe-rnd/ui-components and the 
 
 Note that you might run into trouble with the CORS settings of the RIPE NCC webservers when making XHR calls to the json files hosted on the webservers of the RIPE NCC. A workaround is to locally edit your /etc/hosts file to point localhost to something.ripe.net and change the webpack-dev-server port to port 80. Now if you go to https://something.ripe.net on your browser you'll be able to download the JSON files (the CORS headers are set to *.ripe.net).
 
+# Misc
+
+The misc directory has various prototype/ideas that are partly implemented. It
+has a separate README
