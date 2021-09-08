@@ -210,8 +210,7 @@ def doit(cc):
 
 rundate = arrow.utcnow().format('YYYY-MM-DD')
 basedir = os.path.dirname(os.path.realpath(__file__))
-# datadir = "%s/data/%s" % (basedir, rundate)
-datadir = "%s/data/%s" % (WEBROOT, rundate)  # TODO <-- check
+datadir = "%s/data/%s" % (WEBROOT, rundate) 
 if not os.path.exists(datadir): os.makedirs(datadir)
 prep_cmd = "%s/prepare.py" % basedir
 meas_cmd = "%s/measure.py" % basedir
@@ -259,7 +258,10 @@ def main():
         "%s/history/%s/" % (WEBROOT, rundate),
         "%s/latest" % (WEBROOT)
     )
-    os.system('tar czvf %s/ixp-country-jedi-confs.tgz %s/data/20*/*/*json*' % (WEBROOT, WEBROOT) )
+    # the tar command needs a relative path to the data, otherwise the absolute path
+    # is included in the archive
+    os.chdir(WEBROOT)
+    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./data/20*/*/*json*' % WEBROOT )
     #os.system('find %s/history -name "asgraph.json" | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
     os.chdir( basedir )
     os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/history/country-timelines.json' % (WEBROOT,WEBROOT) )
