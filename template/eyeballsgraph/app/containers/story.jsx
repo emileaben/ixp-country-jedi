@@ -72,7 +72,7 @@ export class PeerToPeerContainer extends React.Component {
 
   loadAs2GeojsonIndex = async () => {
     const fetchUrl =
-      "https://sg-pub.ripe.net/emile/ixp-country-jedi/history/country-timelines.json";
+      "https://jedi.ripe.net/history/country-timelines.json";
     let response = await fetch(fetchUrl);
     let countrySnapshots = await response.json();
     return countrySnapshots;
