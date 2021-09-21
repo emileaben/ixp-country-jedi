@@ -62,7 +62,7 @@ def oneofftrace( probes_def, dst, **kwargs ):
     if not 'description' in defs:
         defs['description'] = 'trace to %s (IPv%d)' % ( dst, defs['af'] )
 
-    data =  {
+    data = {
         'definitions': defs,
         'probes': 
             {
@@ -70,12 +70,12 @@ def oneofftrace( probes_def, dst, **kwargs ):
                 'type': 'probes',
                 'value': ','.join( map( str, probe_list ) )
             }
-    };
+    }
     
     traceroute = Traceroute( ** data['definitions']  )
     source = AtlasSource( ** data['probes']  )
     atlas_request = AtlasCreateRequest(
-        start_time = datetime.utcnow(),
+        # start_time = datetime.utcnow(), # this was generating "Measurements must have the start time in future"
         key = KEY,
         measurements = [traceroute],
         sources = [source],

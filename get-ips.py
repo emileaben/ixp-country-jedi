@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import os
 import sys
-sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
+
+from lib.Atlas import MeasurementFetch,MeasurementPrint,IPInfoCache
 sys.path.append( os.path.dirname(os.path.realpath(__file__) ) )
 from libixpcountryjedi import ip2asn,ip2hostname,ICJRun
 import requests

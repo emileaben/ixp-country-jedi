@@ -3,7 +3,7 @@
 
 IXP Country Jedi is a project that shows if the Internet traffic paths stay within the country, and if the paths between two networks within the country go through an Internet eXchange Point (IXP). 
 
-You can get the pre-processed data here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
+You can get the pre-processed data here: [jedi.ripe.net](https://jedi.ripe.net)
 
 You can read more about the use-cases in these articles:
 * https://labs.ripe.net/Members/emileaben/looking-at-france-ix-with-ripe-atlas-and-ris
@@ -15,7 +15,7 @@ You can read more about the use-cases in these articles:
 
 This codebase contains a couple of scripts to make probe mesh measurements feasible/easy.
 
-Monthly runs of this code for all countries with enough diversity in RIPE Atlas probes can be found here: https://sg-pub.ripe.net/emile/ixp-country-jedi/
+Monthly runs of this code for all countries with enough diversity in RIPE Atlas probes can be found here: [jedi.ripe.net](https://jedi.ripe.net)
 
 The way the scripts are used/tested is to first create a directory for
 your measurement campaign, and run the scripts as follows:
@@ -169,6 +169,14 @@ is run.
 If you want to tweak the visualisations, tweaking them in the
 _templates_ directory and then running the _analyse-results.py_ script
 again will probably do what you want.
+
+---
+# doit.py
+
+This script is a convenient replacement for running the scripts above in sequence for every country (running _individual_ Jedis for each country). When finished it packs the configs into `ixp-country-jedi-confs.tgz `.
+
+---
+
 
 # Install the user-to-user graph locally
 

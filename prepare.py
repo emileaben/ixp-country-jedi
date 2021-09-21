@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 from math import radians, cos, sin, asin, sqrt
 import os
 import sys
-sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import ProbeInfo
+
+from lib.Atlas import ProbeInfo
 import fetch_news_sites
 
 # One-off traceroute msm cost 
@@ -25,14 +25,14 @@ TOP_ALEXA_SITES = 25
 
 ## find connected probes
 
-MEASUREMENT_TYPES = set([
+MEASUREMENT_TYPES = {
    'probe-mesh',
    'traceroute',
    'http-traceroute',
    'https-traceroute',
    'local-news-traceroute',
    'local-tld-traceroute',
-])
+}
 
 GEONAMES_USER=None
 authfile = "%s/.geonames/auth" % os.path.dirname(os.path.realpath(__file__) )

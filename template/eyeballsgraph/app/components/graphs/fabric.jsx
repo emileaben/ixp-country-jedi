@@ -975,7 +975,7 @@ export class PeerToPeerFabricGraph extends React.Component {
 PeerToPeerFabricGraph.defaultProps = {
   primary: false,
   scaleFactor: 2,
-  dataBaseUrl: "https://sg-pub.ripe.net/emile/ixp-country-jedi/history/",
+  dataBaseUrl: "https://jedi.ripe.net/history/",
   asResolverUrl: "https://stat.ripe.net/data/as-overview/data.json?resource=",
   width: 1440,
   height: 750,

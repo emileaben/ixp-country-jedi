@@ -7,10 +7,51 @@ import time
 import json
 import errno
 import requests
-sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import ProbeInfo
 
-WEBROOT='/var/www/html/emile/ixp-country-jedi'
+from lib.Atlas import ProbeInfo
+
+from multiprocessing import Pool, cpu_count
+from collections import defaultdict
+import argparse
+
+parser = argparse.ArgumentParser(description='Process the Jedi arguments.')
+parser.add_argument(
+    '--dir',
+    dest='webroot',
+    type=str,
+    default='/var/www/html/emile/ixp-country-jedi',  # TODO temporarily keeping this for backwards compatibility
+    help='Webroot directory'
+)
+parser.add_argument(
+    '--ccs',
+    dest='ccs',
+    type=str,
+    nargs='+',
+    default=None,
+    required=False,
+    help='CCs to run the Jedi through'
+)
+parser.add_argument(
+    '--parallel',
+    dest='parallel',
+    type=int,
+    default=1,  # let's keep it single-threaded by default for the time being, later on we can start using default=cpu_count(),
+    help='Amount of parallel threads to run (through a multiprocessing.Pool)'
+)
+parser.add_argument(
+    '--log',
+    dest='logfile',
+    type=str,
+    default='',
+    help='Redirect stderr to this logfile'
+)
+
+args = parser.parse_args()
+
+WEBROOT = args.webroot
+CCS = args.ccs
+PARALLEL = args.parallel
+LOGFILE = args.logfile
 
 ### monkey patch SSL/requests
 # http://stackoverflow.com/questions/14102416/python-requests-requests-exceptions-sslerror-errno-8-ssl-c504-eof-occurred/24166498#24166498
@@ -29,7 +70,8 @@ ssl.wrap_socket = sslwrap(ssl.wrap_socket)
 
 def get_ixp_info():
     ## ccix contains country code with lists of IXP peering LANs
-    ccix = {}
+    ccix = defaultdict(list)
+    # ccix = {}
 
     ## contains useful info on peering lans, indexed by peeringdb ix_id
     ix2lans = {}
@@ -130,58 +172,84 @@ def force_symlink(file1, file2):
             os.remove(file2)
             os.symlink(file1, file2)
 
+
+
+
+def doit(cc):
+    went_wrong = []
+
+    try:
+        ccdir = "%s/%s" % (datadir, cc)
+        print "starting run in %s" % ccdir
+        print "\n\n----\nCOUNTRY: %s\n----" % cc
+        if not os.path.exists(ccdir): os.makedirs(ccdir)
+        os.chdir(ccdir)
+        if not cc in ixlans_per_country:
+            ixlans_per_country[cc] = []
+        create_configfile(cc, ixlans_per_country[cc])
+        os.system(prep_cmd)
+        os.system(meas_cmd)
+        time.sleep(360)  # 6 mins ok?
+        # os.system( ips_old_cmd )
+        os.system(ips_cmd)
+        os.system(fetch_cmd)
+        ## now create symlink
+        WEBDEST = "%s/history/%s/%s" % (WEBROOT, rundate, cc)
+        if not os.path.exists(WEBDEST): os.makedirs(WEBDEST)
+        os.symlink(WEBDEST, './analysis')
+        ## now the analytics should have output in WEBDEST
+        os.system(anal_cmd)
+    except:
+        print "SOMETHING WENT WRONG FOR COUNTRY: %s" % cc
+        went_wrong.append(cc)
+
+    return went_wrong
+
+
+
+
+rundate = arrow.utcnow().format('YYYY-MM-DD')
+basedir = os.path.dirname(os.path.realpath(__file__))
+datadir = "%s/data/%s" % (WEBROOT, rundate) 
+if not os.path.exists(datadir): os.makedirs(datadir)
+prep_cmd = "%s/prepare.py" % basedir
+meas_cmd = "%s/measure.py" % basedir
+# ips_old_cmd = "%s/get-ips-old.py" % basedir
+ips_cmd = "%s/get-ips.py" % basedir
+fetch_cmd = "%s/get-measurements.py" % basedir
+anal_cmd = "%s/analyse-results.py" % basedir
+os.environ["PYTHONIOENCODING"] = "UTF-8"
+
+ixlans_per_country = get_ixp_info()
+# store ixlans info
+with open("%s/ixp_info.json" % datadir ,'w') as outf:
+    json.dump( ixlans_per_country, outf )
+
+# redirect stdout to logfile
+if LOGFILE:
+    LOGFILE = "%s/%s" % (datadir, LOGFILE)
+    print "redirecting stdout to %s" % ( LOGFILE )
+    sys.stdout = open(LOGFILE, 'w')
+
 def main():
-    os.environ["PYTHONIOENCODING"] = "UTF-8"
-    rundate = arrow.utcnow().format('YYYY-MM-DD')
-    basedir = os.path.dirname( os.path.realpath(__file__) )
-    datadir = "%s/data/%s" % ( basedir, rundate )
-    prep_cmd = "%s/prepare.py" % basedir
-    meas_cmd = "%s/measure.py" % basedir
-    #ips_old_cmd = "%s/get-ips-old.py" % basedir
-    ips_cmd = "%s/get-ips.py" % basedir
-    fetch_cmd = "%s/get-measurements.py" % basedir
-    anal_cmd = "%s/analyse-results.py" % basedir
-
-    if not os.path.exists(datadir): os.makedirs(datadir)
-
-    ## redirect stdout to logfile
-    #LOGFILE = "%s/run.log" % ( datadir, )
-    #print "redirecting stdout to %s" % ( LOGFILE )
-    #sys.stdout = open(LOGFILE, 'w')
-    ixlans_per_country = get_ixp_info()
-    ## store ixlans info
-    with open("%s/ixp_info.json" % datadir ,'w') as outf:
-        json.dump( ixlans_per_country, outf )
-    #sys.exit(0)
 
     countries = countries_with_enough_diversity( min_asn_v4_diversity=3 )
     random.shuffle( countries )
-    went_wrong = []
-    for cc in countries:
-        try:
-            ccdir = "%s/%s" % ( datadir, cc )
-            print "starting run in %s" % ccdir
-            print "\n\n----\nCOUNTRY: %s\n----" % cc
-            if not os.path.exists(ccdir): os.makedirs(ccdir)
-            os.chdir(ccdir)
-            if not cc in ixlans_per_country:
-                ixlans_per_country[ cc ] = []
-            create_configfile( cc, ixlans_per_country[ cc ] )
-            os.system( prep_cmd )
-            os.system( meas_cmd )
-            time.sleep( 360 ) # 6 mins ok?
-            #os.system( ips_old_cmd )
-            os.system( ips_cmd )
-            os.system( fetch_cmd )
-            ## now create symlink
-            WEBDEST = "%s/history/%s/%s" % (WEBROOT,rundate,cc)
-            if not os.path.exists(WEBDEST): os.makedirs(WEBDEST)
-            os.symlink( WEBDEST, './analysis')
-            ## now the analytics should have output in WEBDEST
-            os.system( anal_cmd )
-        except:
-            print "SOMETHING WENT WRONG FOR COUNTRY: %s" % cc
-            went_wrong.append( cc )
+
+    if CCS:
+        # we keep those countries chosen by the user
+        countries = list(
+            set(countries).intersection(CCS)
+        )
+
+    pool = Pool(PARALLEL)
+    went_wrong = pool.map(
+        func=doit,
+        iterable=countries
+    )
+    pool.close()
+    pool.join()
+
     exec_log = {}
     exec_log['countries'] = countries
     exec_log['countries_errs'] = went_wrong
@@ -190,9 +258,12 @@ def main():
         "%s/history/%s/" % (WEBROOT, rundate),
         "%s/latest" % (WEBROOT)
     )
-    os.chdir( basedir )
-    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./data/20*/*/*json*' % (WEBROOT) )
+    # the tar command needs a relative path to the data, otherwise the absolute path
+    # is included in the archive
+    os.chdir(WEBROOT)
+    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./data/20*/*/*json*' % WEBROOT )
     #os.system('find %s/history -name "asgraph.json" | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
+    os.chdir( basedir )
     os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/history/country-timelines.json' % (WEBROOT,WEBROOT) )
     # now print characteristics for this run
     WEBDEST_EXECLOG = "%s/history/%s/exec_log.json" % (WEBROOT,rundate)

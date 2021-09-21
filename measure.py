@@ -3,8 +3,8 @@ import json
 import time
 import os
 import sys
-sys.path.append("%s/lib" % ( os.path.dirname(os.path.realpath(__file__) ) ) )
-from Atlas import Measure
+
+from lib.Atlas import Measure
 
 ### read a probeset.json (default in current dir)
 ### spit out measurementset.json
