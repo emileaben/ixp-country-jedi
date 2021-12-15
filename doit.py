@@ -16,11 +16,17 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process the Jedi arguments.')
 parser.add_argument(
-    '--dir',
+    '--dir-www',
     dest='webroot',
     type=str,
-    default='/var/www/html/emile/ixp-country-jedi',  # TODO temporarily keeping this for backwards compatibility
+    default='/export/jedi/www',
     help='Webroot directory'
+)
+parser.add_argument(
+    '--dir-run',
+    type=str,
+    default='/export/jedi/run',
+    help='Data directory.'
 )
 parser.add_argument(
     '--ccs',
@@ -49,6 +55,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 WEBROOT = args.webroot
+DATA_DIR = args.dir_run
 CCS = args.ccs
 PARALLEL = args.parallel
 LOGFILE = args.logfile
@@ -210,7 +217,7 @@ def doit(cc):
 
 rundate = arrow.utcnow().format('YYYY-MM-DD')
 basedir = os.path.dirname(os.path.realpath(__file__))
-datadir = "%s/data/%s" % (WEBROOT, rundate) 
+datadir = "%s/%s" % (DATA_DIR, rundate)
 if not os.path.exists(datadir): os.makedirs(datadir)
 prep_cmd = "%s/prepare.py" % basedir
 meas_cmd = "%s/measure.py" % basedir
@@ -260,8 +267,8 @@ def main():
     )
     # the tar command needs a relative path to the data, otherwise the absolute path
     # is included in the archive
-    os.chdir(WEBROOT)
-    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./data/20*/*/*json*' % WEBROOT )
+    os.chdir(DATA_DIR)
+    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./20*/*/*json*' % WEBROOT )
     #os.system('find %s/history -name "asgraph.json" | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
     os.chdir( basedir )
     os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/history/country-timelines.json' % (WEBROOT,WEBROOT) )
