@@ -31,6 +31,9 @@
     <script src="../bower_components/underscore/underscore-min.js"></script>
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script src="https://d3js.org/queue.v1.min.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
     <script src="../bower_components/d3-plugins/fisheye/fisheye.js"></script>
     <script src="../bower_components/jquery/dist/jquery.min.js"></script>
     <script src="../bower_components/colorbrewer/colorbrewer.js"></script>
@@ -141,7 +144,7 @@
      var count = 0
      d3.json("ixplans.v4.json", function(error,data) {
         colorScale.domain( data['ixps'] )
-           .range( colorbrewer.Paired[ d3.max([3,data['ixps'].length]) ]); // #TODO  max no. IXPs? 11?  legend width
+           .range(d3.schemeSet2);
         var legendg = d3.select("svg")
            .append("g"); // .attr("transform","translate(200,0)");
         legendg.selectAll('.legendcolor').data( data['ixps'] ).enter().append('rect')
