@@ -268,7 +268,7 @@ def main():
     # the tar command needs a relative path to the data, otherwise the absolute path
     # is included in the archive
     os.chdir(DATA_DIR)
-    os.system('tar czvf %s/ixp-country-jedi-confs.tgz ./20*/*/*json*' % WEBROOT )
+    os.system("find ./20*/* -maxdepth 1 -name '*json*' -type f -print | tar czvf %s/ixp-country-jedi-confs-test.tgz -T -" % WEBROOT )
     #os.system('find %s/history -name "asgraph.json" | ./country-timelines2json.py %s/country-timelines.json' % (WEBROOT,WEBROOT) )
     os.chdir( basedir )
     os.system('ls %s/history/*/*/asgraph/asgraph.json | ./country-timelines2json.py %s/history/country-timelines.json' % (WEBROOT,WEBROOT) )
