@@ -424,7 +424,7 @@ def capital_city_for_country( country_code ):
    '''
    try:
       #wb_url = "http://api.worldbank.org/countries/%s/?format=json" % ( country_code.lower() )
-      wb_url = "http://api.worldbank.org/v2/countries/%s/?format=json" % ( country_code.lower() )
+      wb_url = "https://api.worldbank.org/v2/countries/%s/?format=json" % ( country_code.lower() )
       req = urllib2.urlopen( wb_url )
       resp = json.loads(req.read())
       lat = float(resp[1][0]['latitude'])
