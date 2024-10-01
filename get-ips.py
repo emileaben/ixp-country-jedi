@@ -142,7 +142,7 @@ def main():
         have_result = False
         try:
             out = {'ip': ip, 'lon': None, 'location': '', 'lat': None, 'hostname': "", 'asn': "", 'geo_error': None}
-            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=probeslocation,crowdsourced,ixp" % ip , timeout=25, verify=False )
+            req = requests.get("https://ipmap.ripe.net/api/v1/locate/%s/partials?engines=crowdsourced,ixp" % ip , timeout=25, verify=False )
             j = req.json()
             j['ip'] = ip
             #del( j['meta'] )
