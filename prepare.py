@@ -352,7 +352,7 @@ alexa_blacklist = set([
    'bongacams.com'
 ])
 
-def alexa_country_top25( countries ):
+def alexa_country_top25( countries, maxsites ):
    for cc in countries:
       targets = []
       targetsitenames = []
@@ -376,7 +376,7 @@ def alexa_country_top25( countries ):
          else:
             targetsitenames.append(sitename)
             ## add 'www'?
-            if targetsites < TOP_ALEXA_SITES:
+            if targetsites < maxsites:
                targets.append( site )
                targetsites = targetsites + 1
    print >>sys.stderr, "WARNING: when using alexa-country-top25 lists, some sites may be considered offensive"
@@ -561,7 +561,11 @@ if __name__ == '__main__':
          print >> sys.stderr, "config has 'targets', but that is not a list"
    elif 'target-type' in conf:
       if conf['target-type'] == 'alexa-country-top25':
-         basedata['targets'] = alexa_country_top25( basedata['countries'] )
+         if 'alexa-maxsites' in conf:
+            alexa_maxsites = conf['alexa-maxsites']
+         else:
+            alexa_maxsites = TOP_ALEXA_SITES
+         basedata['targets'] = alexa_country_top25( basedata['countries'], alexa_maxsites )
       elif conf['target-type'] == 'local-news-traceroute' in conf['measurement-type']:
          pages = fetch_news_sites.fetch_country_pages()
          basedata['targets'] = [urlparse(url).hostname for url in
